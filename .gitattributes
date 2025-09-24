@@ -1,3 +1,4 @@
 * text=auto eol=lf
 *.hxc linguist-language=Haxe
 *.hxp linguist-language=Haxe
+*.fla filter=lfs diff=lfs merge=lfs -text
