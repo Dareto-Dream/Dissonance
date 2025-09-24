@@ -1,66 +1,123 @@
-<div align='center'><img src="https://fridaynightfunkin.wiki.gg/images/FNF_logo.png" width="800">
-
-<h2>Friday Night Funkin' is a rhythm game. Built using HaxeFlixel for <a href="https://ldjam.com/events/ludum-dare/47">Ludum Dare 47.</a></h2>
-
-This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
-
+<div align="center">
+  <img src="assets/logo.png" width="700" alt="Dissonance Logo"/>
+  
+  <h2><em>Dissonance</em> is a narrative-driven rhythm horror game.  
+  Built with HaxeFlixel, inspired by the legacy of Friday Night Funkin’ and DDLC.</h2>
 </div>
 
-- [Playable web demo on Newgrounds!](https://www.newgrounds.com/portal/view/770371)
-- [Demo download builds for Windows, Mac, and Linux from Itch.io!](https://ninja-muffin24.itch.io/funkin)
-- [Download Android builds from Google Play!](https://play.google.com/store/apps/details?id=me.funkin.fnf)
-- [Download iOS builds from the App Store!](https://apps.apple.com/app/id6740428530)
+---
 
-<div align='center'>
-<table>
-  <tr>
-    <td><img src="https://fridaynightfunkin.wiki.gg/images/d/d7/Title_Card.gif" alt="Title Screen" width="350"/></td>
-    <td><img src="https://fridaynightfunkin.wiki.gg/images/9/99/Menu.png" alt="Main Menu" width="350"/></td>
-  </tr>
-</table>
+## About the Game
+
+**Dissonance** blends visual novel storytelling with rhythm gameplay.  
+You’ll guide a fractured music club through trauma, grief, and performance—where every note matters.  
+
+- Story-rich **5-act arc** with branching outcomes.  
+- **Rot Score system**: player choices and performance affect each character’s path.  
+- **Puppeteer Mode**: share control of notes with characters as they unravel.  
+- Hand-drawn art and animation, original compositions, and a haunting narrative.
+
+---
+
+## Play the Game
+
+- **[Latest Builds on Itch.io](https://your-itch-link-here)** – Windows, Mac, Linux  
+- **[Web Demo (coming soon)](https://your-webdemo-link-here)**  
+- **[Join the Community](https://discord.gg/yourserver)**  
+
+---
+
+## Getting Started (Developers)
+
+If you want to **build from source**:
+
+1. Install [Haxe](https://haxe.org/) and [HaxeFlixel](https://haxeflixel.com/).  
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/DeltaVDevs/dissonance.git
+   cd dissonance
+   git submodule update --init --recursive
+
+
+3. Install dependencies:
+
+   ```bash
+   haxelib install lime
+   haxelib install openfl
+   haxelib install flixel
+   ```
+4. Build & run:
+
+   ```bash
+   lime test windows
+   ```
+
+   (Replace `windows` with `mac`, `linux`, or `html5`.)
+
+For more details, see our [Compiling Guide](docs/COMPILING.md).
+
+---
+
+## Contributing
+
+We welcome contributors!
+
+* See our [Contributing Guide](docs/CONTRIBUTING.md).
+* Check out [Issues](https://github.com/DeltaVDevs/dissonance/issues) for open tasks.
+* Submit PRs for bugfixes, new charts, or documentation.
+
+---
+
+## Modding
+
+Like FNF, **Dissonance** is mod-friendly.
+
+* Custom charts, sprites, and music are supported.
+* Documentation coming soon at [dissonance.dev/modding](https://dissonance.dev/modding).
+
+---
+
+## Credits
+
+### Core Team
+
+* **Commander** – Lead Developer, Writer, Composer
+* **Melody** – Lead Character Animator
+* **Contributors** – Charting, Testing, and Code Support
+
+### Special Thanks
+
+* Inspired by **Friday Night Funkin’** (ninjamuffin99, PhantomArcade, evilsk8r, kawaisprite)
+* Narrative structure influenced by **DDLC** and story-driven rhythm games.
+* Our community, for keeping the beat alive.
+
+---
+
+## Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="assets/screenshots/title.png" width="350" alt="Title Screen"/></td>
+      <td><img src="assets/screenshots/menu.png" width="350" alt="Main Menu"/></td>
+    </tr>
+    <tr>
+      <td><img src="assets/screenshots/gameplay1.png" width="350" alt="Gameplay"/></td>
+      <td><img src="assets/screenshots/gameplay2.png" width="350" alt="Gameplay"/></td>
+    </tr>
+  </table>
 </div>
 
-# Getting Started
+---
 
-**PLEASE USE THE LINKS ABOVE IF YOU JUST WANT TO PLAY THE GAME**
+## License
 
-To learn how to install the necessary dependencies and compile the game from source, please follow our [Compiling Guide](/docs/COMPILING.md).
+This project is open source under the [MIT License](LICENSE).
+Certain assets may have separate licenses (see `assets/LICENSE.md`).
 
-# Contributing
+---
 
-Check out our [Contributing Guide](/docs/CONTRIBUTING.md) to learn how you can actively contribute to the development of Friday Night Funkin'!
-
-# Modding
-
-Feel free to start learning to mod the game by reading our [documentation](https://funkincrew.github.io/funkin-modding-docs/) and guide to modding.
-
-# Credits and Special Thanks
-
-Full credits can be found in-game, or in the `credits.json` file which is located [here](https://github.com/FunkinCrew/funkin.assets/blob/main/exclude/data/credits.json).
-
-## Programming
-- [ninjamuffin99](https://twitter.com/ninja_muffin99) - Lead Programmer
-- [EliteMasterEric](https://twitter.com/EliteMasterEric) - Programmer
-- [MtH](https://twitter.com/emmnyaa) - Charting and Additional Programming
-- [GeoKureli](https://twitter.com/Geokureli/) - Additional Programming
-- [ZackDroid](https://x.com/ZackDroidCoder) - Lead Mobile Programmer
-- [MAJigsaw77](https://github.com/MAJigsaw77) - Mobile Programmer
-- [Karim-Akra](https://x.com/KarimAkra_0) - Mobile Programmer
-- [Sector_5](https://github.com/sector-a) - Mobile Programmer
-- [Luckydog7](https://github.com/luckydog7) - Mobile Programmer
-- Our contributors on GitHub
-
-## Art / Animation / UI
-- [PhantomArcade3K](https://twitter.com/phantomarcade3k) - Artist and Animator
-- [Evilsk8r](https://twitter.com/evilsk8r) - Art
-- [Moawling](https://twitter.com/moawko) - Week 6 Pixel Art
-- [IvanAlmighty](https://twitter.com/IvanA1mighty) - Misc UI Design
-
-## Music
-- [Kawaisprite](https://twitter.com/kawaisprite) - Musician
-- [BassetFilms](https://twitter.com/Bassetfilms) - Music for "Monster", Additional Character Design
-
-## Special Thanks
-- [Tom Fulp](https://twitter.com/tomfulp) - For being a great guy and for Newgrounds
-- [JohnnyUtah](https://twitter.com/JohnnyUtahNG/) - Voice of Tankman
-- [L0Litsmonica](https://twitter.com/L0Litsmonica) - Voice of Mommy Mearest
+<div align="center">
+  <em>Dissonance</em> is about grief, silence, and rhythm.  
+  Every note brings you closer to collapse—or catharsis.
+</div>
