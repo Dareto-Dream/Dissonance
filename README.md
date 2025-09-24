@@ -81,7 +81,7 @@ Like FNF, **Dissonance** is mod-friendly.
 
 ### Core Team
 
-* **Commander** – Lead Developer, Writer, Composer
+* **DeltaVDev** – Lead Developer, Writer, Composer
 * **Melody** – Lead Character Animator
 * **Contributors** – Charting, Testing, and Code Support
 
