@@ -2,12 +2,12 @@ package states;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
-import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
-import flixel.FlxSprite;
 import vn.SceneRunner;
 
 class VNState extends FlxState {
