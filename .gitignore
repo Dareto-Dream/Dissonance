@@ -1,0 +1,106 @@
+# -----------------------------
+# HaxeFlixel / Lime / OpenFL
+# -----------------------------
+
+# Build output directories
+export/
+bin/
+build/
+release/
+debug/
+dist/
+obj/
+cpp/
+ndll/
+linux64/
+linux/
+windows/
+mac/
+ios/
+android/
+
+# HTML5 build cache
+Export/html5/bin/
+Export/html5/obj/
+Export/html5/haxe/
+
+# Flixel save files
+*.sav
+
+# Haxe compiler cache
+.haxelib/
+.haxe/
+.hxml.generated/
+.haxerc
+
+# Lime/OpenFL build cache
+.project/
+.settings/
+hxcpp_config.xml
+hxcpp/
+hxlibs/
+include/
+lib/
+
+# VSCode / JetBrains metadata
+.vscode/
+.idea/
+*.iml
+
+# OS junk files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log files
+*.log
+
+# Backup files
+*~
+*.tmp
+*.swp
+*.bak
+
+# Python tools (if using build scripts)
+__pycache__/
+*.pyc
+
+# Generated documentation
+docs/
+
+# -----------------------------
+# Dissonance VN Data
+# -----------------------------
+
+# Local or work-in-progress scenes
+assets/data/scenes_dev/
+assets/data/test/
+
+# Temporary renders or debug images
+assets/images/debug/
+assets/images/tmp/
+
+# Audio scratch files
+assets/audio/tmp/
+assets/audio/debug/
+
+# -----------------------------
+# Build scripts
+# -----------------------------
+
+# Local environment files
+.env
+.env.local
+
+# -----------------------------
+# Node.js (if using any build tools)
+# -----------------------------
+
+node_modules/
+package-lock.json
+
+# -----------------------------
+# Git LFS concurrency
+# -----------------------------
+*.lfs-cache
+*.lfs-lock

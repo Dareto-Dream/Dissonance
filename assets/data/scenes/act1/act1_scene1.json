@@ -1,0 +1,249 @@
+{
+  "scene_id": "template_scene",
+  "start": "n1",
+
+  "nodes": [
+
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "classroom_day.png",
+      "transition": "fade",
+      "duration": 0.6
+    },
+
+    {
+      "id": "n2",
+      "type": "narration",
+      "text": "The bell rings, echoing through the empty halls. Another day ends."
+    },
+
+    {
+      "id": "n3",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "position": "right",
+      "transition": "slide_in_right",
+      "duration": 0.4
+    },
+
+    {
+      "id": "n4",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "emotion": "soft",
+      "text": "You're here early today."
+    },
+
+    {
+      "id": "n5",
+      "type": "dialogue",
+      "speaker": "MC",
+      "character": "mc",
+      "pose": "neutral",
+      "text": "Couldn't sleep. Thought I'd walk around a bit."
+    },
+
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "footstep.wav",
+      "volume": 0.7
+    },
+
+    {
+      "id": "n7",
+      "type": "narration",
+      "text": "Someone approaches from the hallway..."
+    },
+
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "annoyed",
+      "position": "left",
+      "transition": "slide_in_left",
+      "duration": 0.3
+    },
+
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "You two are loud enough to wake the dead."
+    },
+
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "pout",
+      "text": "Cassian, not now."
+    },
+
+    {
+      "id": "n11",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 2,
+      "duration": 0.4
+    },
+
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "MC",
+      "character": "mc",
+      "pose": "surprised",
+      "text": "What was that!?"
+    },
+
+    {
+      "id": "n13",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "Ask Tiffany what's happening",
+          "target": "n14"
+        },
+        {
+          "text": "Ask Cassian what's happening",
+          "target": "n15"
+        }
+      ]
+    },
+
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "worried",
+      "text": "I'm not sure... something feels wrong.",
+      "set_flag": { "asked_tiffany": true },
+      "next": "n16"
+    },
+
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "How should I know? I'm a singer, not a psychic.",
+      "set_flag": { "asked_cassian": true },
+      "next": "n16"
+    },
+
+    {
+      "id": "n16",
+      "type": "if",
+      "condition": "tiffany_rot <= 2",
+      "true": "n17a",
+      "false": "n17b"
+    },
+
+    {
+      "id": "n17a",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken",
+      "text": "MC... don't leave me alone right now...",
+      "next": "n18"
+    },
+
+    {
+      "id": "n17b",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Let's head to the club room. We can talk there.",
+      "next": "n18"
+    },
+
+    {
+      "id": "n18",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 1.0,
+      "duration": 0.45
+    },
+
+    {
+      "id": "n19",
+      "type": "dialogue",
+      "speaker": "???",
+      "character": "hanami",
+      "pose": "hurt",
+      "text": "...don't..."
+    },
+
+    {
+      "id": "n20",
+      "type": "action",
+      "action": "play_music",
+      "track": "glitch_theme",
+      "volume": 0.5
+    },
+
+    {
+      "id": "n21",
+      "type": "action",
+      "action": "flash",
+      "color": "#FFFFFF",
+      "duration": 0.15
+    },
+
+    {
+      "id": "n22",
+      "type": "game",
+      "song": "duet_of_fragments",
+      "puppeteer": {
+        "cassian_controls": ["left", "down"],
+        "player_controls": ["up", "right"]
+      }
+    },
+
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "The music fades. Silence hangs heavy."
+    },
+
+    {
+      "id": "n24",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian"
+    },
+
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "MC... we need to talk."
+    },
+
+    {
+      "id": "n26",
+      "type": "end",
+      "next_scene": "act1_scene2"
+    }
+
+  ]
+}
