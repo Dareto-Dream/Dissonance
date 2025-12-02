@@ -8,7 +8,7 @@
       "id": "n1",
       "type": "action",
       "action": "set_bg",
-      "background": "classroom_day.png",
+      "background": "assets/images/bg/classroom_day.png",
       "transition": "fade",
       "duration": 0.6
     },

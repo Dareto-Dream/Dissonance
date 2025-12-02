@@ -26,7 +26,7 @@ class DialogueSystem {
 
         // Remove after a short timeout for debug purposes
         var t = new FlxTimer();
-		t.start(0.9, 1, function(timer:FlxTimer)
+		t.start(0.9, function(timer:FlxTimer)
 		{
             state.uiGroup.remove(box);
             state.uiGroup.remove(label);
@@ -51,7 +51,7 @@ class DialogueSystem {
         state.uiGroup.add(label);
 
         var t = new FlxTimer();
-		t.start(0.9, 1, function(timer:FlxTimer)
+		t.start(0.9, function(timer:FlxTimer)
 		{
             state.uiGroup.remove(box);
             state.uiGroup.remove(label);
