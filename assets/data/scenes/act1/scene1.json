@@ -10,13 +10,15 @@
       "action": "set_bg",
       "background": "assets/images/bg/classroom_day.png",
       "transition": "fade",
-      "duration": 0.6
+      "duration": 0.6,
+      "next": "n2"
     },
 
     {
       "id": "n2",
       "type": "narration",
-      "text": "The bell rings, echoing through the empty halls. Another day ends."
+      "text": "The bell rings, echoing through the empty halls. Another day ends.",
+      "next": "n3"
     },
 
     {
@@ -27,7 +29,8 @@
       "pose": "default_smile",
       "position": "right",
       "transition": "slide_in_right",
-      "duration": 0.4
+      "duration": 0.4,
+      "next": "n4"
     },
 
     {
@@ -37,7 +40,8 @@
       "character": "tiffany",
       "pose": "default_smile",
       "emotion": "soft",
-      "text": "You're here early today."
+      "text": "You're here early today.",
+      "next": "n5"
     },
 
     {
@@ -46,7 +50,8 @@
       "speaker": "MC",
       "character": "mc",
       "pose": "neutral",
-      "text": "Couldn't sleep. Thought I'd walk around a bit."
+      "text": "Couldn't sleep. Thought I'd walk around a bit.",
+      "next": "n6"
     },
 
     {
@@ -54,13 +59,15 @@
       "type": "action",
       "action": "play_sound",
       "sound": "footstep.wav",
-      "volume": 0.7
+      "volume": 0.7,
+      "next": "n7"
     },
 
     {
       "id": "n7",
       "type": "narration",
-      "text": "Someone approaches from the hallway..."
+      "text": "Someone approaches from the hallway...",
+      "next": "n8"
     },
 
     {
@@ -71,7 +78,8 @@
       "pose": "annoyed",
       "position": "left",
       "transition": "slide_in_left",
-      "duration": 0.3
+      "duration": 0.3,
+      "next": "n9"
     },
 
     {
@@ -80,7 +88,8 @@
       "speaker": "Cassian",
       "character": "cassian",
       "pose": "annoyed",
-      "text": "You two are loud enough to wake the dead."
+      "text": "You two are loud enough to wake the dead.",
+      "next": "n10"
     },
 
     {
@@ -89,7 +98,8 @@
       "speaker": "Tiffany",
       "character": "tiffany",
       "pose": "pout",
-      "text": "Cassian, not now."
+      "text": "Cassian, not now.",
+      "next": "n11"
     },
 
     {
@@ -97,7 +107,8 @@
       "type": "action",
       "action": "shake_screen",
       "intensity": 2,
-      "duration": 0.4
+      "duration": 0.4,
+      "next": "n12"
     },
 
     {
@@ -106,7 +117,8 @@
       "speaker": "MC",
       "character": "mc",
       "pose": "surprised",
-      "text": "What was that!?"
+      "text": "What was that!?",
+      "next": "n13"
     },
 
     {
@@ -150,8 +162,8 @@
       "id": "n16",
       "type": "if",
       "condition": "tiffany_rot <= 2",
-      "true": "n17a",
-      "false": "n17b"
+      "trueNode": "n17a",
+      "falseNode": "n17b"
     },
 
     {
@@ -179,7 +191,8 @@
       "type": "action",
       "action": "glitch",
       "intensity": 1.0,
-      "duration": 0.45
+      "duration": 0.45,
+      "next": "n19"
     },
 
     {
@@ -188,7 +201,8 @@
       "speaker": "???",
       "character": "hanami",
       "pose": "hurt",
-      "text": "...don't..."
+      "text": "...don't...",
+      "next": "n20"
     },
 
     {
@@ -196,7 +210,8 @@
       "type": "action",
       "action": "play_music",
       "track": "glitch_theme",
-      "volume": 0.5
+      "volume": 0.5,
+      "next": "n21"
     },
 
     {
@@ -204,7 +219,8 @@
       "type": "action",
       "action": "flash",
       "color": "#FFFFFF",
-      "duration": 0.15
+      "duration": 0.15,
+      "next": "n22"
     },
 
     {
@@ -214,20 +230,23 @@
       "puppeteer": {
         "cassian_controls": ["left", "down"],
         "player_controls": ["up", "right"]
-      }
+      },
+      "next": "n23"
     },
 
     {
       "id": "n23",
       "type": "narration",
-      "text": "The music fades. Silence hangs heavy."
+      "text": "The music fades. Silence hangs heavy.",
+      "next": "n24"
     },
 
     {
       "id": "n24",
       "type": "action",
       "action": "hide_character",
-      "character": "cassian"
+      "character": "cassian",
+      "next": "n25"
     },
 
     {
@@ -236,7 +255,8 @@
       "speaker": "Tiffany",
       "character": "tiffany",
       "pose": "neutral",
-      "text": "MC... we need to talk."
+      "text": "MC... we need to talk.",
+      "next": "n26"
     },
 
     {
