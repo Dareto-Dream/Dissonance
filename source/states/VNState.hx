@@ -56,7 +56,14 @@ class VNState extends FlxState
 
 		// Load character definitions from data
 		// (e.g. assets/data/characters/characters.json)
-		var charDefs = VNConfig.loadCharacterDefs();
+		var charDefsMap = VNConfig.loadCharacterDefs();
+
+		// Convert CharacterDefMap to Array<Dynamic>
+		var charDefs:Array<Dynamic> = [];
+		for (key in charDefsMap.keys())
+		{
+			charDefs.push(charDefsMap.get(key));
+		}
 
 		// Let CharacterSystem build sprites/renderers and attach to charGroup
 		CharacterSystem.init(charGroup, charDefs);

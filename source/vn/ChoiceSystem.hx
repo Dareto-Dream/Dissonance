@@ -22,7 +22,7 @@ class ChoiceSystem
 	static var choiceCallback:String->Void;
 
 	// Temporary debug mode: auto-pick the first choice
-	public static var debugAuto:Bool = true;
+	public static var debugAuto:Bool = false;
 
 	public static function init(group:FlxGroup):Void
 	{
@@ -99,7 +99,6 @@ class ChoiceSystem
 		if (choiceCallback == null || choiceTexts == null || choiceTexts.length == 0)
 			return;
 
-		// On mouse click, see if we clicked any choice text
 		if (FlxG.mouse.justPressed)
 		{
 			for (entry in choiceTexts)
@@ -109,15 +108,19 @@ class ChoiceSystem
 					trace("CHOICE SELECTED: " + entry.textObj.text);
 
 					var target = entry.target;
+					// Store callback before we clear
+					var cb = choiceCallback;
 
-					// Clear UI
+					// Clear UI (this will null choiceCallback)
 					clearChoices();
 
-					// Call scene callback
-					choiceCallback(target);
+					// Now call the stored callback
+					if (cb != null)
+						cb(target);
+
 					break;
 				}
 			}
 		}
-    }
+	}
 }

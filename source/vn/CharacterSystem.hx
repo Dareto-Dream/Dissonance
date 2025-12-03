@@ -1,113 +1,84 @@
 package vn;
 
-import Lambda;
-import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup;
-import haxe.ds.StringMap;
-import vn.VNConfig.CharacterDef;
-import vn.VNConfig.CharacterDefMap;
-
+import haxe.Json;
+import openfl.utils.Assets;
 
 class CharacterSystem
 {
-	private static var instance:CharacterSystem;
+	public static var instance:CharacterSystem;
 
-	public var renderers:StringMap<CharacterRenderer>;
-
-	public function new()
-	{
-		renderers = new StringMap<CharacterRenderer>();
-	}
-
-	public static function get():CharacterSystem
-	{
-		if (instance == null)
-			instance = new CharacterSystem();
+	public static function get()
 		return instance;
+
+	public var characters:Map<String, CharacterRenderer> = [];
+	public var group:FlxGroup;
+
+	public static function init(group:FlxGroup, charDefs:Array<Dynamic>)
+	{
+		instance = new CharacterSystem(group, charDefs);
 	}
 
-	// -------------------------------------------------
-	//  INITIALIZE FROM DATA
-	// -------------------------------------------------
-	/**
-	 * Build character sprites and renderers from data and attach them to the given group.
-	 *
-	 * charGroup: the FlxGroup that sits in VNState.charGroup
-	 * defs:      character definition data from VNConfig.loadCharacterDefs()
-	 */
-	public static function init(charGroup:FlxGroup, defs:CharacterDefMap):Void
+	public function new(group:FlxGroup, charDefs:Array<Dynamic>)
 	{
-		var cs = get();
+		this.group = group;
 
-		for (id in defs.keys())
+		var index = 0;
+		for (c in charDefs)
 		{
-			var def = defs.get(id);
-			if (def == null)
-				continue;
+			index++;
 
-			// Create sprite and load atlas frames
-			var spr = new FlxSprite();
-			var frames = FlxAtlasFrames.fromSparrow(def.png, def.xml);
-			spr.frames = frames;
-			spr.scrollFactor.set(0, 0);
-			spr.visible = false;
-			spr.antialiasing = true;
-
-			// Attach to the character layer
-			charGroup.add(spr);
-
-			// Wrap in renderer
-			var renderer = new CharacterRenderer(spr);
-
-			// Apply default pose if present
-			if (def.defaultPose != null && def.defaultPose != "")
+			if (c == null)
 			{
-				renderer.setPose(def.defaultPose);
+				trace("[CharacterSystem] ERROR: charDefs[" + index + "] is NULL.");
+				continue;
 			}
 
-			cs.addRenderer(def.id, renderer);
+			if (!Reflect.hasField(c, "name") || c.name == null)
+			{
+				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'name' field. Entry=", c);
+				continue;
+			}
+
+			var name:String = c.name;
+
+			var renderer = new CharacterRenderer(name);
+			characters.set(name, renderer);
+			group.add(renderer);
 		}
 
-		trace("[CharacterSystem] Initialized " + Lambda.count(defs) + " characters.");
+		var count = 0;
+		for (_ in characters.keys())
+			count++;
+
+		trace("[CharacterSystem] Loaded " + count + " character definitions.");
 	}
 
-	// -------------------------------------------------
-	//  REGISTRY
-	// -------------------------------------------------
-	public function addRenderer(character:String, renderer:CharacterRenderer):Void
+	public function show(name:String, pose:String, position:String, transition:String, duration:Float)
 	{
-		renderers.set(character, renderer);
-	}
-
-	public function getRenderer(character:String):CharacterRenderer
-	{
-		return renderers.get(character);
-	}
-
-	// -------------------------------------------------
-	//  HIGH LEVEL CONTROL
-	// -------------------------------------------------
-	// instance method, used via CharacterSystem.get()
-	public function show(character:String, pose:String, position:Dynamic, transition:String, duration:Float):Void
-	{
-		var r = getRenderer(character);
+		var r = characters.get(name);
 		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Attempted to SHOW unknown character '" + name + "'");
 			return;
-		if (pose != null && pose != "")
-			r.setPose(pose);
+		}
 
-		r.resolvePosition(position);
-		r.playTransition(transition, duration);
-		r.show();
+		r.setPose(pose);
+		r.setPositionKeyword(position);
+
+		if (transition != null && transition != "")
+			r.playTransition(transition, duration);
 	}
 
-	public function hide(character:String, ?transition:String, ?duration:Float = 0):Void
+	public function hide(name:String, transition:String, duration:Float)
 	{
-		var r = getRenderer(character);
+		var r = characters.get(name);
 		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Attempted to HIDE unknown character '" + name + "'");
 			return;
+		}
 
-		r.hide(transition, duration);
+		r.hide();
 	}
 }
