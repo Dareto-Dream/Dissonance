@@ -2,84 +2,129 @@ package vn;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxSpriteGroup;
-import haxe.Json;
-import openfl.Assets;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 
 class CharacterRenderer
 {
-    private static var poseCache:Map<String, Dynamic> = new Map();
-    private static var atlasCache:Map<String, FlxAtlasFrames> = new Map();
+	public var sprite:FlxSprite;
 
-    public static function build(characterId:String, poseId:String):FlxSpriteGroup
-    {
-        var meta = loadPoses(characterId);
-        var atlas = loadAtlas(characterId);
+	// Canonical VN stage positions
+	public static inline var POS_LEFT:Float = 200;
+	public static inline var POS_CENTER:Float = 640;
+	public static inline var POS_RIGHT:Float = 1080;
+	public static inline var BASE_Y:Float = 360;
 
-        var pose:Dynamic = meta.poses.get(poseId);
-        if (pose == null)
-        {
-            trace("[CharacterRenderer] Pose not found: " + poseId + " for " + characterId);
-            return new FlxSpriteGroup();
-        }
+	// Target placement for transitions
+	private var targetX:Float = 0;
+	private var targetY:Float = BASE_Y;
 
-        var group = new FlxSpriteGroup();
+	public function new(sprite:FlxSprite)
+	{
+		this.sprite = sprite;
+		sprite.visible = false;
+	}
 
-        var baseOffsetX = meta.config.base_offset.x;
-        var baseOffsetY = meta.config.base_offset.y;
-        var scale = meta.config.scale;
+	// -------------------------------------------------
+	//  POSE SWITCHING
+	// -------------------------------------------------
+	public function setPose(pose:String)
+	{
+		// Your animation system here:
+		// sprite.animation.play(pose);
+		if (sprite.animation != null)
+			sprite.animation.play(pose);
+	}
 
-        var layers:Array<Dynamic> = cast pose.layers;
-        for (layer in layers)
-        {
-            var spr = new FlxSprite();
-            spr.frames = atlas;
-            spr.animation.frameName = layer.frame;
+	// -------------------------------------------------
+	//  POSITION RESOLUTION (STRING / NUMBER)
+	// -------------------------------------------------
+	public function resolvePosition(pos:Dynamic)
+	{
+		if (Std.isOfType(pos, Float) || Std.isOfType(pos, Int))
+		{
+			// numeric X position
+			targetX = pos;
+			targetY = BASE_Y;
+			return;
+		}
 
-            spr.x = baseOffsetX + layer.x;
-            spr.y = baseOffsetY + layer.y;
+		switch (pos)
+		{
+			case "left":
+				targetX = POS_LEFT;
+			case "center":
+				targetX = POS_CENTER;
+			case "right":
+				targetX = POS_RIGHT;
+			default:
+				targetX = POS_CENTER; // fallback
+		}
 
-            spr.scale.set(scale, scale);
-            spr.updateHitbox();
+		targetY = BASE_Y;
+	}
 
-            group.add(spr);
-        }
+	// -------------------------------------------------
+	//  TRANSITIONS
+	// -------------------------------------------------
+	public function playTransition(trans:String, duration:Float)
+	{
+		switch (trans)
+		{
+			case "slide_in_left":
+				sprite.x = -sprite.width;
+				sprite.y = targetY;
+				FlxTween.tween(sprite, {x: targetX}, duration, {ease: FlxEase.quadOut});
 
-        return group;
+			case "slide_in_right":
+				sprite.x = FlxG.width + sprite.width;
+				sprite.y = targetY;
+				FlxTween.tween(sprite, {x: targetX}, duration, {ease: FlxEase.quadOut});
+
+			case "fade_in":
+				sprite.alpha = 0;
+				sprite.x = targetX;
+				sprite.y = targetY;
+				FlxTween.tween(sprite, {alpha: 1}, duration);
+
+			case "instant":
+				sprite.x = targetX;
+				sprite.y = targetY;
+				sprite.alpha = 1;
+
+			default:
+				// unrecognized → snap
+				sprite.x = targetX;
+				sprite.y = targetY;
+				sprite.alpha = 1;
+		}
+	}
+
+	// -------------------------------------------------
+	//  VISIBILITY
+	// -------------------------------------------------
+	public function show()
+	{
+		sprite.visible = true;
     }
 
-    private static function loadPoses(characterId:String):Dynamic
-    {
-        if (poseCache.exists(characterId))
-            return poseCache[characterId];
+	public function hide(?transition:String, ?duration:Float = 0)
+	{
+		if (transition == null || transition == "instant")
+		{
+			sprite.visible = false;
+			return;
+		}
 
-        var path = "assets/data/characters/" + characterId + "/poses.json";
-        var raw = Assets.getText(path);
+		switch (transition)
+		{
+			case "fade_out":
+				FlxTween.tween(sprite, {alpha: 0}, duration, {
+					onComplete: (_) -> sprite.visible = false
+				});
 
-        var json:Dynamic = Json.parse(raw);
-
-        // Convert poses into Map<String, Dynamic>
-        var poseMap:Map<String, Dynamic> = new Map();
-        for (key in Reflect.fields(json.poses))
-        {
-            poseMap.set(key, Reflect.field(json.poses, key));
-        }
-        json.poses = poseMap;
-
-        poseCache[characterId] = json;
-        return json;
-    }
-
-    private static function loadAtlas(characterId:String):FlxAtlasFrames
-    {
-        if (atlasCache.exists(characterId))
-            return atlasCache[characterId];
-
-        var base = "assets/images/characters/" + characterId + "/" + characterId;
-        var frames = FlxAtlasFrames.fromSparrow(base + ".png", base + ".xml");
-
-        atlasCache[characterId] = frames;
-        return frames;
+			default:
+				sprite.visible = false;
+		}
     }
 }

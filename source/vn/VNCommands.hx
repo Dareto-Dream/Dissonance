@@ -25,9 +25,12 @@ class VNCommands {
             case "set_bg":
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
-                CharacterSystem.show(node);
+				trace('SHOW_CHARACTER action:', node.character, node.pose, node.position);
+				CharacterSystem.get().show(node.character, node.pose, node.position, node.transition, node.duration);
+
             case "hide_character":
-                CharacterSystem.hide(node.character);
+				CharacterSystem.get().hide(node.character, node.transition, node.duration);
+
             case "shake_screen":
                 EffectSystem.shake(node.intensity, node.duration);
             case "flash":

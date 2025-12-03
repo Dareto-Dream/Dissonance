@@ -1,99 +1,113 @@
 package vn;
 
-import flixel.FlxG;
-import flixel.group.FlxSpriteGroup;
-import states.VNState;
-import vn.CharacterRenderer;
+import Lambda;
+import flixel.FlxSprite;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.group.FlxGroup;
+import haxe.ds.StringMap;
+import vn.VNConfig.CharacterDef;
+import vn.VNConfig.CharacterDefMap;
 
-/**
- * CharacterSystem
- *
- * This system controls which characters appear on screen,
- * where they appear, and which pose they use.
- *
- * Rendering is handled by CharacterRenderer.
- */
+
 class CharacterSystem
 {
-	// Tracks all visible characters: charId -> FlxSpriteGroup
-	private static var active:Map<String, FlxSpriteGroup> = new Map();
+	private static var instance:CharacterSystem;
 
-	/**
-	 * Shows or updates a character.
-	 *
-	 * Expected fields in the node:
-	 *   node.character  : String
-	 *   node.pose       : String
-	 *   node.slot       : String ("left", "center", "right")
-	 */
-	public static function show(node:Dynamic):Void
+	public var renderers:StringMap<CharacterRenderer>;
+
+	public function new()
 	{
-		var charId:String = node.character;
-		var poseId:String = node.pose;
-		var slot:String = node.slot;
-
-		if (charId == null || poseId == null)
-		{
-			trace("[CharacterSystem] ERROR: Missing character or pose");
-			return;
-		}
-
-		var state:VNState = cast FlxG.state;
-
-		// If character already exists, remove old one so we can replace it.
-		if (active.exists(charId))
-		{
-			var old = active[charId];
-			state.charGroup.remove(old, true);
-			old.destroy();
-		}
-
-		// Build the pose group using your CharacterRenderer.
-		var rendered = CharacterRenderer.build(charId, poseId);
-
-		// Position based on slot
-		switch (slot)
-		{
-			case "left":
-				rendered.x = 150;
-				rendered.y = 100;
-
-			case "center":
-				rendered.x = (FlxG.width / 2) - 200;
-				rendered.y = 100;
-
-			case "right":
-				rendered.x = FlxG.width - 350;
-				rendered.y = 100;
-
-			default:
-				rendered.x = (FlxG.width / 2) - 200;
-				rendered.y = 100;
-		}
-
-		// Add to screen
-		state.charGroup.add(rendered);
-		active[charId] = rendered;
+		renderers = new StringMap<CharacterRenderer>();
 	}
 
-	/**
-	 * Removes a character if they are currently on screen.
-	 *
-	 * node.character or charId:String
-	 */
-	public static function hide(charId:String):Void
+	public static function get():CharacterSystem
 	{
-		if (!active.exists(charId))
+		if (instance == null)
+			instance = new CharacterSystem();
+		return instance;
+	}
+
+	// -------------------------------------------------
+	//  INITIALIZE FROM DATA
+	// -------------------------------------------------
+	/**
+	 * Build character sprites and renderers from data and attach them to the given group.
+	 *
+	 * charGroup: the FlxGroup that sits in VNState.charGroup
+	 * defs:      character definition data from VNConfig.loadCharacterDefs()
+	 */
+	public static function init(charGroup:FlxGroup, defs:CharacterDefMap):Void
+	{
+		var cs = get();
+
+		for (id in defs.keys())
 		{
-			trace("[CharacterSystem] Hide ignored, character not active: " + charId);
-			return;
+			var def = defs.get(id);
+			if (def == null)
+				continue;
+
+			// Create sprite and load atlas frames
+			var spr = new FlxSprite();
+			var frames = FlxAtlasFrames.fromSparrow(def.png, def.xml);
+			spr.frames = frames;
+			spr.scrollFactor.set(0, 0);
+			spr.visible = false;
+			spr.antialiasing = true;
+
+			// Attach to the character layer
+			charGroup.add(spr);
+
+			// Wrap in renderer
+			var renderer = new CharacterRenderer(spr);
+
+			// Apply default pose if present
+			if (def.defaultPose != null && def.defaultPose != "")
+			{
+				renderer.setPose(def.defaultPose);
+			}
+
+			cs.addRenderer(def.id, renderer);
 		}
 
-		var state:VNState = cast FlxG.state;
+		trace("[CharacterSystem] Initialized " + Lambda.count(defs) + " characters.");
+	}
 
-		var grp = active[charId];
-		state.charGroup.remove(grp, true);
-		grp.destroy();
-		active.remove(charId);
-    }
+	// -------------------------------------------------
+	//  REGISTRY
+	// -------------------------------------------------
+	public function addRenderer(character:String, renderer:CharacterRenderer):Void
+	{
+		renderers.set(character, renderer);
+	}
+
+	public function getRenderer(character:String):CharacterRenderer
+	{
+		return renderers.get(character);
+	}
+
+	// -------------------------------------------------
+	//  HIGH LEVEL CONTROL
+	// -------------------------------------------------
+	// instance method, used via CharacterSystem.get()
+	public function show(character:String, pose:String, position:Dynamic, transition:String, duration:Float):Void
+	{
+		var r = getRenderer(character);
+		if (r == null)
+			return;
+		if (pose != null && pose != "")
+			r.setPose(pose);
+
+		r.resolvePosition(position);
+		r.playTransition(transition, duration);
+		r.show();
+	}
+
+	public function hide(character:String, ?transition:String, ?duration:Float = 0):Void
+	{
+		var r = getRenderer(character);
+		if (r == null)
+			return;
+
+		r.hide(transition, duration);
+	}
 }
