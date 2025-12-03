@@ -1,6 +1,8 @@
 package;
 
+import flixel.FlxG;
 import flixel.FlxGame;
+import flixel.system.scaleModes.RatioScaleMode;
 import openfl.display.Sprite;
 import states.VNState;
 
@@ -10,7 +12,15 @@ class Main extends Sprite
     {
         super();
 
-        // 1280x720 is ideal for a VN
-        addChild(new FlxGame(1280, 720, VNState.new));
+		var w = 1280;
+		var h = 720;
+
+		addChild(new FlxGame(w, h, VNState.new, 60, 60, true));
+
+		// Must be run AFTER the FlxGame is created
+		// true = fill screen, false = letterbox
+		FlxG.scaleMode = new RatioScaleMode(true);
+
+		FlxG.fixedTimestep = false;
     }
 }

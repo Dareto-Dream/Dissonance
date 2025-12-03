@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<TextureAtlas imagePath="atlas.png">
+<TextureAtlas imagePath="tiffany.png">
     <SubTexture name="bodyL0001" x="0" y="0" width="960" height="960"/>
     <SubTexture name="bodyR0001" x="0" y="962" width="960" height="960"/>
     <SubTexture name="bodyL0002" x="0" y="1924" width="960" height="960"/>

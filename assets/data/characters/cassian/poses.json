@@ -1,0 +1,46 @@
+{
+  "character": "cassian",
+  "config": {
+    "scale": 1.0,
+    "base_offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "poses": {
+    "annoyed": {
+      "layers": [
+        {
+          "frame": "pose0003",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "base0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "eyes0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "brow0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouthM0006",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "nose0001",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    }
+  }
+}

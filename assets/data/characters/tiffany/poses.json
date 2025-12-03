@@ -1,0 +1,36 @@
+{
+  "character": "tiffany",
+  "config": {
+    "scale": 1.0,
+    "base_offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "poses": {
+    "default_smile": {
+      "layers": [
+        {
+          "frame": "bodyR0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouth0001",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    }
+  }
+}
