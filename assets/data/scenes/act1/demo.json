@@ -1,0 +1,143 @@
+{
+  "scene_id": "text_effects_demo",
+  "start": "start",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "narration",
+      "text": "Welcome to the text effects demonstration!",
+      "next": "shake_demo"
+    },
+    {
+      "id": "shake_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "This text is shaking!",
+      "text_effect": "shake",
+      "effect_intensity": 3.0,
+      "next": "glitch_demo"
+    },
+    {
+      "id": "glitch_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "Th1s t3xt 1s gl1tch1ng!",
+      "text_effect": "glitch",
+      "effect_intensity": 8.0,
+      "next": "wave_demo"
+    },
+    {
+      "id": "wave_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "This text moves in a wave pattern~",
+      "text_effect": "wave",
+      "effect_speed": 4.0,
+      "effect_amplitude": 8.0,
+      "next": "rainbow_demo"
+    },
+    {
+      "id": "rainbow_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "Look at these beautiful rainbow colors!",
+      "text_effect": "rainbow",
+      "effect_speed": 3.0,
+      "next": "fade_demo"
+    },
+    {
+      "id": "fade_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "This text fades in and out mysteriously...",
+      "text_effect": "fade",
+      "effect_speed": 2.0,
+      "next": "typewriter_demo"
+    },
+    {
+      "id": "typewriter_demo",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "This text appears character by character like a typewriter!",
+      "text_effect": "typewriter",
+      "effect_speed": 40.0,
+      "duration": 3.0,
+      "next": "combined_demo"
+    },
+    {
+      "id": "combined_demo",
+      "type": "narration",
+      "text": "You can also combine screen effects with text effects!",
+      "next": "combined_shake"
+    },
+    {
+      "id": "combined_shake",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 0.02,
+      "duration": 1.0,
+      "next": "combined_text"
+    },
+    {
+      "id": "combined_text",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "Everything is shaking now!",
+      "text_effect": "shake",
+      "effect_intensity": 4.0,
+      "next": "persistent_effect_intro"
+    },
+    {
+      "id": "persistent_effect_intro",
+      "type": "narration",
+      "text": "You can also set a persistent text effect using actions...",
+      "next": "set_glitch_effect"
+    },
+    {
+      "id": "set_glitch_effect",
+      "type": "action",
+      "action": "set_text_effect",
+      "text_effect": "glitch",
+      "effect_intensity": 6.0,
+      "next": "glitch_line_1"
+    },
+    {
+      "id": "glitch_line_1",
+      "type": "dialogue",
+      "speaker": "???",
+      "text": "Everything is corrupted...",
+      "next": "glitch_line_2"
+    },
+    {
+      "id": "glitch_line_2",
+      "type": "dialogue",
+      "speaker": "???",
+      "text": "The system is breaking down...",
+      "next": "clear_effect"
+    },
+    {
+      "id": "clear_effect",
+      "type": "action",
+      "action": "clear_text_effect",
+      "next": "normal_again"
+    },
+    {
+      "id": "normal_again",
+      "type": "dialogue",
+      "speaker": "System",
+      "text": "Everything is back to normal now.",
+      "next": "end"
+    },
+    {
+      "id": "end",
+      "type": "narration",
+      "text": "That's all the text effects! Use them to create dramatic moments in your story.",
+      "next": "finish"
+    },
+    {
+      "id": "finish",
+      "type": "end",
+      "next_scene": "MainMenuState"
+    }
+  ]
+}

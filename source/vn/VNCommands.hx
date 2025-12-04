@@ -20,11 +20,12 @@ class VNCommands {
             }
         }
         
-        // Show the dialogue
+        // Show the dialogue - pass the entire node for effect parsing
         DialogueSystem.show(
             node.speaker,
             node.text,
-            () -> runner.goto(nextNode(node))
+            () -> runner.goto(nextNode(node)),
+            node
         );
     }
 
@@ -35,9 +36,11 @@ class VNCommands {
             charSys.deemphasizeAll();
         }
         
+        // Show the narration - pass the entire node for effect parsing
         DialogueSystem.showNarration(
             node.text,
-            () -> runner.goto(nextNode(node))
+            () -> runner.goto(nextNode(node)),
+            node
         );
     }
 
@@ -62,6 +65,10 @@ class VNCommands {
                 AudioSystem.playSound(node.sound, node.volume);
             case "play_music":
                 AudioSystem.playMusic(node.track, node.volume);
+            case "set_text_effect":
+                DialogueSystem.setEffect(node);
+            case "clear_text_effect":
+                DialogueSystem.clearEffect();
             default:
                 throw "Unknown VN action: " + node.action;
         }

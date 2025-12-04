@@ -95,5 +95,6 @@ class VNState extends FlxState
 		if (runner != null)
 			runner.update();
 		ChoiceSystem.update();
+		DialogueSystem.update(elapsed);
 	}
 }
