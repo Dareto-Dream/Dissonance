@@ -1,7 +1,6 @@
 {
   "scene_id": "act1_scene3_cassian",
   "start": "n1",
-
   "nodes": [
     {
       "id": "n1",
@@ -12,14 +11,12 @@
       "duration": 0.6,
       "next": "n2"
     },
-
     {
       "id": "n2",
       "type": "narration",
       "text": "Today's practice is supposed to be the first full group session.",
       "next": "n3"
     },
-
     {
       "id": "n3",
       "type": "action",
@@ -31,14 +28,12 @@
       "duration": 0.4,
       "next": "n4"
     },
-
     {
       "id": "n4",
       "type": "narration",
       "text": "Cassian is already here, tuning his guitar with sharp, precise movements.",
       "next": "n5"
     },
-
     {
       "id": "n5",
       "type": "action",
@@ -47,7 +42,6 @@
       "volume": 0.6,
       "next": "n6"
     },
-
     {
       "id": "n6",
       "type": "dialogue",
@@ -57,7 +51,6 @@
       "text": "You're early.",
       "next": "n7"
     },
-
     {
       "id": "n7",
       "type": "dialogue",
@@ -65,7 +58,6 @@
       "text": "Thought I'd get some extra practice in.",
       "next": "n8"
     },
-
     {
       "id": "n8",
       "type": "dialogue",
@@ -75,14 +67,12 @@
       "text": "Good. You'll need it if you want to keep up with me.",
       "next": "n9"
     },
-
     {
       "id": "n9",
       "type": "narration",
       "text": "His tone is challenging but not hostile. This is just how he talks.",
       "next": "n10"
     },
-
     {
       "id": "n10",
       "type": "dialogue",
@@ -90,29 +80,27 @@
       "text": "I'll do my best.",
       "next": "n11"
     },
-
     {
       "id": "n11",
       "type": "action",
       "action": "show_character",
       "character": "laura",
-      "pose": "shy",
+      "pose": "friendly",
       "position": "left",
       "transition": "slide_left",
       "duration": 0.4,
-      "next": "n12"
+      "next": "n12",
+      "speaker": "Laura"
     },
-
     {
       "id": "n12",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "shy",
-      "text": "Um... sorry I'm late. I was... looking for my sheet music.",
+      "pose": "nervous_smile",
+      "text": "Sorry I'm late! I was looking everywhere for my sheet music. I swear I left it right on the table yesterday!",
       "next": "n13"
     },
-
     {
       "id": "n13",
       "type": "dialogue",
@@ -122,35 +110,39 @@
       "text": "Again? How do you keep losing it?",
       "next": "n14"
     },
-
     {
       "id": "n14",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "nervous",
-      "text": "I-I'm sorry... I'll be more careful...",
+      "pose": "anxious",
+      "text": "I know, I know! I'm sorry. I'll keep better track of it, I promise!",
       "next": "n15"
     },
-
     {
       "id": "n15",
       "type": "choice",
       "choices": [
-        { "text": "Defend laura", "target": "n16_defend" },
-        { "text": "Stay neutral", "target": "n16_neutral" }
+        {
+          "text": "Defend laura",
+          "target": "n16_defend"
+        },
+        {
+          "text": "Stay neutral",
+          "target": "n16_neutral"
+        }
       ]
     },
-
     {
       "id": "n16_defend",
       "type": "dialogue",
       "speaker": "MC",
       "text": "It's not a big deal. We all forget things sometimes.",
-      "set_flag": { "defended_laura": true },
+      "set_flag": {
+        "defended_laura": true
+      },
       "next": "n17_defend"
     },
-
     {
       "id": "n17_defend",
       "type": "dialogue",
@@ -160,14 +152,12 @@
       "text": "Whatever. Just don't make it a habit.",
       "next": "n18_converge"
     },
-
     {
       "id": "n16_neutral",
       "type": "narration",
       "text": "You stay quiet. laura looks down at her shoes.",
       "next": "n18_converge"
     },
-
     {
       "id": "n18_converge",
       "type": "action",
@@ -179,7 +169,6 @@
       "duration": 0.4,
       "next": "n19"
     },
-
     {
       "id": "n19",
       "type": "action",
@@ -191,7 +180,6 @@
       "duration": 0.4,
       "next": "n20"
     },
-
     {
       "id": "n20",
       "type": "dialogue",
@@ -201,7 +189,6 @@
       "text": "Everyone's here! Perfect. Let's get started.",
       "next": "n21"
     },
-
     {
       "id": "n21",
       "type": "dialogue",
@@ -211,7 +198,6 @@
       "text": "I'm excited to hear how we sound together.",
       "next": "n22"
     },
-
     {
       "id": "n22",
       "type": "dialogue",
@@ -221,7 +207,6 @@
       "text": "We'll start with something simple. 'Echoes in Harmony.' Everyone knows it, right?",
       "next": "n23"
     },
-
     {
       "id": "n23",
       "type": "dialogue",
@@ -231,17 +216,15 @@
       "text": "Obviously.",
       "next": "n24"
     },
-
     {
       "id": "n24",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "nervous",
-      "text": "I... I think so...",
+      "pose": "nervous_smile",
+      "text": "Yeah! I think so... I practiced it a bunch at home!",
       "next": "n25"
     },
-
     {
       "id": "n25",
       "type": "dialogue",
@@ -249,7 +232,6 @@
       "text": "I'll follow along as best I can.",
       "next": "n26"
     },
-
     {
       "id": "n26",
       "type": "action",
@@ -258,28 +240,24 @@
       "volume": 0.5,
       "next": "n27"
     },
-
     {
       "id": "n27",
       "type": "narration",
       "text": "The first notes fill the room. Cassian's guitar leads, confident and sharp.",
       "next": "n28"
     },
-
     {
       "id": "n28",
       "type": "game",
       "song": "echoes_in_harmony_full",
       "next": "n29"
     },
-
     {
       "id": "n29",
       "type": "narration",
       "text": "The song ends. There's a moment of silence.",
       "next": "n30"
     },
-
     {
       "id": "n30",
       "type": "dialogue",
@@ -289,17 +267,15 @@
       "text": "laura, you were off beat during the bridge.",
       "next": "n31"
     },
-
     {
       "id": "n31",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "nervous",
-      "text": "I... I'm sorry...",
+      "pose": "anxious",
+      "text": "I-I'm sorry... I thought I had it...",
       "next": "n32"
     },
-
     {
       "id": "n32",
       "type": "dialogue",
@@ -309,7 +285,6 @@
       "text": "It's fine, laura. We'll work on timing next practice.",
       "next": "n33"
     },
-
     {
       "id": "n33",
       "type": "dialogue",
@@ -319,7 +294,6 @@
       "text": "If we're performing at the festival, we need to be perfect. Not 'fine.'",
       "next": "n34"
     },
-
     {
       "id": "n34",
       "type": "dialogue",
@@ -329,7 +303,6 @@
       "text": "Cassian, ease up. We're a team, not a competition.",
       "next": "n35"
     },
-
     {
       "id": "n35",
       "type": "dialogue",
@@ -339,14 +312,12 @@
       "text": "A team that doesn't improve isn't a team. It's dead weight.",
       "next": "n36"
     },
-
     {
       "id": "n36",
       "type": "narration",
       "text": "The room goes cold. laura looks like she might cry.",
       "next": "n37"
     },
-
     {
       "id": "n37",
       "type": "dialogue",
@@ -356,7 +327,6 @@
       "text": "Cassian... that's too harsh.",
       "next": "n38"
     },
-
     {
       "id": "n38",
       "type": "dialogue",
@@ -366,7 +336,6 @@
       "text": "...Fine. Whatever. I'll see you all tomorrow.",
       "next": "n39"
     },
-
     {
       "id": "n39",
       "type": "action",
@@ -374,14 +343,12 @@
       "character": "cassian",
       "next": "n40"
     },
-
     {
       "id": "n40",
       "type": "narration",
       "text": "Cassian storms out, guitar case slung over his shoulder.",
       "next": "n41"
     },
-
     {
       "id": "n41",
       "type": "action",
@@ -390,17 +357,15 @@
       "volume": 0.8,
       "next": "n42"
     },
-
     {
       "id": "n42",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
       "pose": "crying",
-      "text": "I... I'm sorry... I ruined everything...",
+      "text": "I'm so sorry... I messed everything up... I should have practiced more...",
       "next": "n43"
     },
-
     {
       "id": "n43",
       "type": "dialogue",
@@ -410,7 +375,6 @@
       "text": "You didn't ruin anything. Cassian just... he takes this very seriously.",
       "next": "n44"
     },
-
     {
       "id": "n44",
       "type": "dialogue",
@@ -420,44 +384,49 @@
       "text": "He'll cool down. He always does.",
       "next": "n45"
     },
-
     {
       "id": "n45",
       "type": "choice",
       "choices": [
-        { "text": "Comfort laura", "target": "n46_comfort" },
-        { "text": "Talk to Tiffany", "target": "n46_tiffany" }
+        {
+          "text": "Comfort laura",
+          "target": "n46_comfort"
+        },
+        {
+          "text": "Talk to Tiffany",
+          "target": "n46_tiffany"
+        }
       ]
     },
-
     {
       "id": "n46_comfort",
       "type": "dialogue",
       "speaker": "MC",
       "text": "Hey, you did fine. Don't let him get to you.",
-      "set_flag": { "comforted_laura": true },
+      "set_flag": {
+        "comforted_laura": true
+      },
       "next": "n47_comfort"
     },
-
     {
       "id": "n47_comfort",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "shy",
-      "text": "Th-thank you... I'll try harder next time...",
+      "pose": "tearful_smile",
+      "text": "Thanks... I'll practice extra hard. I promise I won't let everyone down next time.",
       "next": "n48_converge"
     },
-
     {
       "id": "n46_tiffany",
       "type": "dialogue",
       "speaker": "MC",
       "text": "Is Cassian always like this?",
-      "set_flag": { "asked_about_cassian": true },
+      "set_flag": {
+        "asked_about_cassian": true
+      },
       "next": "n47_tiffany"
     },
-
     {
       "id": "n47_tiffany",
       "type": "dialogue",
@@ -467,21 +436,18 @@
       "text": "Sometimes. He's incredibly talented, but... he's been through a lot. Music is all he has.",
       "next": "n48_converge"
     },
-
     {
       "id": "n48_converge",
       "type": "narration",
       "text": "The practice ends early. Everyone leaves quietly, the weight of the argument still hanging in the air.",
       "next": "n49"
     },
-
     {
       "id": "n49",
       "type": "narration",
       "text": "You walk home under a cloudy sky, wondering if this club will really work out.",
       "next": "n50"
     },
-
     {
       "id": "n50",
       "type": "end",

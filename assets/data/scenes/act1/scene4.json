@@ -1,7 +1,6 @@
 {
   "scene_id": "act1_scene4_harmony",
   "start": "n1",
-
   "nodes": [
     {
       "id": "n1",
@@ -12,14 +11,12 @@
       "duration": 0.8,
       "next": "n2"
     },
-
     {
       "id": "n2",
       "type": "narration",
       "text": "Two weeks have passed since Cassian's outburst. Things have settled into an uneasy rhythm.",
       "next": "n3"
     },
-
     {
       "id": "n3",
       "type": "action",
@@ -28,7 +25,6 @@
       "volume": 0.4,
       "next": "n4"
     },
-
     {
       "id": "n4",
       "type": "action",
@@ -40,7 +36,6 @@
       "duration": 0.5,
       "next": "n5"
     },
-
     {
       "id": "n5",
       "type": "dialogue",
@@ -50,7 +45,6 @@
       "text": "I'm glad everyone could make it today. I have some news about the festival.",
       "next": "n6"
     },
-
     {
       "id": "n6",
       "type": "action",
@@ -62,7 +56,6 @@
       "duration": 0.4,
       "next": "n7"
     },
-
     {
       "id": "n7",
       "type": "action",
@@ -74,19 +67,18 @@
       "duration": 0.4,
       "next": "n8"
     },
-
     {
       "id": "n8",
       "type": "action",
       "action": "show_character",
       "character": "laura",
-      "pose": "shy",
+      "pose": "friendly",
       "position": "far_left",
       "transition": "fade",
       "duration": 0.5,
-      "next": "n9"
+      "next": "n9",
+      "speaker": "Laura"
     },
-
     {
       "id": "n9",
       "type": "dialogue",
@@ -96,7 +88,6 @@
       "text": "What is it?",
       "next": "n10"
     },
-
     {
       "id": "n10",
       "type": "dialogue",
@@ -106,7 +97,6 @@
       "text": "We've been approved for a thirty-minute performance slot! Isn't that wonderful?",
       "next": "n11"
     },
-
     {
       "id": "n11",
       "type": "dialogue",
@@ -116,7 +106,6 @@
       "text": "Thirty minutes? That's ambitious. Think we can handle it?",
       "next": "n12"
     },
-
     {
       "id": "n12",
       "type": "dialogue",
@@ -126,17 +115,15 @@
       "text": "With proper practice, absolutely. We'll need to rehearse at least three times a week.",
       "next": "n13"
     },
-
     {
       "id": "n13",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "nervous",
-      "text": "Um... three times? I... I'm not sure I can...",
+      "pose": "nervous_smile",
+      "text": "Three times a week? That's... that's a lot, but I can do it! I mean, I want to do it!",
       "next": "n14"
     },
-
     {
       "id": "n14",
       "type": "dialogue",
@@ -146,7 +133,6 @@
       "text": "It's okay, laura. We'll work around everyone's schedules. The important thing is that we all commit.",
       "next": "n15"
     },
-
     {
       "id": "n15",
       "type": "dialogue",
@@ -156,7 +142,6 @@
       "text": "I think it'll be great. We've come a long way already.",
       "next": "n16"
     },
-
     {
       "id": "n16",
       "type": "dialogue",
@@ -164,7 +149,6 @@
       "text": "I'm in. This could be really special.",
       "next": "n17"
     },
-
     {
       "id": "n17",
       "type": "dialogue",
@@ -174,7 +158,6 @@
       "text": "Fine. But no slacking. If we're doing this, we're doing it right.",
       "next": "n18"
     },
-
     {
       "id": "n18",
       "type": "dialogue",
@@ -184,14 +167,12 @@
       "text": "Excellent! Then it's settled. Let's start with a full group piece tonight.",
       "next": "n19"
     },
-
     {
       "id": "n19",
       "type": "narration",
       "text": "Everyone moves into position. The air feels charged with possibility.",
       "next": "n20"
     },
-
     {
       "id": "n20",
       "type": "dialogue",
@@ -201,7 +182,6 @@
       "text": "This piece is called 'Converging Paths.' It's about finding unity despite differences.",
       "next": "n21"
     },
-
     {
       "id": "n21",
       "type": "dialogue",
@@ -211,7 +191,6 @@
       "text": "I love that. It feels... fitting.",
       "next": "n22"
     },
-
     {
       "id": "n22",
       "type": "action",
@@ -220,21 +199,18 @@
       "volume": 0.5,
       "next": "n23"
     },
-
     {
       "id": "n23",
       "type": "game",
       "song": "converging_paths",
       "next": "n24"
     },
-
     {
       "id": "n24",
       "type": "narration",
       "text": "The final note rings out. For a moment, everything feels perfect.",
       "next": "n25"
     },
-
     {
       "id": "n25",
       "type": "dialogue",
@@ -244,17 +220,15 @@
       "text": "...Not bad. We might actually pull this off.",
       "next": "n26"
     },
-
     {
       "id": "n26",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "shy",
-      "text": "That was... that was really nice.",
+      "pose": "cheerful",
+      "text": "That was amazing! We really sounded like a real band!",
       "next": "n27"
     },
-
     {
       "id": "n27",
       "type": "dialogue",
@@ -264,7 +238,6 @@
       "text": "We sound good together. Really good.",
       "next": "n28"
     },
-
     {
       "id": "n28",
       "type": "dialogue",
@@ -274,14 +247,12 @@
       "text": "See? I knew we could do this. We're going to make the festival unforgettable.",
       "next": "n29"
     },
-
     {
       "id": "n29",
       "type": "narration",
       "text": "Tiffany's smile is radiant. She looks genuinely happy, proud of what the group has become.",
       "next": "n30"
     },
-
     {
       "id": "n30",
       "type": "dialogue",
@@ -289,7 +260,6 @@
       "text": "Thanks for pulling us all together, Tiffany.",
       "next": "n31"
     },
-
     {
       "id": "n31",
       "type": "dialogue",
@@ -299,21 +269,18 @@
       "text": "That's what a president does. I just want everyone to shine.",
       "next": "n32"
     },
-
     {
       "id": "n32",
       "type": "narration",
       "text": "But there's something in her eyes. A flicker of something beneath the confidence.",
       "next": "n33"
     },
-
     {
       "id": "n33",
       "type": "narration",
       "text": "You can't quite place it. And before you can think about it further, it's gone.",
       "next": "n34"
     },
-
     {
       "id": "n34",
       "type": "action",
@@ -323,14 +290,12 @@
       "duration": 1.0,
       "next": "n35"
     },
-
     {
       "id": "n35",
       "type": "narration",
       "text": "Practice runs late. One by one, everyone starts packing up.",
       "next": "n36"
     },
-
     {
       "id": "n36",
       "type": "dialogue",
@@ -340,7 +305,6 @@
       "text": "Same time tomorrow?",
       "next": "n37"
     },
-
     {
       "id": "n37",
       "type": "dialogue",
@@ -350,7 +314,6 @@
       "text": "Yes. And don't be late.",
       "next": "n38"
     },
-
     {
       "id": "n38",
       "type": "dialogue",
@@ -360,7 +323,6 @@
       "text": "Wouldn't dream of it.",
       "next": "n39"
     },
-
     {
       "id": "n39",
       "type": "action",
@@ -368,25 +330,23 @@
       "character": "cassian",
       "next": "n40"
     },
-
     {
       "id": "n40",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "shy",
-      "text": "G-goodnight, everyone...",
+      "pose": "friendly",
+      "text": "Goodnight everyone! See you tomorrow! Great practice today!",
       "next": "n41"
     },
-
     {
       "id": "n41",
       "type": "action",
       "action": "hide_character",
       "character": "laura",
-      "next": "n42"
+      "next": "n42",
+      "speaker": "Laura"
     },
-
     {
       "id": "n42",
       "type": "dialogue",
@@ -396,7 +356,6 @@
       "text": "This is going to be amazing. I can feel it.",
       "next": "n43"
     },
-
     {
       "id": "n43",
       "type": "dialogue",
@@ -404,7 +363,6 @@
       "text": "Yeah. I think you're right.",
       "next": "n44"
     },
-
     {
       "id": "n44",
       "type": "action",
@@ -412,14 +370,12 @@
       "character": "hanami",
       "next": "n45"
     },
-
     {
       "id": "n45",
       "type": "narration",
       "text": "Soon, it's just you and Tiffany left in the clubroom.",
       "next": "n46"
     },
-
     {
       "id": "n46",
       "type": "dialogue",
@@ -429,7 +385,6 @@
       "text": "You should head home too. It's getting late.",
       "next": "n47"
     },
-
     {
       "id": "n47",
       "type": "dialogue",
@@ -437,7 +392,6 @@
       "text": "What about you?",
       "next": "n48"
     },
-
     {
       "id": "n48",
       "type": "dialogue",
@@ -447,14 +401,12 @@
       "text": "I'll lock up. I always do.",
       "next": "n49"
     },
-
     {
       "id": "n49",
       "type": "narration",
       "text": "She turns back to the window, looking out at the night.",
       "next": "n50"
     },
-
     {
       "id": "n50",
       "type": "dialogue",
@@ -462,7 +414,6 @@
       "text": "Alright. See you tomorrow.",
       "next": "n51"
     },
-
     {
       "id": "n51",
       "type": "dialogue",
@@ -472,7 +423,6 @@
       "text": "See you tomorrow.",
       "next": "n52"
     },
-
     {
       "id": "n52",
       "type": "action",
@@ -482,7 +432,6 @@
       "duration": 0.8,
       "next": "n53"
     },
-
     {
       "id": "n53",
       "type": "action",
@@ -490,35 +439,30 @@
       "character": "tiffany",
       "next": "n54"
     },
-
     {
       "id": "n54",
       "type": "narration",
       "text": "The walk home is quiet. Streetlights flicker overhead.",
       "next": "n55"
     },
-
     {
       "id": "n55",
       "type": "narration",
       "text": "You think about the music club. About how everyone seems to fit together, despite the rough edges.",
       "next": "n56"
     },
-
     {
       "id": "n56",
       "type": "narration",
       "text": "It feels like something real. Something worth holding onto.",
       "next": "n57"
     },
-
     {
       "id": "n57",
       "type": "narration",
       "text": "You don't know it yet, but this is the calm before everything changes.",
       "next": "n58"
     },
-
     {
       "id": "n58",
       "type": "action",
@@ -528,14 +472,12 @@
       "duration": 1.5,
       "next": "n59"
     },
-
     {
       "id": "n59",
       "type": "narration",
       "text": "End of Act 1.",
       "next": "n60"
     },
-
     {
       "id": "n60",
       "type": "end",

@@ -1,7 +1,6 @@
 {
   "scene_id": "act1_scene1_prologue",
   "start": "prologue_flash",
-
   "nodes": [
     {
       "id": "prologue_flash",
@@ -12,7 +11,6 @@
       "duration": 0,
       "next": "prologue_tiffany"
     },
-
     {
       "id": "prologue_tiffany",
       "type": "action",
@@ -24,7 +22,6 @@
       "duration": 0.3,
       "next": "prologue_line"
     },
-
     {
       "id": "prologue_line",
       "type": "dialogue",
@@ -34,7 +31,6 @@
       "text": "YOU! What have you done?!",
       "next": "prologue_glitch"
     },
-
     {
       "id": "prologue_glitch",
       "type": "action",
@@ -43,7 +39,6 @@
       "duration": 0.8,
       "next": "prologue_blackout"
     },
-
     {
       "id": "prologue_blackout",
       "type": "action",
@@ -53,7 +48,6 @@
       "duration": 0,
       "next": "prologue_hide_tiffany"
     },
-
     {
       "id": "prologue_hide_tiffany",
       "type": "action",
@@ -61,14 +55,12 @@
       "character": "tiffany",
       "next": "title_pause"
     },
-
     {
       "id": "title_pause",
       "type": "narration",
       "text": "...",
       "next": "scene_start"
     },
-
     {
       "id": "scene_start",
       "type": "action",
@@ -78,28 +70,24 @@
       "duration": 1.0,
       "next": "morning_narration"
     },
-
     {
       "id": "morning_narration",
       "type": "narration",
       "text": "First day at a new school. The morning air is crisp, and the building feels bigger than it looked online.",
       "next": "mc_thought1"
     },
-
     {
       "id": "mc_thought1",
       "type": "narration",
       "text": "Mom said joining a club would help me settle in. Something about making connections, finding my place.",
       "next": "mc_thought2"
     },
-
     {
       "id": "mc_thought2",
       "type": "narration",
       "text": "I've always liked music. Not that I'm any good at it.",
       "next": "school_bell"
     },
-
     {
       "id": "school_bell",
       "type": "action",
@@ -108,7 +96,6 @@
       "volume": 0.6,
       "next": "walk_inside"
     },
-
     {
       "id": "walk_inside",
       "type": "action",
@@ -118,21 +105,18 @@
       "duration": 0.5,
       "next": "hallway_narration"
     },
-
     {
       "id": "hallway_narration",
       "type": "narration",
       "text": "The hallway echoes with footsteps. Lockers line the walls. Everything smells like floor polish and anticipation.",
       "next": "find_clubroom"
     },
-
     {
       "id": "find_clubroom",
       "type": "narration",
       "text": "The music club room should be on the third floor. Room 3-B.",
       "next": "approach_door"
     },
-
     {
       "id": "approach_door",
       "type": "action",
@@ -142,14 +126,12 @@
       "duration": 0.4,
       "next": "door_narration"
     },
-
     {
       "id": "door_narration",
       "type": "narration",
       "text": "A small paper sign reads 'Music Club' in neat handwriting. Piano notes drift through the door.",
       "next": "knock_door"
     },
-
     {
       "id": "knock_door",
       "type": "action",
@@ -158,14 +140,12 @@
       "volume": 0.7,
       "next": "piano_stops"
     },
-
     {
       "id": "piano_stops",
       "type": "narration",
       "text": "The piano stops abruptly.",
       "next": "door_open"
     },
-
     {
       "id": "door_open",
       "type": "action",
@@ -175,14 +155,12 @@
       "duration": 0.4,
       "next": "first_look"
     },
-
     {
       "id": "first_look",
       "type": "narration",
       "text": "The room is warm and cluttered. Sheet music covers a corner table. A keyboard sits by the window. Sunlight catches dust in the air.",
       "next": "tiffany_appears"
     },
-
     {
       "id": "tiffany_appears",
       "type": "action",
@@ -194,7 +172,6 @@
       "duration": 0.4,
       "next": "tiffany_greeting"
     },
-
     {
       "id": "tiffany_greeting",
       "type": "dialogue",
@@ -204,7 +181,6 @@
       "text": "Oh! You must be the new member. Come in, come in!",
       "next": "mc_greeting"
     },
-
     {
       "id": "mc_greeting",
       "type": "dialogue",
@@ -212,7 +188,6 @@
       "text": "Thanks. I'm... still figuring out how this works.",
       "next": "tiffany_laugh"
     },
-
     {
       "id": "tiffany_laugh",
       "type": "dialogue",
@@ -222,7 +197,6 @@
       "text": "Don't worry! We're all pretty casual here. I'm Tiffany, the club president.",
       "next": "tiffany_position"
     },
-
     {
       "id": "tiffany_position",
       "type": "action",
@@ -234,7 +208,6 @@
       "duration": 0.3,
       "next": "hanami_enters"
     },
-
     {
       "id": "hanami_enters",
       "type": "action",
@@ -246,7 +219,6 @@
       "duration": 0.4,
       "next": "hanami_greeting"
     },
-
     {
       "id": "hanami_greeting",
       "type": "dialogue",
@@ -256,14 +228,12 @@
       "text": "Hi there! Welcome to the club. I'm Hanami.",
       "next": "hanami_warmth"
     },
-
     {
       "id": "hanami_warmth",
       "type": "narration",
       "text": "Her voice is soft and warm. She looks genuinely happy to meet you.",
       "next": "mc_hanami_response"
     },
-
     {
       "id": "mc_hanami_response",
       "type": "dialogue",
@@ -271,7 +241,6 @@
       "text": "Nice to meet you.",
       "next": "cassian_noise"
     },
-
     {
       "id": "cassian_noise",
       "type": "action",
@@ -280,7 +249,6 @@
       "volume": 0.8,
       "next": "cassian_appears"
     },
-
     {
       "id": "cassian_appears",
       "type": "action",
@@ -292,7 +260,6 @@
       "duration": 0.3,
       "next": "cassian_greeting"
     },
-
     {
       "id": "cassian_greeting",
       "type": "dialogue",
@@ -302,7 +269,6 @@
       "text": "Another one, huh? Don't expect me to go easy on you.",
       "next": "tiffany_cassian_scold"
     },
-
     {
       "id": "tiffany_cassian_scold",
       "type": "dialogue",
@@ -312,7 +278,6 @@
       "text": "Cassian, be nice. It's their first day.",
       "next": "cassian_shrug"
     },
-
     {
       "id": "cassian_shrug",
       "type": "dialogue",
@@ -322,36 +287,41 @@
       "text": "Whatever. Just saying we have standards.",
       "next": "laura_peek"
     },
-
     {
       "id": "laura_peek",
       "type": "action",
       "action": "show_character",
       "character": "laura",
-      "pose": "shy",
+      "pose": "friendly",
       "position": "far_right",
-      "transition": "fade",
-      "duration": 0.5,
+      "transition": "slide_right",
+      "duration": 0.3,
       "next": "laura_greeting"
     },
-
     {
       "id": "laura_greeting",
       "type": "dialogue",
-      "speaker": "laura",
+      "speaker": "Laura",
       "character": "laura",
-      "pose": "shy",
-      "text": "Um... h-hi. I'm laura. Welcome.",
-      "next": "laura_voice"
+      "pose": "friendly",
+      "text": "Oh! Hi! I'm Laura! Welcome to the club!",
+      "next": "laura_energy"
     },
-
     {
-      "id": "laura_voice",
+      "id": "laura_energy",
       "type": "narration",
-      "text": "Her voice is barely above a whisper. She stays near the corner, clutching sheet music.",
+      "text": "She's energetic and smiling, but her hands fidget slightly with the sheet music she's holding.",
+      "next": "laura_followup"
+    },
+    {
+      "id": "laura_followup",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "cheerful",
+      "text": "It's so cool to have someone new! We've been waiting for another member. Right, Tiffany?",
       "next": "tiffany_intro_end"
     },
-
     {
       "id": "tiffany_intro_end",
       "type": "dialogue",
@@ -361,7 +331,6 @@
       "text": "Well, now you've met everyone! We usually practice together after school.",
       "next": "hanami_suggestion"
     },
-
     {
       "id": "hanami_suggestion",
       "type": "dialogue",
@@ -371,7 +340,6 @@
       "text": "Want to try a simple duet? Just to get a feel for things.",
       "next": "mc_nervous"
     },
-
     {
       "id": "mc_nervous",
       "type": "dialogue",
@@ -379,7 +347,6 @@
       "text": "I'm not sure I'm ready for that...",
       "next": "hanami_reassure"
     },
-
     {
       "id": "hanami_reassure",
       "type": "dialogue",
@@ -389,7 +356,6 @@
       "text": "It's okay. I'll guide you through it. Music is just about feeling, you know?",
       "next": "setup_duet"
     },
-
     {
       "id": "setup_duet",
       "type": "action",
@@ -398,14 +364,12 @@
       "volume": 0.4,
       "next": "duet_start"
     },
-
     {
       "id": "duet_start",
       "type": "game",
       "song": "gentle_start_duet",
       "next": "duet_end"
     },
-
     {
       "id": "duet_end",
       "type": "dialogue",
@@ -415,7 +379,6 @@
       "text": "See? You did great!",
       "next": "mc_relief"
     },
-
     {
       "id": "mc_relief",
       "type": "dialogue",
@@ -423,7 +386,6 @@
       "text": "That was... actually kind of fun.",
       "next": "tiffany_approve"
     },
-
     {
       "id": "tiffany_approve",
       "type": "dialogue",
@@ -433,7 +395,6 @@
       "text": "Wonderful! I think you'll fit in just fine here.",
       "next": "cassian_comment"
     },
-
     {
       "id": "cassian_comment",
       "type": "dialogue",
@@ -443,14 +404,12 @@
       "text": "Not bad for a beginner, I guess.",
       "next": "scene_end_narration"
     },
-
     {
       "id": "scene_end_narration",
       "type": "narration",
       "text": "The afternoon light shifts across the room. For the first time in weeks, you feel something like belonging.",
       "next": "scene_end"
     },
-
     {
       "id": "scene_end",
       "type": "end",
