@@ -320,33 +320,33 @@
       "character": "cassian",
       "pose": "smirk",
       "text": "Whatever. Just saying we have standards.",
-      "next": "harumi_peek"
+      "next": "laura_peek"
     },
 
     {
-      "id": "harumi_peek",
+      "id": "laura_peek",
       "type": "action",
       "action": "show_character",
-      "character": "harumi",
+      "character": "laura",
       "pose": "shy",
       "position": "far_right",
       "transition": "fade",
       "duration": 0.5,
-      "next": "harumi_greeting"
+      "next": "laura_greeting"
     },
 
     {
-      "id": "harumi_greeting",
+      "id": "laura_greeting",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
-      "text": "Um... h-hi. I'm Harumi. Welcome.",
-      "next": "harumi_voice"
+      "text": "Um... h-hi. I'm laura. Welcome.",
+      "next": "laura_voice"
     },
 
     {
-      "id": "harumi_voice",
+      "id": "laura_voice",
       "type": "narration",
       "text": "Her voice is barely above a whisper. She stays near the corner, clutching sheet music.",
       "next": "tiffany_intro_end"

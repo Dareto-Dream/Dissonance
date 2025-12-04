@@ -295,7 +295,7 @@
       "id": "n31",
       "type": "action",
       "action": "show_character",
-      "character": "harumi",
+      "character": "laura",
       "pose": "shy",
       "position": "left",
       "transition": "fade",
@@ -306,8 +306,8 @@
     {
       "id": "n32",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
       "text": "Um... I think a festival performance sounds nice.",
       "next": "n33"

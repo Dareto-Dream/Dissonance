@@ -79,7 +79,7 @@
       "id": "n8",
       "type": "action",
       "action": "show_character",
-      "character": "harumi",
+      "character": "laura",
       "pose": "shy",
       "position": "far_left",
       "transition": "fade",
@@ -130,8 +130,8 @@
     {
       "id": "n13",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "nervous",
       "text": "Um... three times? I... I'm not sure I can...",
       "next": "n14"
@@ -143,7 +143,7 @@
       "speaker": "Tiffany",
       "character": "tiffany",
       "pose": "neutral",
-      "text": "It's okay, Harumi. We'll work around everyone's schedules. The important thing is that we all commit.",
+      "text": "It's okay, laura. We'll work around everyone's schedules. The important thing is that we all commit.",
       "next": "n15"
     },
 
@@ -248,8 +248,8 @@
     {
       "id": "n26",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
       "text": "That was... that was really nice.",
       "next": "n27"
@@ -372,8 +372,8 @@
     {
       "id": "n40",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
       "text": "G-goodnight, everyone...",
       "next": "n41"
@@ -383,7 +383,7 @@
       "id": "n41",
       "type": "action",
       "action": "hide_character",
-      "character": "harumi",
+      "character": "laura",
       "next": "n42"
     },
 

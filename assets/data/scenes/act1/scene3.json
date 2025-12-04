@@ -95,7 +95,7 @@
       "id": "n11",
       "type": "action",
       "action": "show_character",
-      "character": "harumi",
+      "character": "laura",
       "pose": "shy",
       "position": "left",
       "transition": "slide_left",
@@ -106,8 +106,8 @@
     {
       "id": "n12",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
       "text": "Um... sorry I'm late. I was... looking for my sheet music.",
       "next": "n13"
@@ -126,8 +126,8 @@
     {
       "id": "n14",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "nervous",
       "text": "I-I'm sorry... I'll be more careful...",
       "next": "n15"
@@ -137,7 +137,7 @@
       "id": "n15",
       "type": "choice",
       "choices": [
-        { "text": "Defend Harumi", "target": "n16_defend" },
+        { "text": "Defend laura", "target": "n16_defend" },
         { "text": "Stay neutral", "target": "n16_neutral" }
       ]
     },
@@ -147,7 +147,7 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "It's not a big deal. We all forget things sometimes.",
-      "set_flag": { "defended_harumi": true },
+      "set_flag": { "defended_laura": true },
       "next": "n17_defend"
     },
 
@@ -164,7 +164,7 @@
     {
       "id": "n16_neutral",
       "type": "narration",
-      "text": "You stay quiet. Harumi looks down at her shoes.",
+      "text": "You stay quiet. laura looks down at her shoes.",
       "next": "n18_converge"
     },
 
@@ -235,8 +235,8 @@
     {
       "id": "n24",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "nervous",
       "text": "I... I think so...",
       "next": "n25"
@@ -286,15 +286,15 @@
       "speaker": "Cassian",
       "character": "cassian",
       "pose": "annoyed",
-      "text": "Harumi, you were off beat during the bridge.",
+      "text": "laura, you were off beat during the bridge.",
       "next": "n31"
     },
 
     {
       "id": "n31",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "nervous",
       "text": "I... I'm sorry...",
       "next": "n32"
@@ -306,7 +306,7 @@
       "speaker": "Tiffany",
       "character": "tiffany",
       "pose": "neutral",
-      "text": "It's fine, Harumi. We'll work on timing next practice.",
+      "text": "It's fine, laura. We'll work on timing next practice.",
       "next": "n33"
     },
 
@@ -343,7 +343,7 @@
     {
       "id": "n36",
       "type": "narration",
-      "text": "The room goes cold. Harumi looks like she might cry.",
+      "text": "The room goes cold. laura looks like she might cry.",
       "next": "n37"
     },
 
@@ -394,8 +394,8 @@
     {
       "id": "n42",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "crying",
       "text": "I... I'm sorry... I ruined everything...",
       "next": "n43"
@@ -425,7 +425,7 @@
       "id": "n45",
       "type": "choice",
       "choices": [
-        { "text": "Comfort Harumi", "target": "n46_comfort" },
+        { "text": "Comfort laura", "target": "n46_comfort" },
         { "text": "Talk to Tiffany", "target": "n46_tiffany" }
       ]
     },
@@ -435,15 +435,15 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "Hey, you did fine. Don't let him get to you.",
-      "set_flag": { "comforted_harumi": true },
+      "set_flag": { "comforted_laura": true },
       "next": "n47_comfort"
     },
 
     {
       "id": "n47_comfort",
       "type": "dialogue",
-      "speaker": "Harumi",
-      "character": "harumi",
+      "speaker": "laura",
+      "character": "laura",
       "pose": "shy",
       "text": "Th-thank you... I'll try harder next time...",
       "next": "n48_converge"
