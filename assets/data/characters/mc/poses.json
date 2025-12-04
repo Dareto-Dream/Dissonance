@@ -1,0 +1,26 @@
+{
+  "character": "mc",
+  "config": {
+    "scale": 1.0,
+    "base_offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "poses": {
+    "nuetral": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0001",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    }
+  }
+}

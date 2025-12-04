@@ -8,15 +8,15 @@
     }
   },
   "poses": {
-    "default_smile": {
+    "nuetral": {
       "layers": [
         {
-          "frame": "bodyR0001",
+          "frame": "bodyL0001",
           "x": 0,
           "y": 0
         },
         {
-          "frame": "bodyL0001",
+          "frame": "bodyR0001",
           "x": 0,
           "y": 0
         },
@@ -32,10 +32,54 @@
         }
       ]
     },
-    "neutral": {
+    "happy": {
       "layers": [
         {
-          "frame": "full0026",
+          "frame": "bodyL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyR0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouth0002",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "suprised": {
+      "layers": [
+        {
+          "frame": "bodyR0002",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "headR0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouth0009",
           "x": 0,
           "y": 0
         }

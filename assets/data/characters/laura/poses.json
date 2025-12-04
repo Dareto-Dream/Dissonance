@@ -1,5 +1,5 @@
 {
-  "character": "cassian",
+  "character": "laura",
   "config": {
     "scale": 1.0,
     "base_offset": {
@@ -8,30 +8,29 @@
     }
   },
   "poses": {
-    "annoyed": {
+    "happy": {
       "layers": [
         {
-          "frame": "pose0003",
+          "frame": "body0001",
           "x": 0,
           "y": 0
         },
         {
-          "frame": "base0001",
+          "frame": "face0007",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "nuetral": {
+      "layers": [
+        {
+          "frame": "body0001",
           "x": 0,
           "y": 0
         },
         {
-          "frame": "brow0001",
-          "x": 0,
-          "y": 0
-        },
-        {
-          "frame": "eyes0001",
-          "x": 0,
-          "y": 0
-        },
-        {
-          "frame": "mouthM0006",
+          "frame": "face0001",
           "x": 0,
           "y": 0
         }
