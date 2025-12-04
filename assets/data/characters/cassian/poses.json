@@ -37,7 +37,7 @@
         }
       ]
     },
-    "nuetral": {
+    "neutral": {
       "layers": [
         {
           "frame": "pose0001",
@@ -79,7 +79,7 @@
           "y": 0
         },
         {
-          "frame": "brow0001",
+          "frame": "brow0003",
           "x": 0,
           "y": 0
         },
@@ -90,7 +90,36 @@
         },
         {
           "frame": "mouthM0005",
-          "x": -8,
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "angry": {
+      "layers": [
+        {
+          "frame": "pose0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "base0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "brow0003",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "eyes0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouthM0006",
+          "x": 0,
           "y": 0
         }
       ]

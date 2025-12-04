@@ -8,7 +8,7 @@
     }
   },
   "poses": {
-    "nuetral": {
+    "neutral": {
       "layers": [
         {
           "frame": "bodyL0001",
@@ -133,6 +133,40 @@
         },
         {
           "frame": "mouth0006",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "broken_blood": {
+      "layers": [
+        {
+          "frame": "bodyL0002",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyR0003",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "headL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouth0009",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "overlay0002",
           "x": 0,
           "y": 0
         }

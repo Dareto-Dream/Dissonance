@@ -22,7 +22,7 @@
         }
       ]
     },
-    "nuetral": {
+    "neutral": {
       "layers": [
         {
           "frame": "body0001",
@@ -31,6 +31,90 @@
         },
         {
           "frame": "face0001",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "friendly": {
+      "layers": [
+        {
+          "frame": "body0004",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0007",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "cheerful": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0009",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "nervous_smile": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0012",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "anxious": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0013",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "crying": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0015",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "tearful_smile": {
+      "layers": [
+        {
+          "frame": "body0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "face0016",
           "x": 0,
           "y": 0
         }

@@ -15,13 +15,13 @@
     "id": "hanami",
     "png": "assets/images/characters/hanami/hanami.png",
     "xml": "assets/images/characters/hanami/hanami.xml",
-    "defaultPose": "nuetral"
+    "defaultPose": "neutral"
   },
   "mc": {
     "id": "mc",
     "png": "assets/images/characters/mc/mc.png",
     "xml": "assets/images/characters/mc/mc.xml",
-    "defaultPose": "nuetral"
+    "defaultPose": "neutral"
   },
   "laura": {
     "id": "laura",
