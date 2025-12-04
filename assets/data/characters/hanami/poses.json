@@ -16,6 +16,24 @@
           "y": 0
         }
       ]
+    },
+    "smile": {
+      "layers": [
+        {
+          "frame": "full0009",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "gentle": {
+      "layers": [
+        {
+          "frame": "full0007",
+          "x": 0,
+          "y": 0
+        }
+      ]
     }
   }
 }

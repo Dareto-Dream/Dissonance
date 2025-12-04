@@ -5,7 +5,22 @@ import util.SceneManager;
 
 class VNCommands {
     public static function showDialogue(node:Dynamic, runner:SceneRunner):Void {
-        // TODO: Display text using DialogueBox
+        var charSys = CharacterSystem.get();
+        
+        // If character is specified, emphasize them (DDLC style)
+        if (node.character != null && charSys != null) {
+            charSys.emphasizeCharacter(node.character);
+            
+            // If pose is also specified, change to that pose
+            if (node.pose != null) {
+                var r = charSys.characters.get(node.character);
+                if (r != null) {
+                    r.setPose(node.pose);
+                }
+            }
+        }
+        
+        // Show the dialogue
         DialogueSystem.show(
             node.speaker,
             node.text,
@@ -14,6 +29,12 @@ class VNCommands {
     }
 
     public static function showNarration(node:Dynamic, runner:SceneRunner):Void {
+        // For narration, deemphasize all characters
+        var charSys = CharacterSystem.get();
+        if (charSys != null) {
+            charSys.deemphasizeAll();
+        }
+        
         DialogueSystem.showNarration(
             node.text,
             () -> runner.goto(nextNode(node))

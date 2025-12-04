@@ -273,4 +273,30 @@ class CharacterRenderer extends FlxGroup
 		for (spr in layers)
 			spr.visible = false;
 	}
+
+	public function emphasize():Void
+	{
+		// Make character larger and more visible (active speaker)
+		for (spr in layers)
+		{
+			if (spr.visible)
+			{
+				spr.scale.set(config.scale * 1.1, config.scale * 1.1);
+				spr.alpha = 1.0;
+			}
+		}
+	}
+
+	public function deemphasize():Void
+	{
+		// Make character smaller and dimmer (inactive)
+		for (spr in layers)
+		{
+			if (spr.visible)
+			{
+				spr.scale.set(config.scale * 0.9, config.scale * 0.9);
+				spr.alpha = 0.6;
+			}
+		}
+	}
 }

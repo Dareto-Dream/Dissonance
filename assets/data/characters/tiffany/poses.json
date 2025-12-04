@@ -26,6 +26,64 @@
           "y": 0
         },
         {
+          "frame": "mouth0003",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "suprised": {
+      "layers": [
+        {
+          "frame": "bodyR0002",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "headR0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "mouth0009",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "overlay0001",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    "default_smile": {
+      "layers": [
+        {
+          "frame": "bodyL0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "bodyR0001",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "frame": "head0001",
+          "x": 0,
+          "y": 0
+        },
+        {
           "frame": "mouth0001",
           "x": 0,
           "y": 0
@@ -56,15 +114,15 @@
         }
       ]
     },
-    "suprised": {
+    "annoyed": {
       "layers": [
         {
-          "frame": "bodyR0002",
+          "frame": "bodyL0004",
           "x": 0,
           "y": 0
         },
         {
-          "frame": "bodyL0001",
+          "frame": "bodyR0004",
           "x": 0,
           "y": 0
         },
@@ -74,12 +132,7 @@
           "y": 0
         },
         {
-          "frame": "headR0001",
-          "x": 0,
-          "y": 0
-        },
-        {
-          "frame": "mouth0009",
+          "frame": "mouth0006",
           "x": 0,
           "y": 0
         }

@@ -81,4 +81,42 @@ class CharacterSystem
 
 		r.hide();
 	}
+	
+	public function emphasizeCharacter(name:String):Void
+	{
+		// Deemphasize all characters first
+		for (charName in characters.keys())
+		{
+			var r = characters.get(charName);
+			if (r != null)
+				r.deemphasize();
+		}
+		
+		// Emphasize the active speaker
+		var r = characters.get(name);
+		if (r != null)
+			r.emphasize();
+		else
+			trace("[CharacterSystem] Cannot emphasize unknown character '" + name + "'");
+	}
+
+	public function deemphasizeAll():Void
+	{
+		// Reset all characters to normal state
+		for (charName in characters.keys())
+		{
+			var r = characters.get(charName);
+			if (r != null)
+			{
+				for (spr in r.layers)
+				{
+					if (spr.visible)
+					{
+						spr.scale.set(r.config.scale, r.config.scale);
+						spr.alpha = 1.0;
+					}
+				}
+			}
+		}
+	}
 }
