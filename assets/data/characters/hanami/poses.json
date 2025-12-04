@@ -1,0 +1,21 @@
+{
+  "character": "hanami",
+  "config": {
+    "scale": 1.0,
+    "base_offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "poses": {
+    "neutral": {
+      "layers": [
+        {
+          "frame": "full0008",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    }
+  }
+}

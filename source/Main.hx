@@ -8,19 +8,17 @@ import states.VNState;
 
 class Main extends Sprite
 {
-    public function new()
-    {
-        super();
+	public function new()
+	{
+		super();
 
 		var w = 1280;
 		var h = 720;
 
-		addChild(new FlxGame(w, h, VNState.new, 60, 60, true));
+		addChild(new FlxGame(w, h, () -> new VNState(), 60, 60, true));
 
 		// Must be run AFTER the FlxGame is created
-		// true = fill screen, false = letterbox
 		FlxG.scaleMode = new RatioScaleMode(true);
-
 		FlxG.fixedTimestep = false;
-    }
+	}
 }

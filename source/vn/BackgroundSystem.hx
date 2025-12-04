@@ -11,25 +11,27 @@ class BackgroundSystem {
     private static var currentBG:FlxSprite = null;
     private static var nextBG:FlxSprite = null;
 
-    // Background group MUST be FlxSpriteGroup in HF 5.x
     private static var bgGroup:FlxSpriteGroup = null;
 
     private static function getGroup():FlxSpriteGroup {
         if (bgGroup == null) {
             var state = cast(FlxG.state, VNState);
-            bgGroup = state.bgGroup; // state.bgGroup is FlxSpriteGroup
+			bgGroup = state.bgGroup;
         }
         return bgGroup;
     }
 
-    // ----------------------------------------------------------
-    //  CHANGE BACKGROUND
-    // ----------------------------------------------------------
+	// Reset state when switching scenes
+	public static function reset():Void
+	{
+		currentBG = null;
+		nextBG = null;
+		bgGroup = null;
+	}
 
     public static function set(bg:String, transition:String = "cut", duration:Float = 0.5):Void {
         var group = getGroup();
 
-        // Attempt to load the image; if missing, create a simple colored placeholder
         try {
             nextBG = new FlxSprite(0, 0, bg);
         } catch(e:Dynamic) {
@@ -55,18 +57,10 @@ class BackgroundSystem {
         }
     }
 
-    // ----------------------------------------------------------
-    //  SCALED BACKGROUND
-    // ----------------------------------------------------------
-
     private static function scaleToScreen(bg:FlxSprite):Void {
         bg.setGraphicSize(FlxG.width, FlxG.height);
         bg.updateHitbox();
     }
-
-    // ----------------------------------------------------------
-    //  TRANSITION IMPLEMENTATIONS
-    // ----------------------------------------------------------
 
     private static function applyCut(group:FlxSpriteGroup):Void {
         if (currentBG != null) {

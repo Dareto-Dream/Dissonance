@@ -1,0 +1,346 @@
+{
+  "scene_id": "act1_scene2_practice",
+  "start": "n1",
+
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/clubroom_afternoon.png",
+      "transition": "fade",
+      "duration": 0.6,
+      "next": "n2"
+    },
+
+    {
+      "id": "n2",
+      "type": "narration",
+      "text": "A week has passed. The music club has become part of your routine.",
+      "next": "n3"
+    },
+
+    {
+      "id": "n3",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/afternoon_ambient.ogg",
+      "volume": 0.3,
+      "next": "n4"
+    },
+
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "position": "center",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n5"
+    },
+
+    {
+      "id": "n5",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Ready for another practice session?",
+      "next": "n6"
+    },
+
+    {
+      "id": "n6",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I think so. Though I'm still getting used to the timing.",
+      "next": "n7"
+    },
+
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "That's okay. Music isn't about perfection. It's about expression.",
+      "next": "n8"
+    },
+
+    {
+      "id": "n8",
+      "type": "narration",
+      "text": "Hanami moves to the keyboard and sits down. Her fingers hover over the keys.",
+      "next": "n9"
+    },
+
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "This song is a little more complex. Follow my lead, okay?",
+      "next": "n10"
+    },
+
+    {
+      "id": "n10",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/piano_chord.wav",
+      "volume": 0.5,
+      "next": "n11"
+    },
+
+    {
+      "id": "n11",
+      "type": "game",
+      "song": "afternoon_melody",
+      "next": "n12"
+    },
+
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "You're getting better already!",
+      "next": "n13"
+    },
+
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Thanks. You make it easier.",
+      "next": "n14"
+    },
+
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I'm glad. Music has always helped me... express things I couldn't say otherwise.",
+      "next": "n15"
+    },
+
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "There's something in her voice. A weight she's carrying that you can't quite place.",
+      "next": "n16"
+    },
+
+    {
+      "id": "n16",
+      "type": "choice",
+      "choices": [
+        { "text": "Ask if she's okay", "target": "n17_ask" },
+        { "text": "Let it pass", "target": "n17_pass" }
+      ]
+    },
+
+    {
+      "id": "n17_ask",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Is everything alright? You seem... distant.",
+      "set_flag": { "asked_hanami_concern": true },
+      "next": "n18_ask"
+    },
+
+    {
+      "id": "n18_ask",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Oh, I'm fine! Just... sometimes my body aches a bit. Nothing serious.",
+      "next": "n19_ask"
+    },
+
+    {
+      "id": "n19_ask",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Are you sure? You should rest if you need to.",
+      "next": "n20_converge"
+    },
+
+    {
+      "id": "n17_pass",
+      "type": "narration",
+      "text": "You decide not to press. Maybe she'll open up when she's ready.",
+      "next": "n20_converge"
+    },
+
+    {
+      "id": "n20_converge",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Come on, let's try that piece one more time. I think you'll nail it this time.",
+      "next": "n21"
+    },
+
+    {
+      "id": "n21",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "position": "right",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n22"
+    },
+
+    {
+      "id": "n22",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Sounds like you two are making good progress!",
+      "next": "n23"
+    },
+
+    {
+      "id": "n23",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "MC is a natural. We'll have a full performance ready soon.",
+      "next": "n24"
+    },
+
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "happy",
+      "text": "That's wonderful! We should plan something for the school festival.",
+      "next": "n25"
+    },
+
+    {
+      "id": "n25",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "position": "far_right",
+      "transition": "slide_left",
+      "duration": 0.3,
+      "next": "n26"
+    },
+
+    {
+      "id": "n26",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Festival? We haven't even practiced as a full group yet.",
+      "next": "n27"
+    },
+
+    {
+      "id": "n27",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "That's why I'm bringing it up now, Cassian. We need a goal to work toward.",
+      "next": "n28"
+    },
+
+    {
+      "id": "n28",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Fine. But don't expect me to carry everyone.",
+      "next": "n29"
+    },
+
+    {
+      "id": "n29",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "We'll all do our part. That's what makes it special, right?",
+      "next": "n30"
+    },
+
+    {
+      "id": "n30",
+      "type": "narration",
+      "text": "The tension eases slightly. Cassian shrugs and picks up his guitar.",
+      "next": "n31"
+    },
+
+    {
+      "id": "n31",
+      "type": "action",
+      "action": "show_character",
+      "character": "harumi",
+      "pose": "shy",
+      "position": "left",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n32"
+    },
+
+    {
+      "id": "n32",
+      "type": "dialogue",
+      "speaker": "Harumi",
+      "character": "harumi",
+      "pose": "shy",
+      "text": "Um... I think a festival performance sounds nice.",
+      "next": "n33"
+    },
+
+    {
+      "id": "n33",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "happy",
+      "text": "See? Everyone's on board. We'll start full group practice next week.",
+      "next": "n34"
+    },
+
+    {
+      "id": "n34",
+      "type": "narration",
+      "text": "The afternoon stretches into evening. The clubroom feels warm, almost safe.",
+      "next": "n35"
+    },
+
+    {
+      "id": "n35",
+      "type": "narration",
+      "text": "For now, everything seems normal.",
+      "next": "n36"
+    },
+
+    {
+      "id": "n36",
+      "type": "end",
+      "next_scene": "scenes/act1/scene3.json"
+    }
+  ]
+}

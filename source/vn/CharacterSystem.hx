@@ -34,13 +34,13 @@ class CharacterSystem
 				continue;
 			}
 
-			if (!Reflect.hasField(c, "name") || c.name == null)
+			if (!Reflect.hasField(c, "id") || c.id == null)
 			{
-				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'name' field. Entry=", c);
+				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'id' field. Entry=", c);
 				continue;
 			}
 
-			var name:String = c.name;
+			var name:String = c.id;
 
 			var renderer = new CharacterRenderer(name);
 			characters.set(name, renderer);

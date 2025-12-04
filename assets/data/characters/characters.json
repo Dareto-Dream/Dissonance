@@ -3,7 +3,7 @@
     "id": "cassian",
     "png": "assets/images/characters/cassian/cassian.png",
     "xml": "assets/images/characters/cassian/cassian.xml",
-    "defaultPose": "neutral"
+    "defaultPose": "annoyed"
   },
   "tiffany": {
     "id": "tiffany",
@@ -15,6 +15,6 @@
     "id": "hanami",
     "png": "assets/images/characters/hanami/hanami.png",
     "xml": "assets/images/characters/hanami/hanami.xml",
-    "defaultPose": "smile"
+    "defaultPose": "nuetral"
   }
 }

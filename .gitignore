@@ -106,3 +106,4 @@ package-lock.json
 *.lfs-lock
 
 packer/assets/
+.venv/

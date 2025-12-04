@@ -1,269 +1,460 @@
 {
-  "scene_id": "template_scene",
-  "start": "n1",
+  "scene_id": "act1_scene1_prologue",
+  "start": "prologue_flash",
 
   "nodes": [
-
     {
-      "id": "n1",
+      "id": "prologue_flash",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/classroom_day.png",
+      "background": "assets/images/bg/void.png",
+      "transition": "cut",
+      "duration": 0,
+      "next": "prologue_tiffany"
+    },
+
+    {
+      "id": "prologue_tiffany",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "position": "center",
       "transition": "fade",
-      "duration": 0.6,
-      "next": "n2"
+      "duration": 0.3,
+      "next": "prologue_line"
     },
 
     {
-      "id": "n2",
+      "id": "prologue_line",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "YOU! What have you done?!",
+      "next": "prologue_glitch"
+    },
+
+    {
+      "id": "prologue_glitch",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 2.0,
+      "duration": 0.8,
+      "next": "prologue_blackout"
+    },
+
+    {
+      "id": "prologue_blackout",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "cut",
+      "duration": 0,
+      "next": "prologue_hide_tiffany"
+    },
+
+    {
+      "id": "prologue_hide_tiffany",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "next": "title_pause"
+    },
+
+    {
+      "id": "title_pause",
       "type": "narration",
-      "text": "The bell rings, echoing through the empty halls. Another day ends.",
-      "next": "n3"
+      "text": "...",
+      "next": "scene_start"
     },
 
     {
-      "id": "n3",
+      "id": "scene_start",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/school_entrance.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "morning_narration"
+    },
+
+    {
+      "id": "morning_narration",
+      "type": "narration",
+      "text": "First day at a new school. The morning air is crisp, and the building feels bigger than it looked online.",
+      "next": "mc_thought1"
+    },
+
+    {
+      "id": "mc_thought1",
+      "type": "narration",
+      "text": "Mom said joining a club would help me settle in. Something about making connections, finding my place.",
+      "next": "mc_thought2"
+    },
+
+    {
+      "id": "mc_thought2",
+      "type": "narration",
+      "text": "I've always liked music. Not that I'm any good at it.",
+      "next": "school_bell"
+    },
+
+    {
+      "id": "school_bell",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/school_bell.wav",
+      "volume": 0.6,
+      "next": "walk_inside"
+    },
+
+    {
+      "id": "walk_inside",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway_day.png",
+      "transition": "slide_left",
+      "duration": 0.5,
+      "next": "hallway_narration"
+    },
+
+    {
+      "id": "hallway_narration",
+      "type": "narration",
+      "text": "The hallway echoes with footsteps. Lockers line the walls. Everything smells like floor polish and anticipation.",
+      "next": "find_clubroom"
+    },
+
+    {
+      "id": "find_clubroom",
+      "type": "narration",
+      "text": "The music club room should be on the third floor. Room 3-B.",
+      "next": "approach_door"
+    },
+
+    {
+      "id": "approach_door",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club_door.png",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "door_narration"
+    },
+
+    {
+      "id": "door_narration",
+      "type": "narration",
+      "text": "A small paper sign reads 'Music Club' in neat handwriting. Piano notes drift through the door.",
+      "next": "knock_door"
+    },
+
+    {
+      "id": "knock_door",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_knock.wav",
+      "volume": 0.7,
+      "next": "piano_stops"
+    },
+
+    {
+      "id": "piano_stops",
+      "type": "narration",
+      "text": "The piano stops abruptly.",
+      "next": "door_open"
+    },
+
+    {
+      "id": "door_open",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/clubroom_day.png",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "first_look"
+    },
+
+    {
+      "id": "first_look",
+      "type": "narration",
+      "text": "The room is warm and cluttered. Sheet music covers a corner table. A keyboard sits by the window. Sunlight catches dust in the air.",
+      "next": "tiffany_appears"
+    },
+
+    {
+      "id": "tiffany_appears",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "position": "center",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "tiffany_greeting"
+    },
+
+    {
+      "id": "tiffany_greeting",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Oh! You must be the new member. Come in, come in!",
+      "next": "mc_greeting"
+    },
+
+    {
+      "id": "mc_greeting",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Thanks. I'm... still figuring out how this works.",
+      "next": "tiffany_laugh"
+    },
+
+    {
+      "id": "tiffany_laugh",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "happy",
+      "text": "Don't worry! We're all pretty casual here. I'm Tiffany, the club president.",
+      "next": "tiffany_position"
+    },
+
+    {
+      "id": "tiffany_position",
       "type": "action",
       "action": "show_character",
       "character": "tiffany",
       "pose": "default_smile",
       "position": "right",
-      "transition": "slide_in_right",
+      "transition": "slide_right",
+      "duration": 0.3,
+      "next": "hanami_enters"
+    },
+
+    {
+      "id": "hanami_enters",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "position": "left",
+      "transition": "slide_left",
       "duration": 0.4,
-      "next": "n4"
+      "next": "hanami_greeting"
     },
 
     {
-      "id": "n4",
+      "id": "hanami_greeting",
       "type": "dialogue",
-      "speaker": "Tiffany",
-      "character": "tiffany",
-      "pose": "default_smile",
-      "emotion": "soft",
-      "text": "You're here early today.",
-      "next": "n5"
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Hi there! Welcome to the club. I'm Hanami.",
+      "next": "hanami_warmth"
     },
 
     {
-      "id": "n5",
+      "id": "hanami_warmth",
+      "type": "narration",
+      "text": "Her voice is soft and warm. She looks genuinely happy to meet you.",
+      "next": "mc_hanami_response"
+    },
+
+    {
+      "id": "mc_hanami_response",
       "type": "dialogue",
       "speaker": "MC",
-      "character": "mc",
-      "pose": "neutral",
-      "text": "Couldn't sleep. Thought I'd walk around a bit.",
-      "next": "n6"
+      "text": "Nice to meet you.",
+      "next": "cassian_noise"
     },
 
     {
-      "id": "n6",
+      "id": "cassian_noise",
       "type": "action",
       "action": "play_sound",
-      "sound": "footstep.wav",
-      "volume": 0.7,
-      "next": "n7"
+      "sound": "assets/sounds/guitar_strum.wav",
+      "volume": 0.8,
+      "next": "cassian_appears"
     },
 
     {
-      "id": "n7",
-      "type": "narration",
-      "text": "Someone approaches from the hallway...",
-      "next": "n8"
-    },
-
-    {
-      "id": "n8",
+      "id": "cassian_appears",
       "type": "action",
       "action": "show_character",
       "character": "cassian",
-      "pose": "annoyed",
-      "position": "left",
-      "transition": "slide_in_left",
+      "pose": "neutral",
+      "position": "center",
+      "transition": "slide_up",
       "duration": 0.3,
-      "next": "n9"
+      "next": "cassian_greeting"
     },
 
     {
-      "id": "n9",
+      "id": "cassian_greeting",
       "type": "dialogue",
       "speaker": "Cassian",
       "character": "cassian",
-      "pose": "annoyed",
-      "text": "You two are loud enough to wake the dead.",
-      "next": "n10"
+      "pose": "neutral",
+      "text": "Another one, huh? Don't expect me to go easy on you.",
+      "next": "tiffany_cassian_scold"
     },
 
     {
-      "id": "n10",
+      "id": "tiffany_cassian_scold",
       "type": "dialogue",
       "speaker": "Tiffany",
       "character": "tiffany",
-      "pose": "pout",
-      "text": "Cassian, not now.",
-      "next": "n11"
+      "pose": "annoyed",
+      "text": "Cassian, be nice. It's their first day.",
+      "next": "cassian_shrug"
     },
 
     {
-      "id": "n11",
+      "id": "cassian_shrug",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Whatever. Just saying we have standards.",
+      "next": "harumi_peek"
+    },
+
+    {
+      "id": "harumi_peek",
       "type": "action",
-      "action": "shake_screen",
-      "intensity": 0.2,
-      "duration": 0.4,
-      "next": "n12"
+      "action": "show_character",
+      "character": "harumi",
+      "pose": "shy",
+      "position": "far_right",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "harumi_greeting"
     },
 
     {
-      "id": "n12",
+      "id": "harumi_greeting",
       "type": "dialogue",
-      "speaker": "MC",
-      "character": "mc",
-      "pose": "surprised",
-      "text": "What was that!?",
-      "next": "n13"
+      "speaker": "Harumi",
+      "character": "harumi",
+      "pose": "shy",
+      "text": "Um... h-hi. I'm Harumi. Welcome.",
+      "next": "harumi_voice"
     },
 
     {
-      "id": "n13",
-      "type": "choice",
-      "choices": [
-        {
-          "text": "Ask Tiffany what's happening",
-          "target": "n14"
-        },
-        {
-          "text": "Ask Cassian what's happening",
-          "target": "n15"
-        }
-      ]
+      "id": "harumi_voice",
+      "type": "narration",
+      "text": "Her voice is barely above a whisper. She stays near the corner, clutching sheet music.",
+      "next": "tiffany_intro_end"
     },
 
     {
-      "id": "n14",
-      "type": "dialogue",
-      "speaker": "Tiffany",
-      "character": "tiffany",
-      "pose": "worried",
-      "text": "I'm not sure... something feels wrong.",
-      "set_flag": { "asked_tiffany": true },
-      "next": "n16"
-    },
-
-    {
-      "id": "n15",
-      "type": "dialogue",
-      "speaker": "Cassian",
-      "character": "cassian",
-      "pose": "annoyed",
-      "text": "How should I know? I'm a singer, not a psychic.",
-      "set_flag": { "asked_cassian": true },
-      "next": "n16"
-    },
-
-    {
-      "id": "n16",
-      "type": "if",
-      "condition": "tiffany_rot <= 2",
-      "trueNode": "n17a",
-      "falseNode": "n17b"
-    },
-
-    {
-      "id": "n17a",
-      "type": "dialogue",
-      "speaker": "Tiffany",
-      "character": "tiffany",
-      "pose": "broken",
-      "text": "MC... don't leave me alone right now...",
-      "next": "n18"
-    },
-
-    {
-      "id": "n17b",
+      "id": "tiffany_intro_end",
       "type": "dialogue",
       "speaker": "Tiffany",
       "character": "tiffany",
       "pose": "default_smile",
-      "text": "Let's head to the club room. We can talk there.",
-      "next": "n18"
+      "text": "Well, now you've met everyone! We usually practice together after school.",
+      "next": "hanami_suggestion"
     },
 
     {
-      "id": "n18",
-      "type": "action",
-      "action": "glitch",
-      "intensity": 1.0,
-      "duration": 0.45,
-      "next": "n19"
-    },
-
-    {
-      "id": "n19",
+      "id": "hanami_suggestion",
       "type": "dialogue",
-      "speaker": "???",
+      "speaker": "Hanami",
       "character": "hanami",
-      "pose": "hurt",
-      "text": "...don't...",
-      "next": "n20"
+      "pose": "smile",
+      "text": "Want to try a simple duet? Just to get a feel for things.",
+      "next": "mc_nervous"
     },
 
     {
-      "id": "n20",
+      "id": "mc_nervous",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'm not sure I'm ready for that...",
+      "next": "hanami_reassure"
+    },
+
+    {
+      "id": "hanami_reassure",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "It's okay. I'll guide you through it. Music is just about feeling, you know?",
+      "next": "setup_duet"
+    },
+
+    {
+      "id": "setup_duet",
       "type": "action",
       "action": "play_music",
-      "track": "glitch_theme",
-      "volume": 0.5,
-      "next": "n21"
+      "track": "assets/music/gentle_start.ogg",
+      "volume": 0.4,
+      "next": "duet_start"
     },
 
     {
-      "id": "n21",
-      "type": "action",
-      "action": "flash",
-      "color": "#FFFFFF",
-      "duration": 0.15,
-      "next": "n22"
-    },
-
-    {
-      "id": "n22",
+      "id": "duet_start",
       "type": "game",
-      "song": "duet_of_fragments",
-      "puppeteer": {
-        "cassian_controls": ["left", "down"],
-        "player_controls": ["up", "right"]
-      },
-      "next": "n23"
+      "song": "gentle_start_duet",
+      "next": "duet_end"
     },
 
     {
-      "id": "n23",
-      "type": "narration",
-      "text": "The music fades. Silence hangs heavy.",
-      "next": "n24"
+      "id": "duet_end",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "See? You did great!",
+      "next": "mc_relief"
     },
 
     {
-      "id": "n24",
-      "type": "action",
-      "action": "hide_character",
-      "character": "cassian",
-      "next": "n25"
+      "id": "mc_relief",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "That was... actually kind of fun.",
+      "next": "tiffany_approve"
     },
 
     {
-      "id": "n25",
+      "id": "tiffany_approve",
       "type": "dialogue",
       "speaker": "Tiffany",
       "character": "tiffany",
-      "pose": "neutral",
-      "text": "MC... we need to talk.",
-      "next": "n26"
+      "pose": "happy",
+      "text": "Wonderful! I think you'll fit in just fine here.",
+      "next": "cassian_comment"
     },
 
     {
-      "id": "n26",
-      "type": "end",
-      "next_scene": "act1_scene2"
-    }
+      "id": "cassian_comment",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Not bad for a beginner, I guess.",
+      "next": "scene_end_narration"
+    },
 
+    {
+      "id": "scene_end_narration",
+      "type": "narration",
+      "text": "The afternoon light shifts across the room. For the first time in weeks, you feel something like belonging.",
+      "next": "scene_end"
+    },
+
+    {
+      "id": "scene_end",
+      "type": "end",
+      "next_scene": "scenes/act1/scene2.json"
+    }
   ]
 }

@@ -6,47 +6,50 @@ import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import vn.AudioSystem;
+import vn.BackgroundSystem;
 import vn.CharacterSystem;
 import vn.ChoiceSystem;
 import vn.DialogueSystem;
 import vn.EffectSystem;
 import vn.SceneRunner;
-import vn.VNConfig; // will provide loadCharacterDefs()
+import vn.VNConfig;
 
-/**
- * VNState
- * Root state for the visual novel layer.
- * Owns render layers and wires VN systems together.
- */
 class VNState extends FlxState
 {
-	// Render layers (bottom → top)
-	public var bgGroup:FlxSpriteGroup; // backgrounds (used by BackgroundSystem)
-	public var charGroup:FlxGroup; // characters
-	public var uiGroup:FlxGroup; // dialogue / choices / overlays
+	public var bgGroup:FlxSpriteGroup;
+	public var charGroup:FlxGroup;
+	public var uiGroup:FlxGroup;
 
-    public var runner:SceneRunner;
+	public var runner:SceneRunner;
+	// Scene path to load
+	private var scenePath:String;
+
+	public function new(scenePath:String = "scenes/act1/scene1.json")
+	{
+		super();
+		this.scenePath = scenePath;
+	}
 
 	override public function create():Void
 	{
-        super.create();
+		super.create();
 
-        FlxG.mouse.visible = true;
+		FlxG.mouse.visible = true;
+
+		// Reset static systems when creating a new state
+		BackgroundSystem.reset();
 
 		// --------------------------------------------------
 		// BACKGROUND LAYER
 		// --------------------------------------------------
-        bgGroup = new FlxSpriteGroup();
-        add(bgGroup);
+		bgGroup = new FlxSpriteGroup();
+		add(bgGroup);
 
 		// Simple debug background so you never get pure black
-        var debugBG = new FlxSprite(0, 0);
-        debugBG.makeGraphic(FlxG.width, FlxG.height, 0xff111111);
+		var debugBG = new FlxSprite(0, 0);
+		debugBG.makeGraphic(FlxG.width, FlxG.height, 0xff111111);
 		debugBG.scrollFactor.set(0, 0);
-        bgGroup.add(debugBG);
-
-		// BackgroundSystem will bind to bgGroup via:
-		//   cast(FlxG.state, VNState).bgGroup
+		bgGroup.add(debugBG);
 
 		// --------------------------------------------------
 		// CHARACTER LAYER
@@ -55,7 +58,6 @@ class VNState extends FlxState
 		add(charGroup);
 
 		// Load character definitions from data
-		// (e.g. assets/data/characters/characters.json)
 		var charDefsMap = VNConfig.loadCharacterDefs();
 
 		// Convert CharacterDefMap to Array<Dynamic>
@@ -81,14 +83,11 @@ class VNState extends FlxState
 		AudioSystem.init();
 
 		// --------------------------------------------------
-		// START FIRST SCENE
+		// START SCENE
 		// --------------------------------------------------
-		// You are preloading:
-		//   assets/data/scenes/act1/scene1.json
-		// SceneRunner should resolve that internally from this id/path.
-        runner = new SceneRunner("scenes/act1/scene1.json");
-        runner.next();
-    }
+		runner = new SceneRunner(scenePath);
+		runner.next();
+	}
 
 	override public function update(elapsed:Float):Void
 	{

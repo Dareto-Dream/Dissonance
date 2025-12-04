@@ -7,18 +7,19 @@ import flixel.tweens.FlxTween;
 import haxe.Json;
 import openfl.utils.Assets;
 
-/**
- * Layered VN Character Renderer
- */
 class CharacterRenderer extends FlxGroup
 {
 	public var layers:Map<String, FlxSprite> = new Map();
 	public var poseData:Dynamic;
 	public var config:Dynamic;
+	public var poses:Map<String, Dynamic>;
 
 	public var name:String;
 	public var baseX:Float = 0;
 	public var baseY:Float = 0;
+
+	private var hasPoseData:Bool = false;
+	private var hasAtlas:Bool = false;
 
 	public function new(characterName:String)
 	{
@@ -26,69 +27,173 @@ class CharacterRenderer extends FlxGroup
 
 		this.name = characterName;
 
-		// Load JSON
 		var jsonPath = 'assets/data/characters/$characterName/poses.json';
-		poseData = Json.parse(Assets.getText(jsonPath));
-		config = poseData.config;
+		try
+		{
+			var jsonText = Assets.getText(jsonPath);
+			poseData = Json.parse(jsonText);
 
-		baseX = config.base_offset.x;
-		baseY = config.base_offset.y;
+			if (poseData == null)
+			{
+				throw "Parsed JSON is null";
+			}
 
-		// Load atlas
+			config = poseData.config;
+			if (config == null)
+			{
+				trace("[CharacterRenderer] WARNING: No config found in poses.json for " + characterName);
+				config = {
+					scale: 1.0,
+					base_offset: {x: 0, y: 0}
+				};
+			}
+
+			if (config.base_offset != null)
+			{
+				baseX = config.base_offset.x;
+				baseY = config.base_offset.y;
+			}
+
+			if (poseData.poses == null)
+			{
+				trace("[CharacterRenderer] WARNING: No poses defined in poses.json for " + characterName);
+				hasPoseData = false;
+				poses = new Map<String, Dynamic>();
+				return;
+			}
+
+			// Convert the Dynamic poses object to a proper Map
+			poses = new Map<String, Dynamic>();
+			var posesObj:Dynamic = poseData.poses;
+			var poseNames:Array<String> = Reflect.fields(posesObj);
+
+			for (poseName in poseNames)
+			{
+				var poseData:Dynamic = Reflect.field(posesObj, poseName);
+				poses.set(poseName, poseData);
+			}
+
+			hasPoseData = true;
+			trace("[CharacterRenderer] Loaded pose data for " + characterName + " with " + [for (k in poses.keys()) k].length + " poses");
+		}
+		catch (e:Dynamic)
+		{
+			trace("[CharacterRenderer] WARNING: Could not load poses.json for '" + characterName + "': " + e);
+			trace("[CharacterRenderer] Path attempted: " + jsonPath);
+			hasPoseData = false;
+			poses = new Map<String, Dynamic>();
+
+			config = {
+				scale: 1.0,
+				base_offset: {x: 0, y: 0}
+			};
+			baseX = 0;
+			baseY = 0;
+			return;
+		}
+
 		var png = 'assets/images/characters/$characterName/$characterName.png';
 		var xml = 'assets/images/characters/$characterName/$characterName.xml';
-		var frames = flixel.graphics.frames.FlxAtlasFrames.fromSparrow(png, xml);
-
-		// Prebuild sprites
-		var poses:Map<String, Dynamic> = cast poseData.poses;
-
-		for (poseName => pose in poses)
+		try
 		{
-			var layerArr:Array<Dynamic> = cast pose.layers;
-
-			for (entry in layerArr)
+			var frames = flixel.graphics.frames.FlxAtlasFrames.fromSparrow(png, xml);
+			
+			if (frames == null)
 			{
-				var frame:String = entry.frame;
+				throw "fromSparrow returned null";
+			}
 
-				if (!layers.exists(frame))
+			hasAtlas = true;
+
+			for (poseName in poses.keys())
+			{
+				var pose:Dynamic = poses.get(poseName);
+
+				if (pose == null || pose.layers == null)
 				{
-					var spr = new FlxSprite();
-					spr.frames = frames;
-					spr.visible = false;
-					spr.antialiasing = true;
-					spr.scrollFactor.set(0, 0);
+					trace("[CharacterRenderer] WARNING: Pose '" + poseName + "' has no layers for " + characterName);
+					continue;
+				}
+				
+				var layerArr:Array<Dynamic> = cast pose.layers;
 
-					layers.set(frame, spr);
-					add(spr);
+				for (entry in layerArr)
+				{
+					if (entry == null || entry.frame == null)
+						continue;
+					
+					var frame:String = entry.frame;
+
+					if (!layers.exists(frame))
+					{
+						var spr = new FlxSprite();
+						spr.frames = frames;
+						spr.visible = false;
+						spr.antialiasing = true;
+						spr.scrollFactor.set(0, 0);
+
+						layers.set(frame, spr);
+						add(spr);
+					}
 				}
 			}
+			trace("[CharacterRenderer] Created " + Lambda.count(layers) + " layer sprites for " + characterName);
+		}
+		catch (e:Dynamic)
+		{
+			trace("[CharacterRenderer] ERROR: Could not load atlas for " + characterName + ": " + e);
+			trace("[CharacterRenderer] PNG: " + png);
+			trace("[CharacterRenderer] XML: " + xml);
+			hasAtlas = false;
 		}
 	}
 
 	public function setPose(poseName:String):Void
 	{
-		var poses:Map<String, Dynamic> = cast poseData.poses;
+		if (!hasPoseData || poses == null)
+		{
+			trace("[CharacterRenderer] Cannot set pose '" + poseName + "' for " + name + " - no pose data loaded");
+			return;
+		}
+
+		if (!hasAtlas)
+		{
+			trace("[CharacterRenderer] Cannot set pose '" + poseName + "' for " + name + " - no atlas loaded");
+			return;
+		}
 
 		if (!poses.exists(poseName))
 		{
-			trace("[CharacterRenderer] Unknown pose: " + poseName);
+			trace("[CharacterRenderer] Unknown pose: " + poseName + " for character " + name);
+			var available = [for (k in poses.keys()) k];
+			trace("[CharacterRenderer] Available poses: " + available.join(", "));
 			return;
 		}
 
 		var pose = poses.get(poseName);
+		if (pose == null || pose.layers == null)
+		{
+			trace("[CharacterRenderer] Pose '" + poseName + "' has no valid layers");
+			return;
+		}
+		
 		var layerArr:Array<Dynamic> = cast pose.layers;
 
-		// Hide all
 		for (spr in layers)
 			spr.visible = false;
 
-		// Activate pose layers
 		for (entry in layerArr)
 		{
+			if (entry == null || entry.frame == null)
+				continue;
+			
 			var frame:String = entry.frame;
 			var spr = layers.get(frame);
 			if (spr == null)
+			{
+				trace("[CharacterRenderer] WARNING: Frame '" + frame + "' not found in layers");
 				continue;
+			}
 
 			spr.visible = true;
 			spr.animation.frameName = frame;
@@ -123,7 +228,7 @@ class CharacterRenderer extends FlxGroup
 			spr.x += x;
 			spr.y += y;
 		}
-    }
+	}
 
 	public function fadeIn(d:Float = 0.4)
 	{
@@ -167,5 +272,5 @@ class CharacterRenderer extends FlxGroup
 	{
 		for (spr in layers)
 			spr.visible = false;
-    }
+	}
 }
