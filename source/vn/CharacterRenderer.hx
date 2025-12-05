@@ -17,6 +17,8 @@ class CharacterRenderer extends FlxGroup
 	public var name:String;
 	public var baseX:Float = 0;
 	public var baseY:Float = 0;
+	
+	public var currentPosition:String = "center";
 
 	private var hasPoseData:Bool = false;
 	private var hasAtlas:Bool = false;
@@ -206,18 +208,35 @@ class CharacterRenderer extends FlxGroup
 
 	public function setPositionKeyword(pos:String)
 	{
+		currentPosition = pos;
 		var screenW = flixel.FlxG.width;
+		var centerX = (screenW / 2) - 250;
 
 		switch pos
 		{
+			case "far_left":
+				setOffset(-200, 0);
+			
 			case "left":
 				setOffset(100, 0);
-
+			
+			case "center_left":
+				setOffset(centerX - 400, 0);
+			
+			case "center":
+				setOffset(centerX, 0);
+			
+			case "center_right":
+				setOffset(centerX + 400, 0);
+			
 			case "right":
 				setOffset(screenW - 500, 0);
+			
+			case "far_right":
+				setOffset(screenW + 200, 0);
 
 			default:
-				setOffset((screenW / 2) - 250, 0);
+				setOffset(centerX, 0);
 		}
 	}
 
@@ -229,7 +248,7 @@ class CharacterRenderer extends FlxGroup
 			spr.y += y;
 		}
 	}
-
+	
 	public function fadeIn(d:Float = 0.4)
 	{
 		for (spr in layers)
