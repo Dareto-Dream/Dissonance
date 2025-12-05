@@ -19,9 +19,12 @@ class DialogueSystem
 	
 	// Text effect tracking
 	static var currentEffect:TextEffect = None;
+	static var persistentEffect:TextEffect = None;
 	static var originalX:Float = 0;
 	static var originalY:Float = 0;
 	static var autoAdvanceEnabled:Bool = true;
+	static var doneCallback:Void->Void = null;
+	static var typewriterCompleted:Bool = false;
 
 	// -------------------------------------------------
 	//  INIT
@@ -60,6 +63,33 @@ class DialogueSystem
 		{
 			TextEffectSystem.update(elapsed);
 			TextEffectSystem.applyEffect(label, currentEffect, elapsed);
+			
+			// Check if typewriter is complete and needs to advance
+			if (isTypewriterEffect(currentEffect) && TextEffectSystem.isTypewriterComplete())
+			{
+				// Auto advance after typewriter completes (only once)
+				if (autoAdvanceEnabled && doneCallback != null && !typewriterCompleted)
+				{
+					typewriterCompleted = true;
+					trace("TYPEWRITER COMPLETE - Starting auto-advance timer");
+					timer.start(0.5, function(_)
+					{
+						trace("TYPEWRITER AUTO-ADVANCE - Calling callback");
+						hide();
+						var callback = doneCallback;
+						doneCallback = null;
+						if (callback != null) 
+						{
+							trace("TYPEWRITER - Executing callback");
+							callback();
+						}
+						else
+						{
+							trace("TYPEWRITER ERROR - Callback was null!");
+						}
+					});
+				}
+			}
 		}
 	}
 
@@ -78,8 +108,14 @@ class DialogueSystem
 
 		// Reset position and effect
 		resetTextPosition();
-		currentEffect = parseTextEffect(effectData);
+		
+		// If there's a persistent effect and no node-specific effect, use persistent
+		var nodeEffect = parseTextEffect(effectData);
+		currentEffect = (nodeEffect != None) ? nodeEffect : persistentEffect;
+		
 		TextEffectSystem.reset();
+		doneCallback = done;
+		typewriterCompleted = false;
 
 		// Show box and text
 		box.visible = true;
@@ -88,15 +124,22 @@ class DialogueSystem
 		label.alpha = 1;
 		label.color = 0xFFFFFFFF;
 
-		// Auto advance or wait for typewriter completion
+		// Auto advance (unless it's typewriter - that handles its own timing in update())
 		timer.cancel();
-		if (autoAdvanceEnabled)
+		if (autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
 		{
 			timer.start(0.9, function(_)
 			{
+				trace("NORMAL AUTO-ADVANCE");
 				hide();
-				done();
+				var callback = doneCallback;
+				doneCallback = null;
+				if (callback != null) callback();
 			});
+		}
+		else if (isTypewriterEffect(currentEffect))
+		{
+			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
 		}
     }
 
@@ -114,8 +157,14 @@ class DialogueSystem
 
 		// Reset position and effect
 		resetTextPosition();
-		currentEffect = parseTextEffect(effectData);
+		
+		// If there's a persistent effect and no node-specific effect, use persistent
+		var nodeEffect = parseTextEffect(effectData);
+		currentEffect = (nodeEffect != None) ? nodeEffect : persistentEffect;
+		
 		TextEffectSystem.reset();
+		doneCallback = done;
+		typewriterCompleted = false;
 
 		box.visible = true;
 		label.visible = true;
@@ -124,13 +173,20 @@ class DialogueSystem
 		label.color = 0xFFFFFFFF;
 
 		timer.cancel();
-		if (autoAdvanceEnabled)
+		if (autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
 		{
 			timer.start(0.9, function(_)
 			{
+				trace("NORMAL AUTO-ADVANCE");
 				hide();
-				done();
+				var callback = doneCallback;
+				doneCallback = null;
+				if (callback != null) callback();
 			});
+		}
+		else if (isTypewriterEffect(currentEffect))
+		{
+			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
 		}
     }
 	
@@ -186,7 +242,7 @@ class DialogueSystem
 		box.visible = false;
 		label.visible = false;
 		resetTextPosition();
-		currentEffect = None;
+		currentEffect = persistentEffect; // Keep persistent effect
 	}
 	
 	private static function resetTextPosition():Void
@@ -200,12 +256,15 @@ class DialogueSystem
 	
 	public static function setEffect(effectData:Dynamic):Void
 	{
-		currentEffect = parseTextEffect(effectData);
+		persistentEffect = parseTextEffect(effectData);
+		currentEffect = persistentEffect;
 		TextEffectSystem.reset();
+		trace("SET PERSISTENT EFFECT: " + persistentEffect);
 	}
 	
 	public static function clearEffect():Void
 	{
+		persistentEffect = None;
 		currentEffect = None;
 		resetTextPosition();
 		if (label != null)
@@ -213,10 +272,20 @@ class DialogueSystem
 			label.alpha = 1;
 			label.color = 0xFFFFFFFF;
 		}
+		trace("CLEARED PERSISTENT EFFECT");
 	}
 	
 	public static function setAutoAdvance(enabled:Bool):Void
 	{
 		autoAdvanceEnabled = enabled;
+	}
+	
+	private static function isTypewriterEffect(effect:TextEffect):Bool
+	{
+		return switch(effect)
+		{
+			case Typewriter(_): true;
+			default: false;
+		}
 	}
 }

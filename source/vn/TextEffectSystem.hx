@@ -16,10 +16,11 @@ enum TextEffect {
 
 class TextEffectSystem {
     private static var effectTime:Float = 0;
-    private static var typewriterProgress:Int = 0;
+    private static var typewriterProgress:Float = 0;
     private static var typewriterSpeed:Float = 30;
     private static var originalPositions:Array<{x:Float, y:Float}> = [];
     private static var fullText:String = "";
+    private static var isTypewriterActive:Bool = false;
     
     public static function update(elapsed:Float):Void {
         effectTime += elapsed;
@@ -30,6 +31,7 @@ class TextEffectSystem {
         typewriterProgress = 0;
         originalPositions = [];
         fullText = "";
+        isTypewriterActive = false;
     }
     
     public static function applyEffect(textField:FlxText, effect:TextEffect, elapsed:Float):Void {
@@ -117,21 +119,31 @@ class TextEffectSystem {
     }
     
     private static function applyTypewriter(textField:FlxText, charsPerSecond:Float, elapsed:Float):Void {
-        if (fullText == "") {
+        if (!isTypewriterActive || fullText == "") {
             fullText = textField.text;
             typewriterProgress = 0;
+            typewriterSpeed = charsPerSecond;
+            isTypewriterActive = true;
+            trace("TYPEWRITER START: " + fullText.length + " chars at " + charsPerSecond + " cps");
         }
         
-        typewriterProgress += Math.floor(charsPerSecond * elapsed);
-        
-        if (typewriterProgress > fullText.length) {
-            typewriterProgress = fullText.length;
+        if (typewriterProgress < fullText.length) {
+            typewriterProgress += charsPerSecond * elapsed;
+            
+            var currentLength = Math.floor(Math.min(typewriterProgress, fullText.length));
+            textField.text = fullText.substr(0, currentLength);
+            
+            // Debug trace every 10 characters
+            if (currentLength % 10 == 0 && currentLength > 0) {
+                trace("TYPEWRITER: " + currentLength + "/" + fullText.length);
+            }
+        } else {
+            textField.text = fullText;
         }
-        
-        textField.text = fullText.substr(0, typewriterProgress);
     }
     
     public static function isTypewriterComplete():Bool {
+        if (!isTypewriterActive) return true;
         return fullText == "" || typewriterProgress >= fullText.length;
     }
     

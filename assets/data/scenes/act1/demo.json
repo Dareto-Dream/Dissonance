@@ -61,7 +61,6 @@
       "text": "This text appears character by character like a typewriter!",
       "text_effect": "typewriter",
       "effect_speed": 40.0,
-      "duration": 3.0,
       "next": "combined_demo"
     },
     {
