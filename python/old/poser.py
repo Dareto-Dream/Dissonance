@@ -41,8 +41,8 @@ def find_project_root():
     here = Path(__file__).resolve().parent
     if (here / "assets").exists():
         return here
-    if (here.parent / "assets").exists():
-        return here.parent
+    if (here.parent.parent / "assets").exists():
+        return here.parent.parent
     # Fallback: assume current working directory is project root
     cwd = Path(os.getcwd())
     if (cwd / "assets").exists():

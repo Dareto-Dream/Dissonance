@@ -22,9 +22,10 @@ class DialogueSystem
 	static var persistentEffect:TextEffect = None;
 	static var originalX:Float = 0;
 	static var originalY:Float = 0;
-	static var autoAdvanceEnabled:Bool = true;
+	static var autoAdvanceEnabled:Bool = false;
 	static var doneCallback:Void->Void = null;
 	static var typewriterCompleted:Bool = false;
+	static var canManualAdvance:Bool = false;
 
 	// -------------------------------------------------
 	//  INIT
@@ -89,6 +90,36 @@ class DialogueSystem
 						}
 					});
 				}
+				else if (!autoAdvanceEnabled && !typewriterCompleted)
+				{
+					// Enable manual advancement after typewriter completes
+					typewriterCompleted = true;
+					canManualAdvance = true;
+					trace("TYPEWRITER COMPLETE - Manual advance enabled");
+				}
+			}
+		}
+	}
+	
+	// -------------------------------------------------
+	//  MANUAL PROGRESSION
+	// -------------------------------------------------
+	public static function handleInput():Void
+	{
+		// Only allow manual progression when auto-advance is disabled and dialogue is visible
+		if (!autoAdvanceEnabled && canManualAdvance && label.visible && doneCallback != null)
+		{
+			if (FlxG.keys.justPressed.SPACE || FlxG.keys.justPressed.ENTER)
+			{
+				trace("MANUAL ADVANCE - Space/Enter pressed");
+				canManualAdvance = false;
+				hide();
+				var callback = doneCallback;
+				doneCallback = null;
+				if (callback != null)
+				{
+					callback();
+				}
 			}
 		}
 	}
@@ -116,6 +147,7 @@ class DialogueSystem
 		TextEffectSystem.reset();
 		doneCallback = done;
 		typewriterCompleted = false;
+		canManualAdvance = false;
 
 		// Show box and text
 		box.visible = true;
@@ -141,6 +173,12 @@ class DialogueSystem
 		{
 			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
 		}
+		else if (!autoAdvanceEnabled)
+		{
+			// Enable manual advancement immediately for non-typewriter effects
+			canManualAdvance = true;
+			trace("MANUAL ADVANCE ENABLED - Waiting for Space/Enter");
+		}
     }
 
 	// -------------------------------------------------
@@ -165,6 +203,7 @@ class DialogueSystem
 		TextEffectSystem.reset();
 		doneCallback = done;
 		typewriterCompleted = false;
+		canManualAdvance = false;
 
 		box.visible = true;
 		label.visible = true;
@@ -187,6 +226,12 @@ class DialogueSystem
 		else if (isTypewriterEffect(currentEffect))
 		{
 			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
+		}
+		else if (!autoAdvanceEnabled)
+		{
+			// Enable manual advancement immediately for non-typewriter effects
+			canManualAdvance = true;
+			trace("MANUAL ADVANCE ENABLED - Waiting for Space/Enter");
 		}
     }
 	
@@ -243,6 +288,7 @@ class DialogueSystem
 		label.visible = false;
 		resetTextPosition();
 		currentEffect = persistentEffect; // Keep persistent effect
+		canManualAdvance = false;
 	}
 	
 	private static function resetTextPosition():Void
