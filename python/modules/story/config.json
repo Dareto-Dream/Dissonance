@@ -1,0 +1,92 @@
+{
+  "default_node_type": "dialogue",
+  "type_order": [
+    "dialogue",
+    "narration",
+    "action",
+    "choice",
+    "if",
+    "jump",
+    "game",
+    "end"
+  ],
+  "float_fields": [
+    "duration",
+    "effect_speed",
+    "effect_intensity",
+    "effect_amplitude"
+  ],
+  "json_fields": [
+    "choices"
+  ],
+  "bool_fields": [
+    "auto_advance",
+    "loop",
+    "skippable",
+    "persistent",
+    "enabled"
+  ],
+  "node_types": {
+    "dialogue": {
+      "fields": [
+        { "key": "speaker", "label": "Speaker", "type": "text" },
+        { "key": "character", "label": "Character", "type": "text" },
+        { "key": "pose", "label": "Pose", "type": "text" },
+        { "key": "text", "label": "Text", "type": "text" },
+        { "key": "text_effect", "label": "Text Effect", "type": "text" },
+        { "key": "effect_speed", "label": "Effect Speed", "type": "float" },
+        { "key": "effect_intensity", "label": "Effect Intensity", "type": "float" },
+        { "key": "effect_amplitude", "label": "Effect Amplitude", "type": "float" },
+        { "key": "next", "label": "Next Node", "type": "text" }
+      ]
+    },
+    "narration": {
+      "fields": [
+        { "key": "text", "label": "Text", "type": "text" },
+        { "key": "text_effect", "label": "Text Effect", "type": "text" },
+        { "key": "effect_speed", "label": "Effect Speed", "type": "float" },
+        { "key": "next", "label": "Next Node", "type": "text" }
+      ]
+    },
+    "action": {
+      "fields": [
+        { "key": "action", "label": "Action", "type": "text" },
+        { "key": "background", "label": "Background", "type": "text" },
+        { "key": "character", "label": "Character", "type": "text" },
+        { "key": "pose", "label": "Pose", "type": "text" },
+        { "key": "transition", "label": "Transition", "type": "text" },
+        { "key": "duration", "label": "Duration", "type": "float" },
+        { "key": "text_effect", "label": "Text Effect", "type": "text" },
+        { "key": "next", "label": "Next Node", "type": "text" }
+      ]
+    },
+    "choice": {
+      "fields": [
+        { "key": "choices", "label": "Choices (JSON)", "type": "json", "placeholder": "[{\"text\":...,\"target\":...}]" }
+      ]
+    },
+    "if": {
+      "fields": [
+        { "key": "condition", "label": "Condition", "type": "text" },
+        { "key": "trueNode", "label": "True Node", "type": "text" },
+        { "key": "falseNode", "label": "False Node", "type": "text" }
+      ]
+    },
+    "jump": {
+      "fields": [
+        { "key": "target", "label": "Target Node", "type": "text" }
+      ]
+    },
+    "game": {
+      "fields": [
+        { "key": "song", "label": "Song Id", "type": "text" },
+        { "key": "next", "label": "Next Node", "type": "text" }
+      ]
+    },
+    "end": {
+      "fields": [
+        { "key": "next_scene", "label": "Next Scene", "type": "text" }
+      ]
+    }
+  }
+}

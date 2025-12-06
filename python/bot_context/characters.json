@@ -1,0 +1,32 @@
+{
+  "cassian": {
+    "id": "cassian",
+    "png": "assets/images/characters/cassian/cassian.png",
+    "xml": "assets/images/characters/cassian/cassian.xml",
+    "defaultPose": "annoyed"
+  },
+  "tiffany": {
+    "id": "tiffany",
+    "png": "assets/images/characters/tiffany/tiffany.png",
+    "xml": "assets/images/characters/tiffany/tiffany.xml",
+    "defaultPose": "neutral"
+  },
+  "hanami": {
+    "id": "hanami",
+    "png": "assets/images/characters/hanami/hanami.png",
+    "xml": "assets/images/characters/hanami/hanami.xml",
+    "defaultPose": "neutral"
+  },
+  "mc": {
+    "id": "mc",
+    "png": "assets/images/characters/mc/mc.png",
+    "xml": "assets/images/characters/mc/mc.xml",
+    "defaultPose": "neutral"
+  },
+  "laura": {
+    "id": "laura",
+    "png": "assets/images/characters/laura/laura.png",
+    "xml": "assets/images/characters/laura/laura.xml",
+    "defaultPose": "happy"
+  }
+}

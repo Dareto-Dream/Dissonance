@@ -1,221 +1,448 @@
 #!/usr/bin/env python3
 """
-Optimized Dissonance Packer:
-- max-rect packing with rotation
-- no forced square atlas
-- dynamically grows width AND height
-- preserves input transparency
-- outputs pretty-printed XML
+Dissonance Visual Novel Editor - Main Entry Point
+
+A comprehensive modular editor for creating visual novel content.
+Features:
+- Story editor with node graph visualization
+- Pose editor for character composition
+- XML atlas viewer and creator
+- Text effect previewer
+- Condition builder
+- Scene placement tool
 """
 
+import sys
 import os
-import argparse
-from PIL import Image
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
+from pathlib import Path
 
-# ---------------------------------------------------
-# Max-Rect Bin
-# ---------------------------------------------------
+import pygame
+import pygame.freetype
 
-class MaxRectBin:
-    def __init__(self, width, height):
-        self.bin_width = width
-        self.bin_height = height
-        self.free_rects = [(0, 0, width, height)]
+# Add modules directory to path
+SCRIPT_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPT_DIR))
 
-    def find_position(self, w, h):
-        """Find the best-fit location for w,h or rotated h,w."""
-        best = None
-        best_score = 1e15
+from modules.ui.sidebar import Sidebar
+from modules.ui.theme import Theme
+from modules.story.story_editor import StoryEditor
+from modules.pose.pose_editor import PoseEditorModule
+from modules.xml.xml_viewer import XMLViewer
+from modules.xml.xml_creator import XMLCreator
+from modules.effects.text_effects import TextEffectPreview
+from modules.placement.scene_placement import ScenePlacement
+from modules.conditions.condition_editor import ConditionEditor
 
-        for rx, ry, rw, rh in self.free_rects:
-            # Try normal
-            if w <= rw and h <= rh:
-                score = rw * rh - w * h
-                if score < best_score:
-                    best_score = score
-                    best = (rx, ry, False)
 
-            # Try rotated
-            if h <= rw and w <= rh:
-                score = rw * rh - h * w
-                if score < best_score:
-                    best_score = score
-                    best = (rx, ry, True)
-
-        return best
-
-    def split_free_rects(self, px, py, pw, ph):
-        """Cut free rectangles around placed rect."""
-        new_free = []
-
-        for rx, ry, rw, rh in self.free_rects:
-            if px >= rx + rw or px + pw <= rx or py >= ry + rh or py + ph <= ry:
-                new_free.append((rx, ry, rw, rh))
+class DissonanceEditor:
+    """Main editor application with module switching."""
+    
+    def __init__(self):
+        pygame.init()
+        pygame.freetype.init()
+        
+        # Window setup
+        self.screen_width = 1600
+        self.screen_height = 900
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        pygame.display.set_caption("Dissonance VN Editor")
+        
+        self.clock = pygame.time.Clock()
+        self.running = True
+        
+        # Initialize theme
+        self.theme = Theme()
+        
+        # Sidebar setup
+        self.sidebar = Sidebar(self.theme)
+        self.sidebar_width = 200
+        self.help_visible = False
+        self.help_font = pygame.freetype.SysFont("Arial", 22, bold=True)
+        self.help_small_font = pygame.freetype.SysFont("Arial", 16)
+        self.help_sections = [
+            (
+                "Global Controls",
+                [
+                    "H - Toggle this help overlay",
+                    "Esc - Close help",
+                    "Sidebar click - Switch editor modules",
+                    "Ctrl+S - Module-specific save/export actions",
+                ],
+            ),
+            (
+                "Story Editor",
+                [
+                    "Drag nodes with Left Mouse, pan with Middle Mouse",
+                    "Scroll wheel - Zoom | F - Frame all nodes",
+                    "Ctrl+N - New node | Ctrl+L - Load sample | Ctrl+S - Save scene",
+                ],
+            ),
+            (
+                "Pose & Scene Tools",
+                [
+                    "Pose Editor: Click pose/layer lists, arrow keys to nudge layers",
+                    "Scene Placement: Drag characters to slots, Ctrl+S exports layout",
+                ],
+            ),
+            (
+                "Data Tools",
+                [
+                    "XML Viewer: Click entries to inspect frames, R to rescan",
+                    "XML Creator: Fill inputs, Add Frame, Export XML",
+                    "Text Effects: Space/Right advances demo, R clears persistent effect",
+                    "Condition Editor: Click stat/operator/value cells to build expressions",
+                ],
+            ),
+        ]
+        self.help_scroll = 0
+        self.help_content_height = 0
+        self.help_view_height = 0
+        
+        # Available modules
+        self.modules = {
+            "Story Editor": None,
+            "Pose Editor": None,
+            "XML Viewer": None,
+            "XML Creator": None,
+            "Text Effects": None,
+            "Scene Placement": None,
+            "Condition Editor": None
+        }
+        
+        self.current_module = None
+        self.active_module_name = None
+        
+        # Project root detection
+        self.project_root = self.find_project_root()
+        
+    def find_project_root(self):
+        """Try to find the project root with assets folder."""
+        here = Path(os.getcwd())
+        if (here / "assets").exists():
+            return here
+        if (here.parent / "assets").exists():
+            return here.parent
+        if (here.parent.parent / "assets").exists():
+            return here.parent.parent
+        return here
+    
+    def switch_module(self, module_name: str):
+        """Switch to a different editor module."""
+        if module_name == self.active_module_name:
+            return
+        
+        # Clean up current module
+        if self.current_module:
+            if hasattr(self.current_module, 'cleanup'):
+                self.current_module.cleanup()
+        
+        # Create workspace rect (excluding sidebar)
+        workspace_rect = pygame.Rect(
+            self.sidebar_width,
+            0,
+            self.screen_width - self.sidebar_width,
+            self.screen_height
+        )
+        
+        # Initialize new module
+        if module_name == "Story Editor":
+            self.current_module = StoryEditor(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Pose Editor":
+            self.current_module = PoseEditorModule(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "XML Viewer":
+            self.current_module = XMLViewer(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "XML Creator":
+            self.current_module = XMLCreator(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Text Effects":
+            self.current_module = TextEffectPreview(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Scene Placement":
+            self.current_module = ScenePlacement(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Condition Editor":
+            self.current_module = ConditionEditor(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        
+        self.active_module_name = module_name
+        print(f"Switched to: {module_name}")
+    
+    def handle_events(self):
+        """Handle global events."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                return
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_h:
+                    self.help_visible = not self.help_visible
+                    if self.help_visible:
+                        self.help_scroll = 0
+                    continue
+                if event.key == pygame.K_ESCAPE and self.help_visible:
+                    self.help_visible = False
+                    self.help_scroll = 0
+                    continue
+            
+            if self.help_visible:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_PAGEUP:
+                        self._scroll_help(-self.help_view_height // 2 if self.help_view_height else -120)
+                        continue
+                    if event.key == pygame.K_PAGEDOWN:
+                        self._scroll_help(self.help_view_height // 2 if self.help_view_height else 120)
+                        continue
+                    # Allow help toggle keys only while visible
+                    continue
+                if event.type == pygame.MOUSEWHEEL:
+                    self._scroll_help(-event.y * 30)
+                    continue
                 continue
-
-            # Left
-            if px > rx:
-                new_free.append((rx, ry, px - rx, rh))
-
-            # Right
-            if px + pw < rx + rw:
-                new_free.append((px + pw, ry, (rx + rw) - (px + pw), rh))
-
-            # Top
-            if py > ry:
-                new_free.append((max(rx, px), ry, min(rw, pw), py - ry))
-
-            # Bottom
-            if py + ph < ry + rh:
-                new_free.append((max(rx, px), py + ph, min(rw, pw), (ry + rh) - (py + ph)))
-
-        self.free_rects = new_free
-
-    def insert(self, w, h):
-        pos = self.find_position(w, h)
-        if pos is None:
-            return None
-        x, y, rotated = pos
-        rw, rh = (h, w) if rotated else (w, h)
-        self.split_free_rects(x, y, rw, rh)
-        return x, y, rotated
-
-
-# ---------------------------------------------------
-# Basic Category Detection (face/body only for now)
-# ---------------------------------------------------
-
-def detect_category(fn):
-    name = os.path.splitext(fn)[0]
-    if name[0].isdigit():
-        return "body"
-    return "face"
-
-
-def collect_sprites(folder):
-    out = []
-    for f in sorted(os.listdir(folder)):
-        if f.lower().endswith(".png"):
-            out.append((os.path.join(folder, f), detect_category(f)))
-    return out
-
-
-# ---------------------------------------------------
-# Packing
-# ---------------------------------------------------
-
-def pack_sprites(sprites, start_w=512, start_h=512, padding=2):
-    # Load images
-    imgs = [(path, cat, Image.open(path).convert("RGBA")) for path, cat in sprites]
-
-    width = start_w
-    height = start_h
-
-    while True:
-        bin_pack = MaxRectBin(width, height)
-        placements = []
-        failed = False
-
-        for path, cat, img in imgs:
-            w, h = img.size
-            pos = bin_pack.insert(w + padding, h + padding)
-            if pos is None:
-                failed = True
-                break
-
-            x, y, rot = pos
-            placements.append((path, cat, x, y, rot, img))
-
-        if not failed:
-            break
-
-        # Expand width first, then height
-        if width <= height:
-            width *= 2
+            
+            sidebar_consumed = False
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if hasattr(event, "pos") and event.pos[0] < self.sidebar_width:
+                    module_name = self.sidebar.handle_click(event.pos, list(self.modules.keys()))
+                    if module_name:
+                        self.switch_module(module_name)
+                    sidebar_consumed = True
+            if sidebar_consumed:
+                continue
+            
+            workspace_event = self._translate_event_for_workspace(event)
+            if workspace_event is None:
+                continue
+            
+            if self.current_module:
+                self.current_module.handle_event(workspace_event)
+    
+    def update(self, dt):
+        """Update active module."""
+        if self.current_module:
+            self.current_module.update(dt)
+    
+    def draw(self):
+        """Render sidebar and active module."""
+        self.screen.fill(self.theme.bg_dark)
+        
+        # Draw sidebar
+        sidebar_rect = pygame.Rect(0, 0, self.sidebar_width, self.screen_height)
+        self.sidebar.draw(
+            self.screen,
+            sidebar_rect,
+            list(self.modules.keys()),
+            self.active_module_name
+        )
+        
+        # Draw vertical separator
+        pygame.draw.line(
+            self.screen,
+            self.theme.border,
+            (self.sidebar_width, 0),
+            (self.sidebar_width, self.screen_height),
+            2
+        )
+        
+        # Draw active module
+        if self.current_module:
+            workspace_surface = self.screen.subsurface(
+                self.sidebar_width,
+                0,
+                self.screen_width - self.sidebar_width,
+                self.screen_height
+            )
+            self.current_module.draw(workspace_surface)
         else:
-            height *= 2
+            # Welcome screen
+            self.draw_welcome()
+        
+        if self.help_visible:
+            self.draw_help_overlay()
+        
+        pygame.display.flip()
+    
+    def draw_welcome(self):
+        """Draw welcome screen when no module is active."""
+        font = pygame.freetype.SysFont("Arial", 36)
+        small_font = pygame.freetype.SysFont("Arial", 18)
+        
+        center_x = self.sidebar_width + (self.screen_width - self.sidebar_width) // 2
+        center_y = self.screen_height // 2
+        
+        # Title
+        title_surf, title_rect = font.render(
+            "Dissonance Visual Novel Editor",
+            self.theme.text_primary
+        )
+        title_rect.center = (center_x, center_y - 60)
+        self.screen.blit(title_surf, title_rect)
+        
+        # Instructions
+        instructions = [
+            "Select a module from the sidebar to begin",
+            "",
+            "Available modules:",
+            "- Story Editor - Create and edit scene graphs",
+            "- Pose Editor - Compose character poses",
+            "- XML Viewer - Browse atlas textures",
+            "- XML Creator - Generate texture atlases",
+            "- Text Effects - Preview text animations",
+            "- Scene Placement - Position characters and backgrounds",
+            "- Condition Editor - Build conditional logic"
+        ]
+        
+        y = center_y - 10
+        for line in instructions:
+            if line:
+                text_surf, text_rect = small_font.render(line, self.theme.text_secondary)
+                text_rect.center = (center_x, y)
+                self.screen.blit(text_surf, text_rect)
+            y += 25
+    
+    def _translate_event_for_workspace(self, event):
+        """Shift mouse events so workspace modules receive coordinates relative to their surface."""
+        if hasattr(event, "pos"):
+            x, y = event.pos
+            if x < self.sidebar_width:
+                return None
+            event_data = getattr(event, "dict", {}).copy()
+            event_data["pos"] = (x - self.sidebar_width, y)
+            return pygame.event.Event(event.type, event_data)
+        return event
+    
+    def draw_help_overlay(self):
+        """Draw translucent help overlay."""
+        overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        overlay.fill(self.theme.overlay_dark)
+        self.screen.blit(overlay, (0, 0))
+        
+        panel_width = self.screen_width - 240
+        panel_height = self.screen_height - 200
+        panel_x = 120
+        panel_y = 100
+        
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(self.screen, self.theme.bg_medium, panel_rect, border_radius=12)
+        pygame.draw.rect(self.screen, self.theme.border, panel_rect, 2, border_radius=12)
+        
+        title = "Dissonance Editor Help"
+        if self.active_module_name:
+            title = f"{title} – {self.active_module_name}"
+        title_surf, title_rect = self.help_font.render(title, self.theme.text_primary)
+        title_rect.midtop = (self.screen_width // 2, panel_y + 20)
+        self.screen.blit(title_surf, title_rect)
+        
+        info_text = "Press H to close this help. ESC also closes."
+        info_surf, _ = self.help_small_font.render(info_text, self.theme.text_secondary)
+        self.screen.blit(info_surf, (panel_x + 20, panel_y + 70))
+        
+        sections = list(self.help_sections)
+        if self.current_module and hasattr(self.current_module, "get_help_entries"):
+            module_sections = self.current_module.get_help_entries()
+            if module_sections:
+                sections.extend(module_sections)
+        
+        content_width = panel_width - 60
+        content_height = 0
+        for heading, bullets in sections:
+            content_height += 28
+            content_height += len(bullets) * 24
+            content_height += 16
+        content_height = max(content_height, 10)
+        content_surface = pygame.Surface((content_width, content_height), pygame.SRCALPHA)
+        
+        y = 0
+        for heading, bullets in sections:
+            heading_surf, _ = self.help_small_font.render(heading, self.theme.accent_blue)
+            content_surface.blit(heading_surf, (0, y))
+            y += 28
+            for bullet in bullets:
+                bullet_text = f"- {bullet}"
+                bullet_surf, _ = self.help_small_font.render(bullet_text, self.theme.text_primary)
+                content_surface.blit(bullet_surf, (20, y))
+                y += 24
+            y += 16
+        
+        content_top = panel_y + 110
+        view_height = panel_height - 150
+        view_height = max(60, view_height)
+        self.help_content_height = content_height
+        self.help_view_height = view_height
+        self._scroll_help(0)  # clamp to bounds
+        viewport = pygame.Rect(0, self.help_scroll, content_width, min(view_height, content_height))
+        self.screen.blit(content_surface, (panel_x + 30, content_top), area=viewport)
+        
+        if content_height > view_height:
+            max_scroll = content_height - view_height
+            bar_height = max(20, int(view_height * (view_height / content_height)))
+            bar_y = content_top + int((self.help_scroll / max_scroll) * (view_height - bar_height))
+            scrollbar_rect = pygame.Rect(panel_x + panel_width - 20, bar_y, 8, bar_height)
+            pygame.draw.rect(self.screen, self.theme.accent_blue, scrollbar_rect, border_radius=4)
 
-        if width > 16384 or height > 16384:
-            raise RuntimeError("Sprite too large to pack into reasonable atlas.")
+    def _scroll_help(self, delta):
+        max_scroll = max(0, self.help_content_height - self.help_view_height)
+        self.help_scroll = max(0, min(self.help_scroll + delta, max_scroll))
+    
+    def run(self):
+        """Main application loop."""
+        print("=" * 60)
+        print("Dissonance Visual Novel Editor")
+        print("=" * 60)
+        print(f"Project root: {self.project_root}")
+        print()
+        
+        while self.running:
+            dt = self.clock.tick(60) / 1000.0
+            
+            self.handle_events()
+            self.update(dt)
+            self.draw()
+        
+        # Cleanup
+        if self.current_module and hasattr(self.current_module, 'cleanup'):
+            self.current_module.cleanup()
+        
+        pygame.quit()
+        print("\nEditor closed.")
 
-    # Compute minimal needed height
-    atlas_h = max(
-        y + (img.size[0] if rot else img.size[1])
-        for (_, _, x, y, rot, img) in placements
-    ) + padding
-
-    # Compute minimal needed width
-    atlas_w = max(
-        x + (img.size[1] if rot else img.size[0])
-        for (_, _, x, y, rot, img) in placements
-    ) + padding
-
-    atlas = Image.new("RGBA", (atlas_w, atlas_h), (0, 0, 0, 0))
-
-    final = []
-    for path, cat, x, y, rot, img in placements:
-        dr = img.rotate(90, expand=True) if rot else img
-        atlas.paste(dr, (x, y), dr)
-        final.append((path, cat, x, y, rot, img))
-
-    return atlas, final
-
-
-# ---------------------------------------------------
-# Pretty XML
-# ---------------------------------------------------
-
-def write_xml(placements, xml_path):
-    root = ET.Element("TextureAtlas")
-    root.set("imagePath", "atlas.png")
-
-    counters = {"body": 1, "face": 1}
-
-    for path, cat, x, y, rot, img in placements:
-        w, h = img.size
-        if rot:
-            w, h = h, w
-
-        name = f"{cat}{counters[cat]:04d}"
-        counters[cat] += 1
-
-        st = ET.SubElement(root, "SubTexture")
-        st.set("name", name)
-        st.set("x", str(x))
-        st.set("y", str(y))
-        st.set("width", str(w))
-        st.set("height", str(h))
-        if rot:
-            st.set("rotated", "true")
-
-    # Pretty print
-    xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="    ")
-    with open(xml_path, "w", encoding="utf-8") as f:
-        f.write(xml_str)
-
-
-# ---------------------------------------------------
-# Main
-# ---------------------------------------------------
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True)
-    ap.add_argument("--output", default="atlas.png")
-    ap.add_argument("--xml", default="atlas.xml")
-    args = ap.parse_args()
-
-    sprites = collect_sprites(args.input)
-    atlas, placements = pack_sprites(sprites)
-    atlas.save(args.output)
-    write_xml(placements, args.xml)
-
-    print("Done.")
-    print("Output:", args.output)
-    print("XML:", args.xml)
+    try:
+        editor = DissonanceEditor()
+        editor.run()
+    except Exception as e:
+        print(f"\nFatal error: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
+    
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
