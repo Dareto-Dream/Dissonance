@@ -21,6 +21,12 @@ class Theme:
         self.text_disabled = (100, 100, 110)
         self.text_highlight = (180, 200, 255)
         
+        # Status/State colors
+        self.error_red = (255, 100, 100)
+        self.warning_yellow = (255, 200, 80)
+        self.success_green = (100, 220, 140)
+        self.info_blue = (80, 140, 255)
+        
         # Accent colors
         self.accent_blue = (80, 140, 255)
         self.accent_green = (100, 220, 140)

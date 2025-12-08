@@ -50,50 +50,20 @@ class DissonanceEditor:
         self.clock = pygame.time.Clock()
         self.running = True
         
+        # Fullscreen state + windowed size restore cache
+        self.fullscreen = False
+        self.windowed_size = (self.screen_width, self.screen_height)
+        
         # Initialize theme
         self.theme = Theme()
         
         # Sidebar setup
         self.sidebar = Sidebar(self.theme)
+        self.windowed_size = (self.screen_width, self.screen_height)
         self.sidebar_width = 200
         self.help_visible = False
         self.help_font = pygame.freetype.SysFont("Arial", 22, bold=True)
         self.help_small_font = pygame.freetype.SysFont("Arial", 16)
-        self.help_sections = [
-            (
-                "Global Controls",
-                [
-                    "H - Toggle this help overlay",
-                    "Esc - Close help",
-                    "Sidebar click - Switch editor modules",
-                    "Ctrl+S - Module-specific save/export actions",
-                ],
-            ),
-            (
-                "Story Editor",
-                [
-                    "Drag nodes with Left Mouse, pan with Middle Mouse",
-                    "Scroll wheel - Zoom | F - Frame all nodes",
-                    "Ctrl+N - New node | Ctrl+L - Load sample | Ctrl+S - Save scene",
-                ],
-            ),
-            (
-                "Pose & Scene Tools",
-                [
-                    "Pose Editor: Click pose/layer lists, arrow keys to nudge layers",
-                    "Scene Placement: Drag characters to slots, Ctrl+S exports layout",
-                ],
-            ),
-            (
-                "Data Tools",
-                [
-                    "XML Viewer: Click entries to inspect frames, R to rescan",
-                    "XML Creator: Fill inputs, Add Frame, Export XML",
-                    "Text Effects: Space/Right advances demo, R clears persistent effect",
-                    "Condition Editor: Click stat/operator/value cells to build expressions",
-                ],
-            ),
-        ]
         self.help_scroll = 0
         self.help_content_height = 0
         self.help_view_height = 0
@@ -208,6 +178,13 @@ class DissonanceEditor:
                     self.help_visible = False
                     self.help_scroll = 0
                     continue
+                if event.key == pygame.K_f and (event.mod & pygame.KMOD_CTRL):
+                    self.toggle_fullscreen()
+                    continue
+
+                if event.key == pygame.K_F11:
+                    self.toggle_fullscreen()
+                    continue
             
             if self.help_visible:
                 if event.type == pygame.KEYDOWN:
@@ -245,6 +222,38 @@ class DissonanceEditor:
         """Update active module."""
         if self.current_module:
             self.current_module.update(dt)
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not self.fullscreen
+
+        if self.fullscreen:
+            # Store current windowed size before switching
+            self.windowed_size = (self.screen_width, self.screen_height)
+
+            self.screen = pygame.display.set_mode(
+                (0, 0),
+                pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
+            )
+        else:
+            # Restore the previous windowed size
+            self.screen = pygame.display.set_mode(
+                self.windowed_size
+            )
+
+        # Update width/height so modules get correct sizing
+        self.screen_width, self.screen_height = self.screen.get_size()
+
+        # Notify module of resize if needed
+        if self.current_module and hasattr(self.current_module, "on_resize"):
+            self.current_module.on_resize(
+                pygame.Rect(
+                    self.sidebar_width,
+                    0,
+                    self.screen_width - self.sidebar_width,
+                    self.screen_height
+                )
+            )
+
     
     def draw(self):
         """Render sidebar and active module."""
@@ -357,7 +366,7 @@ class DissonanceEditor:
         title_rect.midtop = (self.screen_width // 2, panel_y + 20)
         self.screen.blit(title_surf, title_rect)
         
-        info_text = "Press H to close this help. ESC also closes."
+        info_text = "Press Ctrl + H to close this help. ESC also closes."
         info_surf, _ = self.help_small_font.render(info_text, self.theme.text_secondary)
         self.screen.blit(info_surf, (panel_x + 20, panel_y + 70))
         
