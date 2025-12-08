@@ -199,7 +199,7 @@ class DissonanceEditor:
                 return
             
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_h:
+                if event.key == pygame.K_h and (event.mod & pygame.KMOD_CTRL):
                     self.help_visible = not self.help_visible
                     if self.help_visible:
                         self.help_scroll = 0
@@ -361,11 +361,36 @@ class DissonanceEditor:
         info_surf, _ = self.help_small_font.render(info_text, self.theme.text_secondary)
         self.screen.blit(info_surf, (panel_x + 20, panel_y + 70))
         
-        sections = list(self.help_sections)
+        # Always show global controls first
+        sections = [
+            (
+                "Global Controls",
+                [
+                    "Ctrl+H - Toggle help",
+                    "Esc - Close help",
+                    "Sidebar click - Switch modules",
+                    "Ctrl+S - Module-specific save/export",
+                ],
+            )
+        ]
+
+        # Then use ONLY the current module’s help
         if self.current_module and hasattr(self.current_module, "get_help_entries"):
             module_sections = self.current_module.get_help_entries()
             if module_sections:
                 sections.extend(module_sections)
+            else:
+                # If module has no help, show fallback
+                sections.append((
+                    "Module Help",
+                    ["This module does not provide additional help information."]
+                ))
+        else:
+            # If nothing loaded
+            sections.append((
+                "Module Help",
+                ["No module is currently active."]
+            ))
         
         content_width = panel_width - 60
         content_height = 0
