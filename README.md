@@ -16,7 +16,7 @@ The purpose of the engine is to support a narrative that constantly switches bet
 4. Extensibility for additional effects, transitions, conditions, and gameplay hooks
 5. Stability and predictability during Act 4 branching and puppeteer mode
 
-The engine avoids reliance on FNF mod engines or legacy frameworks. Everything is written from scratch for maintainability and long-term growth.
+The engine avoids reliance on FNF mod engines or legacy frameworks (such as Pysch Engine or the Ludum Dare build). Everything is written from scratch for maintainability and long-term growth.
 
 ---
 
