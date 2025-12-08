@@ -29,6 +29,8 @@
       "character": "tiffany",
       "pose": "broken_blood",
       "text": "YOU! What have you done?!",
+      "text_effect": "glitch",
+      "effect_intensity": 8.0,
       "next": "prologue_glitch"
     },
     {
