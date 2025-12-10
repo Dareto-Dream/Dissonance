@@ -3,6 +3,7 @@ package vn;
 import flixel.group.FlxGroup;
 import haxe.Json;
 import openfl.utils.Assets;
+import vn.PlacementManager;
 
 class CharacterSystem
 {
@@ -13,15 +14,25 @@ class CharacterSystem
 
 	public var characters:Map<String, CharacterRenderer> = [];
 	public var group:FlxGroup;
+	
+	// NEW: Placement manager for position tracking
+	public var placementManager:PlacementManager;
 
-	public static function init(group:FlxGroup, charDefs:Array<Dynamic>)
+	public static function init(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
 	{
-		instance = new CharacterSystem(group, charDefs);
+		instance = new CharacterSystem(group, charDefs, placementPath);
 	}
 
-	public function new(group:FlxGroup, charDefs:Array<Dynamic>)
+	public function new(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
 	{
 		this.group = group;
+		
+		// Initialize placement manager
+		placementManager = new PlacementManager();
+		if (placementPath != null && placementPath != "")
+		{
+			placementManager.loadPlacements(placementPath);
+		}
 
 		var index = 0;
 		for (c in charDefs)
@@ -36,7 +47,7 @@ class CharacterSystem
 
 			if (!Reflect.hasField(c, "id") || c.id == null)
 			{
-				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'id' field. Entry=", c);
+				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'id' field.");
 				continue;
 			}
 
@@ -54,7 +65,11 @@ class CharacterSystem
 		trace("[CharacterSystem] Loaded " + count + " character definitions.");
 	}
 
-	public function show(name:String, pose:String, position:String, transition:String, duration:Float)
+	/**
+	 * Show a character with placement support
+	 * NEW: Checks PlacementManager for custom positions before using default slot
+	 */
+	public function show(name:String, pose:String, position:String, transition:String, duration:Float, ?nodeId:String)
 	{
 		var r = characters.get(name);
 		if (r == null)
@@ -63,13 +78,46 @@ class CharacterSystem
 			return;
 		}
 
+		// Set pose
 		r.setPose(pose);
-		r.setPositionKeyword(position);
 
+		// Check for custom placement data
+		var customPosition:Null<PlacementData> = null;
+		if (nodeId != null)
+		{
+			// Apply placements for this node first
+			placementManager.applyNode(nodeId);
+			customPosition = placementManager.getPosition(name);
+		}
+
+		if (customPosition != null)
+		{
+			// Use custom placement
+			trace('[CharacterSystem] Using custom placement for $name: (${customPosition.x}, ${customPosition.y}) slot=${customPosition.slot}');
+			
+			// Reset to base position first
+			r.baseX = 0;
+			r.baseY = 0;
+			
+			// Apply custom offset
+			r.setOffset(customPosition.x, customPosition.y);
+			r.currentPosition = customPosition.slot;
+		}
+		else
+		{
+			// Use default slot-based positioning
+			r.setPositionKeyword(position);
+		}
+
+		// Apply transition
 		if (transition != null && transition != "")
 			r.playTransition(transition, duration);
 	}
 
+	/**
+	 * Hide a character
+	 * NEW: Removes character from placement tracking
+	 */
 	public function hide(name:String, transition:String, duration:Float)
 	{
 		var r = characters.get(name);
@@ -80,8 +128,11 @@ class CharacterSystem
 		}
 
 		r.hide();
+		
+		// Remove from placement tracking
+		placementManager.removeCharacter(name);
 	}
-	
+
 	public function emphasizeCharacter(name:String):Void
 	{
 		// Deemphasize all characters first
@@ -91,7 +142,7 @@ class CharacterSystem
 			if (r != null)
 				r.deemphasize();
 		}
-		
+
 		// Emphasize the active speaker
 		var r = characters.get(name);
 		if (r != null)
@@ -118,5 +169,13 @@ class CharacterSystem
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Reset placement state (useful when loading new scenes)
+	 */
+	public function resetPlacements():Void
+	{
+		placementManager.reset();
 	}
 }

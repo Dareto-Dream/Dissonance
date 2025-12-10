@@ -49,11 +49,19 @@ class VNCommands {
             case "set_bg":
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
-				trace('SHOW_CHARACTER action:', node.character, node.pose, node.position);
-				CharacterSystem.get().show(node.character, node.pose, node.position, node.transition, node.duration);
+                trace('SHOW_CHARACTER action:', node.character, node.pose, node.position, 'node_id:', node.id);
+                // UPDATED: Pass node.id for placement lookup
+                CharacterSystem.get().show(
+                    node.character, 
+                    node.pose, 
+                    node.position, 
+                    node.transition, 
+                    node.duration,
+                    node.id  // NEW: Pass node ID for placement lookup
+                );
 
             case "hide_character":
-				CharacterSystem.get().hide(node.character, node.transition, node.duration);
+                CharacterSystem.get().hide(node.character, node.transition, node.duration);
 
             case "shake_screen":
                 EffectSystem.shake(node.intensity, node.duration);

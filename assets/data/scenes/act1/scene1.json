@@ -17,7 +17,6 @@
       "action": "show_character",
       "character": "tiffany",
       "pose": "broken_blood",
-      "position": "center",
       "transition": "fade",
       "duration": 0.3,
       "next": "prologue_line"
@@ -169,7 +168,6 @@
       "action": "show_character",
       "character": "tiffany",
       "pose": "default_smile",
-      "position": "center",
       "transition": "fade",
       "duration": 0.4,
       "next": "tiffany_greeting"
@@ -205,7 +203,6 @@
       "action": "show_character",
       "character": "tiffany",
       "pose": "default_smile",
-      "position": "right",
       "transition": "slide_right",
       "duration": 0.3,
       "next": "hanami_enters"
@@ -216,7 +213,6 @@
       "action": "show_character",
       "character": "hanami",
       "pose": "smile",
-      "position": "left",
       "transition": "slide_left",
       "duration": 0.4,
       "next": "hanami_greeting"
@@ -257,7 +253,6 @@
       "action": "show_character",
       "character": "cassian",
       "pose": "neutral",
-      "position": "center",
       "transition": "slide_up",
       "duration": 0.3,
       "next": "cassian_greeting"
@@ -295,7 +290,6 @@
       "action": "show_character",
       "character": "laura",
       "pose": "friendly",
-      "position": "far_right",
       "transition": "slide_right",
       "duration": 0.3,
       "next": "laura_greeting"

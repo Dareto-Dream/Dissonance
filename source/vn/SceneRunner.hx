@@ -13,6 +13,31 @@ class SceneRunner {
         parser = new SceneParser(scenePath);
         currentNode = parser.startNode;
         active = true;
+        
+        // Auto-load placement file based on scene_id
+        loadPlacementFile();
+    }
+    
+    /**
+     * Automatically load placement file for this scene
+     * Looks for: assets/data/placements/{scene_id}_placement.json
+     */
+    private function loadPlacementFile():Void {
+        var placementPath = 'placements/${parser.sceneId}_placement.json';
+        
+        try {
+            var charSys = CharacterSystem.get();
+            if (charSys != null && charSys.placementManager != null) {
+                var loaded = charSys.placementManager.loadPlacements(placementPath);
+                if (loaded) {
+                    trace('[SceneRunner] Loaded placements for scene: ${parser.sceneId}');
+                } else {
+                    trace('[SceneRunner] No placements found for scene: ${parser.sceneId} (using defaults)');
+                }
+            }
+        } catch (e:Dynamic) {
+            trace('[SceneRunner] Could not load placements for ${parser.sceneId}: $e (using defaults)');
+        }
     }
 
     public function update():Void {
