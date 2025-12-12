@@ -15,7 +15,6 @@ class CharacterSystem
 	public var characters:Map<String, CharacterRenderer> = [];
 	public var group:FlxGroup;
 	
-	// NEW: Placement manager for position tracking
 	public var placementManager:PlacementManager;
 
 	public static function init(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
@@ -67,7 +66,7 @@ class CharacterSystem
 
 	/**
 	 * Show a character with placement support
-	 * NEW: Checks PlacementManager for custom positions before using default slot
+	 * FIXED: Properly applies custom positions by setting absolute coordinates
 	 */
 	public function show(name:String, pose:String, position:String, transition:String, duration:Float, ?nodeId:String)
 	{
@@ -78,8 +77,9 @@ class CharacterSystem
 			return;
 		}
 
-		// Set pose
+		// Set pose first (this positions sprites based on pose data)
 		r.setPose(pose);
+		trace('[CharacterSystem] Set pose "$pose" for $name');
 
 		// Check for custom placement data
 		var customPosition:Null<PlacementData> = null;
@@ -88,36 +88,41 @@ class CharacterSystem
 			// Apply placements for this node first
 			placementManager.applyNode(nodeId);
 			customPosition = placementManager.getPosition(name);
+			
+			if (customPosition != null)
+			{
+				trace('[CharacterSystem] Found custom placement for $name at node $nodeId');
+			}
+			else
+			{
+				trace('[CharacterSystem] No custom placement for $name at node $nodeId');
+			}
 		}
 
 		if (customPosition != null)
 		{
-			// Use custom placement
-			trace('[CharacterSystem] Using custom placement for $name: (${customPosition.x}, ${customPosition.y}) slot=${customPosition.slot}');
+			// Use custom placement - set ABSOLUTE position
+			trace('[CharacterSystem] ✓ Using CUSTOM placement for $name: (${customPosition.x}, ${customPosition.y}) slot=${customPosition.slot}');
 			
-			// Reset to base position first
-			r.baseX = 0;
-			r.baseY = 0;
-			
-			// Apply custom offset
-			r.setOffset(customPosition.x, customPosition.y);
+			// FIXED: Use setAbsolutePosition instead of adding offsets
+			r.setAbsolutePosition(customPosition.x, customPosition.y);
 			r.currentPosition = customPosition.slot;
 		}
 		else
 		{
 			// Use default slot-based positioning
+			trace('[CharacterSystem] Using DEFAULT slot positioning for $name: $position');
 			r.setPositionKeyword(position);
 		}
 
 		// Apply transition
 		if (transition != null && transition != "")
+		{
+			trace('[CharacterSystem] Applying transition: $transition (duration: $duration)');
 			r.playTransition(transition, duration);
+		}
 	}
 
-	/**
-	 * Hide a character
-	 * NEW: Removes character from placement tracking
-	 */
 	public function hide(name:String, transition:String, duration:Float)
 	{
 		var r = characters.get(name);
@@ -171,9 +176,6 @@ class CharacterSystem
 		}
 	}
 	
-	/**
-	 * Reset placement state (useful when loading new scenes)
-	 */
 	public function resetPlacements():Void
 	{
 		placementManager.reset();
