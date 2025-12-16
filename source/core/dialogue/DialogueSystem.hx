@@ -1,11 +1,12 @@
-package vn;
+package core.dialogue;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxTimer;
-import vn.TextEffectSystem.TextEffect;
+import core.rendering.TextEffectSystem;
+import core.rendering.TextEffectSystem.TextEffect;
 
 class DialogueSystem
 {

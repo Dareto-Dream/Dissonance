@@ -1,4 +1,4 @@
-package vn;
+package core.dialogue;
 
 class ConditionParser {
     public static function eval(expr:String):Bool {

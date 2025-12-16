@@ -1,5 +1,12 @@
 package vn;
 
+import core.audio.AudioSystem;
+import core.dialogue.ChoiceSystem;
+import core.dialogue.DialogueSystem;
+import core.effects.EffectSystem;
+import core.rendering.BackgroundSystem;
+import core.rendering.CharacterSystem;
+import core.scene.SceneRunner;
 import flixel.FlxG;
 import util.SceneManager;
 

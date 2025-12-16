@@ -1,4 +1,4 @@
-package vn;
+package core.scene;
 
 import haxe.Json;
 import openfl.utils.Assets;

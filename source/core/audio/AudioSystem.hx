@@ -1,4 +1,4 @@
-package vn;
+package core.audio;
 
 import flixel.FlxG;
 import flixel.sound.FlxSound;

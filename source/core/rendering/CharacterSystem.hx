@@ -1,9 +1,8 @@
-package vn;
+package core.rendering;
 
 import flixel.group.FlxGroup;
-import haxe.Json;
-import openfl.utils.Assets;
-import vn.PlacementManager;
+import core.scene.PlacementManager;
+import core.scene.PlacementManager.PlacementData;
 
 class CharacterSystem
 {

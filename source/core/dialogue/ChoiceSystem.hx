@@ -1,4 +1,4 @@
-package vn;
+package core.dialogue;
 
 import flixel.FlxG;
 import flixel.group.FlxGroup;

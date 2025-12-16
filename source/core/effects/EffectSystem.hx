@@ -1,4 +1,4 @@
-package vn;
+package core.effects;
 
 import flixel.FlxG;
 import flixel.FlxSprite;

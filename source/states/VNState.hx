@@ -5,13 +5,13 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
-import vn.AudioSystem;
-import vn.BackgroundSystem;
-import vn.CharacterSystem;
-import vn.ChoiceSystem;
-import vn.DialogueSystem;
-import vn.EffectSystem;
-import vn.SceneRunner;
+import core.audio.AudioSystem;
+import core.dialogue.ChoiceSystem;
+import core.dialogue.DialogueSystem;
+import core.effects.EffectSystem;
+import core.rendering.BackgroundSystem;
+import core.rendering.CharacterSystem;
+import core.scene.SceneRunner;
 import vn.VNConfig;
 
 class VNState extends FlxState

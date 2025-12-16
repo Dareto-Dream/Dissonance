@@ -1,4 +1,4 @@
-package vn;
+package core.rendering;
 
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;

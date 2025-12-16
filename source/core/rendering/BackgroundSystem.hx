@@ -1,10 +1,9 @@
-package vn;
+package core.rendering;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
-import openfl.utils.Assets;
 import states.VNState;
 
 class BackgroundSystem {

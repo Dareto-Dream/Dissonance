@@ -1,8 +1,8 @@
-package vn;
+package core.scene;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxTimer;
+import core.rendering.CharacterSystem;
+import vn.VNCommands;
+import vn.VNConditions;
 
 class SceneRunner {
     public var parser:SceneParser;
