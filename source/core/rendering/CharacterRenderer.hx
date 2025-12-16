@@ -19,6 +19,9 @@ class CharacterRenderer extends FlxGroup
 	public var baseY:Float = 0;
 	
 	public var currentPosition:String = "center";
+	
+	// Store layer offsets from pose data
+	private var layerOffsets:Map<String, {x:Float, y:Float}> = new Map();
 
 	private var hasPoseData:Bool = false;
 	private var hasAtlas:Bool = false;
@@ -181,9 +184,16 @@ class CharacterRenderer extends FlxGroup
 		
 		var layerArr:Array<Dynamic> = cast pose.layers;
 
+		// Hide all layers first
 		for (spr in layers)
 			spr.visible = false;
+		
+		// Clear layer offsets
+		layerOffsets.clear();
 
+		trace('[CharacterRenderer] Setting pose "$poseName" for $name (${layerArr.length} layers)');
+
+		// Show and position each layer
 		for (entry in layerArr)
 		{
 			if (entry == null || entry.frame == null)
@@ -200,10 +210,52 @@ class CharacterRenderer extends FlxGroup
 			spr.visible = true;
 			spr.animation.frameName = frame;
 
-			spr.x = baseX + entry.x;
-			spr.y = baseY + entry.y;
+			// Store layer offsets for this pose
+			var offsetX:Float = entry.x;
+			var offsetY:Float = entry.y;
+			layerOffsets.set(frame, {x: offsetX, y: offsetY});
+
+			// Apply base position + layer offset
+			spr.x = baseX + offsetX;
+			spr.y = baseY + offsetY;
 			spr.scale.set(config.scale, config.scale);
+			
+			trace('[CharacterRenderer]   Layer "$frame" -> sprite pos (${spr.x}, ${spr.y}) = base ($baseX, $baseY) + offset ($offsetX, $offsetY)');
 		}
+	}
+
+	/**
+	 * Set absolute position for the character
+	 * 
+	 * This moves all currently visible sprites to position the character at (x, y).
+	 * It preserves the relative positions of layers that were set by setPose().
+	 */
+	public function setAbsolutePosition(x:Float, y:Float):Void
+	{
+		trace('[CharacterRenderer] Moving character $name to absolute position ($x, $y)');
+		
+		// Calculate how far to move from current base position
+		var deltaX = x - baseX;
+		var deltaY = y - baseY;
+		
+		trace('[CharacterRenderer]   Delta: ($deltaX, $deltaY) from base ($baseX, $baseY)');
+		
+		// Move all visible sprites by this delta
+		for (spr in layers)
+		{
+			if (spr.visible)
+			{
+				var oldX = spr.x;
+				var oldY = spr.y;
+				spr.x += deltaX;
+				spr.y += deltaY;
+				trace('[CharacterRenderer]   Moved sprite from ($oldX, $oldY) to (${spr.x}, ${spr.y})');
+			}
+		}
+		
+		// Update base position
+		baseX = x;
+		baseY = y;
 	}
 
 	public function setPositionKeyword(pos:String)
@@ -212,41 +264,52 @@ class CharacterRenderer extends FlxGroup
 		var screenW = flixel.FlxG.width;
 		var centerX = (screenW / 2) - 250;
 
+		var targetX:Float;
+		var targetY:Float = 0;
+
 		switch pos
 		{
 			case "far_left":
-				setOffset(-200, 0);
+				targetX = -200;
 			
 			case "left":
-				setOffset(100, 0);
+				targetX = 100;
 			
 			case "center_left":
-				setOffset(centerX - 400, 0);
+				targetX = centerX - 400;
 			
 			case "center":
-				setOffset(centerX, 0);
+				targetX = centerX;
 			
 			case "center_right":
-				setOffset(centerX + 400, 0);
+				targetX = centerX + 400;
 			
 			case "right":
-				setOffset(screenW - 500, 0);
+				targetX = screenW - 500;
 			
 			case "far_right":
-				setOffset(screenW + 200, 0);
+				targetX = screenW + 200;
 
 			default:
-				setOffset(centerX, 0);
+				targetX = centerX;
 		}
+		
+		// Use absolute positioning
+		setAbsolutePosition(targetX, targetY);
 	}
 
 	public function setOffset(x:Float, y:Float)
 	{
+		// Add relative offset to ALL layers
 		for (spr in layers)
 		{
 			spr.x += x;
 			spr.y += y;
 		}
+		
+		// Update base position
+		baseX += x;
+		baseY += y;
 	}
 	
 	public function fadeIn(d:Float = 0.4)
