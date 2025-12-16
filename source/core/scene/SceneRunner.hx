@@ -68,6 +68,8 @@ class SceneRunner {
                 handleIf(node);
             case "game":
                 VNCommands.startRhythm(node, this);
+            case "music":
+                VNCommands.playMusic(node, this);
             case "end":
                 VNCommands.endScene(node, this);
             default:

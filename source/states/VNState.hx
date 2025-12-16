@@ -1,10 +1,5 @@
 package states;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.FlxState;
-import flixel.group.FlxGroup;
-import flixel.group.FlxSpriteGroup;
 import core.audio.AudioSystem;
 import core.dialogue.ChoiceSystem;
 import core.dialogue.DialogueSystem;
@@ -12,6 +7,11 @@ import core.effects.EffectSystem;
 import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
 import core.scene.SceneRunner;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.FlxState;
+import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import vn.VNConfig;
 
 class VNState extends FlxState
@@ -23,11 +23,14 @@ class VNState extends FlxState
 	public var runner:SceneRunner;
 	// Scene path to load
 	private var scenePath:String;
+	// Optional default background music
+	private var defaultBGM:String;
 
-	public function new(scenePath:String = "scenes/act1/scene1.json")
+	public function new(scenePath:String = "scenes/act1/scene1.json", ?defaultBGM:String)
 	{
 		super();
 		this.scenePath = scenePath;
+		this.defaultBGM = defaultBGM;
 	}
 
 	override public function create():Void
@@ -81,6 +84,15 @@ class VNState extends FlxState
 		ChoiceSystem.init(uiGroup);
 		EffectSystem.init(uiGroup);
 		AudioSystem.init();
+
+		// --------------------------------------------------
+		// BACKGROUND MUSIC
+		// --------------------------------------------------
+		// Start default background music if specified
+		if (defaultBGM != null && defaultBGM != "")
+		{
+			AudioSystem.setDefaultBGM(defaultBGM, 0.7);
+		}
 
 		// --------------------------------------------------
 		// START SCENE

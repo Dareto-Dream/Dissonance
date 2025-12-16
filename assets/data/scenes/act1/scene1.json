@@ -1,7 +1,16 @@
 {
   "scene_id": "act1_scene1_prologue",
-  "start": "prologue_flash",
+  "start": "intro_music",
   "nodes": [
+    {
+      "id": "intro_music",
+      "type": "music",
+      "track": "assets/music/unsettled.ogg",
+      "volume": 0.7,
+      "transition": "fade",
+      "duration": 2,
+      "next": "prologue_flash"
+    },
     {
       "id": "prologue_flash",
       "type": "action",
@@ -69,6 +78,15 @@
       "background": "assets/images/bg/school_entrance.png",
       "transition": "fade",
       "duration": 1.0,
+      "next": "gentle_music"
+    },
+    {
+      "id": "gentle_music",
+      "type": "music",
+      "track": "assets/music/my_little_world.ogg",
+      "volume": 0.7,
+      "transition": "cut",
+      "duration": 2,
       "next": "morning_narration"
     },
     {
