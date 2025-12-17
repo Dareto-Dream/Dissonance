@@ -75,7 +75,7 @@
       "id": "scene_start",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/school_entrance.png",
+      "background": "assets/images/bg/stairs1/day1.png",
       "transition": "fade",
       "duration": 1.0,
       "next": "gentle_music"
@@ -119,7 +119,7 @@
       "id": "walk_inside",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/hallway_day.png",
+      "background": "assets/images/bg/hallway11/day1.png",
       "transition": "slide_left",
       "duration": 0.5,
       "next": "hallway_narration"
@@ -140,7 +140,7 @@
       "id": "approach_door",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/club_door.png",
+      "background": "assets/images/bg/noticeboard/day1.png",
       "transition": "fade",
       "duration": 0.4,
       "next": "door_narration"
@@ -169,7 +169,7 @@
       "id": "door_open",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/classroom3/day1.png",
+      "background": "assets/images/bg/club3/day1.png",
       "transition": "slide_right",
       "duration": 0.4,
       "next": "first_look"
