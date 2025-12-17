@@ -6,7 +6,7 @@
       "id": "n1",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/clubroom_afternoon.png",
+      "background": "assets/images/bg/classroom1/evening1.png",
       "transition": "fade",
       "duration": 0.6,
       "next": "n2"

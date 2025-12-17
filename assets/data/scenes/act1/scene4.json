@@ -6,7 +6,7 @@
       "id": "n1",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/clubroom_sunset.png",
+      "background": "assets/images/bg/classroom2/evening1.png",
       "transition": "fade",
       "duration": 0.8,
       "next": "n2"
@@ -285,7 +285,7 @@
       "id": "n34",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/clubroom_night.png",
+      "background": "assets/images/bg/classroom2/night1.png",
       "transition": "fade",
       "duration": 1.0,
       "next": "n35"
