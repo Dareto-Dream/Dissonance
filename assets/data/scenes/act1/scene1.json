@@ -4,7 +4,8 @@
   "nodes": [
     {
       "id": "intro_music",
-      "type": "music",
+      "type": "action",
+      "action": "play_music",
       "track": "assets/music/unsettled.ogg",
       "volume": 0.7,
       "transition": "fade",
@@ -82,7 +83,8 @@
     },
     {
       "id": "gentle_music",
-      "type": "music",
+      "type": "action",
+      "action": "play_music",
       "track": "assets/music/my_little_world.ogg",
       "volume": 0.7,
       "transition": "cut",

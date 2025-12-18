@@ -1,5 +1,6 @@
 package states;
 
+import core.audio.AudioSystem;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -121,9 +122,8 @@ class TitleState extends FlxState
 			});
 		}
 		
-		// Play title music
-		FlxG.sound.playMusic("assets/music/title.ogg", 0.7, true);
-		// Commented out until you have a title music file
+		// Play title music using AudioSystem (not FlxG.sound)
+		AudioSystem.playMusic("assets/music/title.ogg", 0.7);
 	}
 	
 	private function createBackground():Void
@@ -222,6 +222,9 @@ class TitleState extends FlxState
 	
 	private function startGame():Void
 	{
+		// Fade out title music before transitioning
+		AudioSystem.fadeOutMusic(0.5);
+		
 		// Transition to VNState
 		FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function() {
 			FlxG.switchState(() -> new VNState("scenes/act1/scene1.json"));

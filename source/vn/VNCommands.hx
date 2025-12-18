@@ -57,14 +57,14 @@ class VNCommands {
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
                 trace('SHOW_CHARACTER action:', node.character, node.pose, node.position, 'node_id:', node.id);
-                // Pass node.id for placement lookup
+                // UPDATED: Pass node.id for placement lookup
                 CharacterSystem.get().show(
                     node.character, 
                     node.pose, 
                     node.position, 
                     node.transition, 
                     node.duration,
-                    node.id
+                    node.id  // NEW: Pass node ID for placement lookup
                 );
 
             case "hide_character":
@@ -79,10 +79,21 @@ class VNCommands {
             case "play_sound":
                 AudioSystem.playSound(node.sound, node.volume);
             case "play_music":
-                // Legacy action node support - uses default transition
-                var transition = node.transition != null ? node.transition : "fade";
-                var duration = node.duration != null ? node.duration : 2.0;
+                // Use transition and duration from node if specified
+                var transition = node.transition != null ? node.transition : null;
+                var duration = node.duration != null ? node.duration : null;
                 AudioSystem.playMusic(node.track, node.volume, transition, duration);
+            case "stop_music":
+                AudioSystem.stopMusic();
+            case "fade_out_music":
+                var duration = node.duration != null ? node.duration : 1.0;
+                AudioSystem.fadeOutMusic(duration);
+            case "set_default_bgm":
+                var volume = node.volume != null ? node.volume : 1.0;
+                AudioSystem.setDefaultBGM(node.track, volume);
+            case "play_default_bgm":
+                var volume = node.volume != null ? node.volume : 1.0;
+                AudioSystem.playDefaultBGM(volume);
             case "set_text_effect":
                 DialogueSystem.setEffect(node);
             case "clear_text_effect":
@@ -109,23 +120,6 @@ class VNCommands {
 
     public static function endScene(node:Dynamic, runner:SceneRunner):Void {
         SceneManager.loadScene(node.next_scene);
-    }
-    
-    /**
-     * Handle the new "music" node type for background music transitions
-     */
-    public static function playMusic(node:Dynamic, runner:SceneRunner):Void {
-        var track = node.track != null ? node.track : "";
-        var volume = node.volume != null ? node.volume : 1.0;
-        var transition = node.transition != null ? node.transition : "fade";
-        var duration = node.duration != null ? node.duration : 2.0;
-        
-        trace("[VNCommands] Music node: track=" + track + ", transition=" + transition);
-        
-        AudioSystem.playMusic(track, volume, transition, duration);
-        
-        // Continue to next node immediately (transition happens in background)
-        runner.goto(nextNode(node));
     }
 
     private static function nextNode(node:Dynamic):String {
