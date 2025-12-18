@@ -1,72 +1,80 @@
 # Dissonance Visual Novel Engine (HaxeFlixel 2025)
 
-The Dissonance Engine is a modular visual novel framework built on HaxeFlixel 5.x.
-It provides a node-based scripting system capable of branching narrative, transitions, character display, background control, and integration with rhythm gameplay segments.
-This engine is custom-built for the narrative structure and pacing demands of the game "Dissonance."
+A modular visual novel framework built on HaxeFlixel 5.x with node-based JSON scripting, advanced audio transitions, and rhythm game integration.
 
 ---
 
-## Overview
+## Core Features
 
-The purpose of the engine is to support a narrative that constantly switches between introspective visual novel scenes and gameplay sections. The design focuses on:
-
-1. A lightweight, readable scene format using JSON
-2. Clear separation of responsibilities across subsystems
-3. A SceneRunner that executes nodes deterministically
-4. Extensibility for additional effects, transitions, conditions, and gameplay hooks
-5. Stability and predictability during Act 4 branching and puppeteer mode
-
-The engine avoids reliance on FNF mod engines or legacy frameworks (such as Pysch Engine or the Ludum Dare build). Everything is written from scratch for maintainability and long-term growth.
+* **Node-based JSON scripting** - Lightweight, readable scene format
+* **Advanced audio system** - Music transitions with fade, cut, and wait_till_end modes
+* **Text effects** - Six animation types (shake, glitch, wave, rainbow, fade, typewriter)
+* **Character system** - Multi-layer sprites with poses, emphasis, and custom positioning
+* **Background transitions** - Seven transition modes including slides and crossfades
+* **Screen effects** - Shake, flash, and glitch effects
+* **Conditional branching** - Dynamic story paths based on game state
+* **Rhythm game integration** - Seamless transitions between VN and gameplay
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
 source/
-├── Main.hx                     Entry point, initializes VNState
+├── Main.hx
 ├── states/
-│   └── VNState.hx              Main VN rendering layer and container
+│   ├── TitleState.hx          Title screen and main menu
+│   └── VNState.hx             VN rendering and scene management
+│
+├── core/
+│   ├── audio/
+│   │   └── AudioSystem.hx     Music transitions and sound effects
+│   ├── dialogue/
+│   │   ├── DialogueSystem.hx  Text display with effects
+│   │   ├── ChoiceSystem.hx    Player choices
+│   │   └── TextEffectSystem.hx Animation effects
+│   ├── effects/
+│   │   └── EffectSystem.hx    Screen effects
+│   ├── rendering/
+│   │   ├── BackgroundSystem.hx Background transitions
+│   │   ├── CharacterSystem.hx  Character management
+│   │   └── CharacterRenderer.hx Sprite layering
+│   └── scene/
+│       ├── SceneParser.hx     JSON loading and validation
+│       ├── SceneRunner.hx     Node execution
+│       └── PlacementManager.hx Custom positioning
 │
 ├── vn/
-│   ├── SceneParser.hx          Loads JSON and maps nodes
-│   ├── SceneRunner.hx          Executes the VN node graph
-│   ├── VNCommands.hx           Dispatches node actions to systems
-│   ├── VNConditions.hx         Evaluates expressions
-│   ├── ConditionParser.hx      Expression parsing (to be implemented)
-│   ├── DialogueSystem.hx       Dialogue UI with text effects support
-│   ├── TextEffectSystem.hx     Text animation effects (shake, glitch, wave, etc.)
-│   ├── BackgroundSystem.hx     Background transitions
-│   ├── CharacterSystem.hx      Character poses and rendering
-│   ├── CharacterRenderer.hx    Character sprite layering and rendering
-│   ├── EffectSystem.hx         Screen effects (shake, flash, glitch)
-│   ├── AudioSystem.hx          Sound and music management
-│   ├── ChoiceSystem.hx         Choice UI
-│   └── RhythmBridge.hx         VN to rhythm gameplay handoff
+│   ├── VNCommands.hx          Action routing
+│   ├── VNConditions.hx        Expression evaluation
+│   ├── VNConfig.hx            Configuration
+│   └── RhythmBridge.hx        Gameplay integration
 │
 └── util/
-    └── SceneManager.hx         Handles switching between VN scenes
+    └── SceneManager.hx        Scene transitions
 ```
 
 ---
 
-# Scene File Format (JSON)
+# Scene Format
 
-All scenes are stored here:
+Scenes are JSON files stored in `assets/data/scenes/<act>/<scene>.json`.
 
-```
-assets/data/scenes/<act>/<scene>.json
-```
-
-A scene definition contains a starting node and a list of nodes representing the narrative flow.
-
-### Root Structure
+## Basic Structure
 
 ```json
 {
   "scene_id": "example_scene",
   "start": "n1",
-  "nodes": [ ... ]
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "dialogue",
+      "speaker": "Character",
+      "text": "Welcome.",
+      "next": "n2"
+    }
+  ]
 }
 ```
 
@@ -74,16 +82,9 @@ A scene definition contains a starting node and a list of nodes representing the
 
 # Node Types
 
-Each node is an object with at least:
+## Dialogue
 
-```
-"id": "n1",  
-"type": "<node_type>"
-```
-
-The engine supports the following node types:
-
-### 1. Dialogue
+Displays character dialogue with optional text effects.
 
 ```json
 {
@@ -91,22 +92,28 @@ The engine supports the following node types:
   "type": "dialogue",
   "speaker": "Tiffany",
   "character": "tiffany",
-  "pose": "soft_smile",
+  "pose": "smile",
   "text": "Welcome to the music club.",
   "text_effect": "wave",
   "effect_speed": 3.0,
-  "effect_amplitude": 5.0,
   "next": "n2"
 }
 ```
 
-**Text Effects (Optional):**
-- `text_effect`: Effect type (shake, glitch, wave, rainbow, fade, typewriter)
-- `effect_intensity`: For shake/glitch effects (default: 2.0/5.0)
-- `effect_speed`: For wave/rainbow/fade/typewriter effects (default: varies)
-- `effect_amplitude`: For wave effect (default: 5.0)
+**Parameters:**
+- `speaker` - Name displayed in dialogue box
+- `character` - Character ID for sprite display
+- `pose` - Character pose/expression
+- `text` - Dialogue text
+- `text_effect` - Optional: shake, glitch, wave, rainbow, fade, typewriter
+- `effect_intensity` - For shake/glitch (default: 2.0/5.0)
+- `effect_speed` - For wave/rainbow/fade/typewriter
+- `effect_amplitude` - For wave effect (default: 5.0)
+- `next` - Next node ID
 
-### 2. Narration
+## Narration
+
+Displays narrator text without character.
 
 ```json
 {
@@ -114,194 +121,338 @@ The engine supports the following node types:
   "type": "narration",
   "text": "The room falls quiet.",
   "text_effect": "fade",
-  "effect_speed": 2.0,
   "next": "n3"
 }
 ```
 
-Text effects work the same way in narration nodes.
+## Action
 
-### 3. Action (Background, Characters, Effects)
+Performs actions like background changes, character display, effects, and audio.
+
+### Background
 
 ```json
 {
   "id": "n3",
   "type": "action",
   "action": "set_bg",
-  "background": "assets/images/bg/classroom_day.png",
+  "background": "assets/images/bg/classroom.png",
   "transition": "fade",
   "duration": 0.6,
   "next": "n4"
 }
 ```
 
-**Supported Background Transitions:**
+**Transitions:** cut, fade, crossfade, slide_left, slide_right, slide_up, slide_down
 
-* cut
-* fade
-* crossfade
-* slide_left
-* slide_right
-* slide_up
-* slide_down
-
-**Supported Actions:**
-
-* `set_bg` - Change background
-* `show_character` - Display character sprite
-* `hide_character` - Remove character sprite
-* `shake_screen` - Screen shake effect
-* `flash` - Screen flash effect
-* `glitch` - Screen glitch effect
-* `play_sound` - Play sound effect
-* `play_music` - Play music track
-* `set_text_effect` - Set persistent text effect
-* `clear_text_effect` - Clear persistent text effect
-
-**Persistent Text Effects Example:**
+### Show Character
 
 ```json
 {
-  "id": "corruption_start",
+  "id": "n4",
   "type": "action",
-  "action": "set_text_effect",
-  "text_effect": "glitch",
-  "effect_intensity": 8.0,
-  "next": "corrupted_dialogue"
+  "action": "show_character",
+  "character": "tiffany",
+  "pose": "smile",
+  "position": "center",
+  "transition": "fade",
+  "duration": 0.4,
+  "next": "n5"
 }
 ```
 
-This applies the text effect to all subsequent dialogue until cleared with `clear_text_effect`.
-
-### 4. Choice
+### Hide Character
 
 ```json
 {
   "id": "n5",
+  "type": "action",
+  "action": "hide_character",
+  "character": "tiffany",
+  "transition": "fade",
+  "duration": 0.3,
+  "next": "n6"
+}
+```
+
+### Play Music
+
+```json
+{
+  "id": "n6",
+  "type": "action",
+  "action": "play_music",
+  "track": "assets/music/theme.ogg",
+  "volume": 0.7,
+  "transition": "fade",
+  "duration": 2.0,
+  "next": "n7"
+}
+```
+
+**Transition types:**
+- `fade` - Smooth crossfade between tracks
+- `cut` - Instant change
+- `wait_till_end` - Wait for current track to finish
+
+### Other Audio Actions
+
+```json
+// Stop music
+{"action": "stop_music"}
+
+// Fade out music
+{"action": "fade_out_music", "duration": 1.5}
+
+// Play sound effect
+{"action": "play_sound", "sound": "assets/sounds/door.wav", "volume": 0.7}
+
+// Set default BGM
+{"action": "set_default_bgm", "track": "assets/music/main.ogg", "volume": 0.8}
+
+// Play default BGM
+{"action": "play_default_bgm", "volume": 0.8}
+```
+
+### Screen Effects
+
+```json
+// Shake screen
+{"action": "shake_screen", "intensity": 0.03, "duration": 2.0}
+
+// Flash screen
+{"action": "flash", "color": "white", "duration": 0.5}
+
+// Glitch effect
+{"action": "glitch", "intensity": 2.0, "duration": 0.8}
+```
+
+### Text Effects
+
+```json
+// Set persistent text effect
+{
+  "action": "set_text_effect",
+  "text_effect": "glitch",
+  "effect_intensity": 8.0
+}
+
+// Clear text effect
+{"action": "clear_text_effect"}
+```
+
+## Choice
+
+Presents player choices.
+
+```json
+{
+  "id": "n7",
   "type": "choice",
   "choices": [
-    { "text": "Comfort her", "target": "n6a" },
-    { "text": "Stay silent", "target": "n6b" }
+    {"text": "Comfort her", "target": "n8a"},
+    {"text": "Stay silent", "target": "n8b"}
   ]
 }
 ```
 
-### 5. Conditional (Branching)
+## Conditional
+
+Branches based on game state.
 
 ```json
 {
-  "id": "n10",
+  "id": "n9",
   "type": "if",
   "condition": "tiffany_rot <= 2",
-  "trueNode": "n11a",
-  "falseNode": "n11b"
+  "trueNode": "n10a",
+  "falseNode": "n10b"
 }
 ```
 
-ConditionParser will evaluate the expression and SceneRunner will choose the next node accordingly.
+## Jump
 
-### 6. Jump
+Jumps to another node.
 
 ```json
 {
-  "id": "n12",
+  "id": "n11",
   "type": "jump",
   "target": "n1"
 }
 ```
 
-### 7. Rhythm Start
+## Game
+
+Starts rhythm gameplay.
+
+```json
+{
+  "id": "n12",
+  "type": "game",
+  "song": "gentle_start_duet",
+  "next": "n13"
+}
+```
+
+## End
+
+Ends scene and loads next.
 
 ```json
 {
   "id": "n14",
-  "type": "game",
-  "song": "new_beginnings",
-  "next": "n15"
-}
-```
-
-RhythmBridge handles the gameplay session and returns when complete.
-
-### 8. End Scene
-
-```json
-{
-  "id": "end",
   "type": "end",
   "next_scene": "scenes/act2/intro.json"
 }
 ```
 
-SceneManager loads the next VN scene.
+---
+
+# Audio System
+
+## Overview
+
+AudioSystem manages all music and sound effects with transition support. All states must use AudioSystem rather than FlxG.sound directly to prevent audio overlap.
+
+## Music Playback
+
+### In Code
+
+```haxe
+// Basic playback
+AudioSystem.playMusic("assets/music/track.ogg", 0.7);
+
+// With fade transition
+AudioSystem.playMusic("assets/music/track.ogg", 0.7, "fade", 2.0);
+
+// Instant change
+AudioSystem.playMusic("assets/music/track.ogg", 0.7, "cut");
+
+// Wait for current track to end
+AudioSystem.playMusic("assets/music/track.ogg", 0.7, "wait_till_end");
+```
+
+### In JSON Scenes
+
+```json
+{
+  "type": "action",
+  "action": "play_music",
+  "track": "assets/music/scene_theme.ogg",
+  "volume": 0.7,
+  "transition": "fade",
+  "duration": 2.0
+}
+```
+
+## Music Control
+
+```haxe
+// Stop all music
+AudioSystem.stopMusic();
+
+// Fade out
+AudioSystem.fadeOutMusic(1.5);
+
+// Check if playing
+if (AudioSystem.isMusicPlaying()) { }
+
+// Get current track
+var track = AudioSystem.getCurrentTrack();
+
+// Set volume
+AudioSystem.setVolume(0.5);
+```
+
+## Default BGM
+
+```haxe
+// Set default background music
+AudioSystem.setDefaultBGM("assets/music/main_theme.ogg", 0.8);
+
+// Play default BGM
+AudioSystem.playDefaultBGM(0.8);
+```
+
+## Sound Effects
+
+```haxe
+AudioSystem.playSound("assets/sounds/door_knock.wav", 0.7);
+```
+
+## TitleState Integration
+
+```haxe
+class TitleState extends FlxState
+{
+    override public function create():Void
+    {
+        super.create();
+        
+        // Use AudioSystem, not FlxG.sound
+        AudioSystem.playMusic("assets/music/title.ogg", 0.7);
+    }
+    
+    private function startGame():Void
+    {
+        // Fade out before transition
+        AudioSystem.fadeOutMusic(0.5);
+        
+        FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function() {
+            FlxG.switchState(() -> new VNState("scenes/act1/scene1.json"));
+        });
+    }
+}
+```
+
+## Transition Duration Guidelines
+
+- **0.5-1.0s** - Quick scene changes within same mood
+- **1.5-2.0s** - Standard scene-to-scene transitions
+- **2.5-4.0s** - Act changes, dramatic moments
+- **4.0s+** - Special dramatic sequences
 
 ---
 
-# Text Effects System
-
-The engine includes a comprehensive text effects system for creating dramatic visual impact during dialogue and narration.
+# Text Effects
 
 ## Available Effects
 
-### 1. Shake
-Makes text shake randomly (nervousness, earthquakes, fear).
-
+### Shake
+Random jitter for nervousness, earthquakes, fear.
 ```json
-{
-  "text_effect": "shake",
-  "effect_intensity": 3.0
-}
+{"text_effect": "shake", "effect_intensity": 3.0}
 ```
 
-### 2. Glitch
-Creates a glitching effect with random position jumps and color corruption (system errors, horror).
-
+### Glitch
+Position jumps and color corruption for system errors, horror.
 ```json
-{
-  "text_effect": "glitch",
-  "effect_intensity": 5.0
-}
+{"text_effect": "glitch", "effect_intensity": 5.0}
 ```
 
-### 3. Wave
-Text moves in a sine wave pattern (ghosts, magic, floating).
-
+### Wave
+Sine wave motion for ghosts, magic, floating.
 ```json
-{
-  "text_effect": "wave",
-  "effect_speed": 3.0,
-  "effect_amplitude": 5.0
-}
+{"text_effect": "wave", "effect_speed": 3.0, "effect_amplitude": 5.0}
 ```
 
-### 4. Rainbow
-Text cycles through rainbow colors (magical effects, celebrations).
-
+### Rainbow
+Color cycling for magical effects, celebrations.
 ```json
-{
-  "text_effect": "rainbow",
-  "effect_speed": 2.0
-}
+{"text_effect": "rainbow", "effect_speed": 2.0}
 ```
 
-### 5. Fade
-Text pulses in and out (mysterious, ethereal).
-
+### Fade
+Alpha pulsing for mysterious, ethereal effects.
 ```json
-{
-  "text_effect": "fade",
-  "effect_speed": 2.0
-}
+{"text_effect": "fade", "effect_speed": 2.0}
 ```
 
-### 6. Typewriter
-Text appears character by character (dramatic reveals, computer text).
-
+### Typewriter
+Character-by-character reveal for dramatic reveals.
 ```json
-{
-  "text_effect": "typewriter",
-  "effect_speed": 40.0
-}
+{"text_effect": "typewriter", "effect_speed": 40.0}
 ```
 
 ## Effect Parameters
@@ -315,13 +466,11 @@ Text appears character by character (dramatic reveals, computer text).
 | fade | effect_speed | - | 2.0 |
 | typewriter | effect_speed (chars/sec) | - | 30.0 |
 
-## Combining with Screen Effects
-
-Text effects can be combined with screen effects for maximum dramatic impact:
+## Combining Effects
 
 ```json
 {
-  "id": "earthquake",
+  "id": "earthquake_effect",
   "type": "action",
   "action": "shake_screen",
   "intensity": 0.03,
@@ -341,310 +490,308 @@ Text effects can be combined with screen effects for maximum dramatic impact:
 
 ---
 
-# SceneParser
+# Character System
 
-SceneParser loads a JSON file and validates:
+## Character Definitions
 
-* scene_id exists
-* start node exists
-* nodes array is valid
-* all node ids are unique
-* all referenced nodes exist
+Characters are defined in `assets/data/characters.json`:
 
-It builds a dictionary mapping:
-
-```
-nodeId -> nodeData
-```
-
-This allows SceneRunner to perform instant lookup without searching.
-
----
-
-# SceneRunner
-
-SceneRunner is the core state machine of the VN.
-Its responsibilities:
-
-* Track the current node
-* Execute it
-* Call VNCommands for each node type
-* Advance to the next node
-* Handle branching, jumps, choice callbacks, and endings
-
-It never performs rendering. It only decides what should happen next.
-
-When a node requests a transition into rhythm gameplay, SceneRunner pauses itself until RhythmBridge signals completion.
-
----
-
-# VNCommands
-
-This class routes actions to the correct subsystems.
-Examples:
-
-```
-dialogue node        → DialogueSystem.show()
-narration node       → DialogueSystem.showNarration()
-set_bg action        → BackgroundSystem.set()
-character show       → CharacterSystem.show()
-effect:shake         → EffectSystem.shake()
-play sound           → AudioSystem.playSound()
-choice               → ChoiceSystem.show()
-game                 → RhythmBridge.start()
-end                  → SceneManager.loadScene()
-set_text_effect      → DialogueSystem.setEffect()
-clear_text_effect    → DialogueSystem.clearEffect()
+```json
+{
+  "tiffany": {
+    "name": "Tiffany",
+    "default_pose": "default_smile",
+    "poses": {
+      "default_smile": {
+        "base": "assets/images/characters/tiffany/base.png",
+        "expression": "assets/images/characters/tiffany/smile.png"
+      }
+    }
+  }
+}
 ```
 
-VNCommands remains thin and focused on routing. It does not parse text effects - that responsibility belongs to DialogueSystem.
+## Display Characters
+
+```json
+{
+  "type": "action",
+  "action": "show_character",
+  "character": "tiffany",
+  "pose": "smile",
+  "position": "center",
+  "transition": "fade",
+  "duration": 0.4
+}
+```
+
+**Positions:** left, center, right, or custom via PlacementManager
+
+## Custom Positioning
+
+Create placement files in `assets/data/placements/{scene_id}_placement.json`:
+
+```json
+{
+  "node_id": {
+    "x": 400,
+    "y": 200,
+    "scale": 0.8
+  }
+}
+```
+
+## Character Emphasis
+
+Characters automatically emphasize (brighten) when speaking and deemphasize (darken) others, similar to DDLC.
 
 ---
 
-# DialogueSystem
+# Background System
 
-Handles all dialogue and narration display with integrated text effect support.
+## Transitions
 
-**Key Features:**
-- Text effect parsing and application
-- Effect state management
-- Automatic position/color reset
-- Optional auto-advance
-- Update loop for effect animation
+```json
+{
+  "type": "action",
+  "action": "set_bg",
+  "background": "assets/images/bg/classroom.png",
+  "transition": "fade",
+  "duration": 0.6
+}
+```
 
-**Architecture:**
-- DialogueSystem handles its own text effect parsing (proper separation of concerns)
-- TextEffectSystem provides the effect animation logic
-- VNCommands simply routes to DialogueSystem
-
-**Integration:**
-VNState must call `DialogueSystem.update(elapsed)` in its update loop for effects to animate.
-
----
-
-# TextEffectSystem
-
-Pure effect logic and animation system. Handles:
-- Shake animation (random jitter)
-- Glitch animation (position jumps + color corruption)
-- Wave animation (sine wave motion)
-- Rainbow animation (color cycling)
-- Fade animation (alpha pulsing)
-- Typewriter animation (character reveal)
-
-This system is stateless and reusable. All state is managed by DialogueSystem.
+**Available transitions:**
+- `cut` - Instant change
+- `fade` - Fade to new background
+- `crossfade` - Fade old while fading in new
+- `slide_left` - Slide from right
+- `slide_right` - Slide from left
+- `slide_up` - Slide from bottom
+- `slide_down` - Slide from top
 
 ---
 
-# BackgroundSystem
+# Screen Effects
 
-Handles loading, scaling, and transitioning between backgrounds.
-Uses a FlxSpriteGroup stored inside VNState.
+## Shake
 
-Supported transition modes:
+Camera shake for impact moments.
 
-* cut (instant)
-* fade
-* crossfade
-* slide_left
-* slide_right
-* slide_up
-* slide_down
+```json
+{
+  "action": "shake_screen",
+  "intensity": 0.03,
+  "duration": 2.0
+}
+```
 
-Background images are scaled to match the screen resolution using FlxSprite's setGraphicSize.
+## Flash
 
----
+Color flash overlay.
 
-# CharacterSystem
+```json
+{
+  "action": "flash",
+  "color": "white",
+  "duration": 0.5
+}
+```
 
-Manages character sprite display with support for:
-- Multiple character positions (left, center, right)
-- Pose changes
-- Character emphasis (DDLC-style)
-- Transitions (fade, slide)
-- Multi-layer character rendering
+## Glitch
 
-Characters are rendered using CharacterRenderer which handles sprite layering and composition.
+Combined shake and flash for horror.
 
----
-
-# EffectSystem
-
-Provides screen-level effects:
-- **shake**: Camera shake for impact moments
-- **flash**: Color flash overlay (white, red, etc.)
-- **glitch**: Screen glitch effect (combines shake + flash)
-
-These are separate from text effects and can be combined for dramatic sequences.
+```json
+{
+  "action": "glitch",
+  "intensity": 2.0,
+  "duration": 0.8
+}
+```
 
 ---
 
-# VNState
+# System Architecture
 
-VNState is responsible for managing the layers:
+## SceneParser
 
-* Background layer (FlxSpriteGroup)
-* Character layer (FlxSpriteGroup)
-* UI layer (FlxGroup)
-* Dialogue box
-* Name box
-* Mouse visibility
+Loads and validates JSON scene files:
+- Validates scene structure
+- Checks node IDs are unique
+- Verifies all referenced nodes exist
+- Creates node lookup dictionary
 
-VNState initializes a SceneRunner and begins the scene defined in Main.hx.
+## SceneRunner
 
----
+Executes the node graph:
+- Tracks current node
+- Calls VNCommands for each node type
+- Handles branching and jumps
+- Manages scene flow
 
-# Extending the Engine
+## VNCommands
 
-## Adding a New Node Type
+Routes actions to subsystems:
+- `dialogue` → DialogueSystem
+- `narration` → DialogueSystem
+- `action` → Appropriate system based on action type
+- `choice` → ChoiceSystem
+- `game` → RhythmBridge
+- `end` → SceneManager
 
-1. Add a case branch in SceneRunner
-2. Add handling in VNCommands
-3. Implement subsystem behavior
+## DialogueSystem
 
-## Adding a New Transition
+Manages text display:
+- Parses and applies text effects
+- Handles text advancement
+- Manages effect state
+- Updates animations each frame
 
-Modify BackgroundSystem by creating a new method and adding a new switch-case branch.
+## Integration
 
-## Adding a New Text Effect
-
-1. Add new effect type to TextEffectSystem enum
-2. Implement effect logic in TextEffectSystem
-3. Add parsing case in DialogueSystem.parseTextEffect()
-
-## Expanding CharacterSystem
-
-Character poses, transitions, slots, and multi-layered sprite behavior can be added without affecting SceneRunner or VNCommands.
-
-## Adding Expression Operators
-
-ConditionParser can be expanded with operators such as:
-
-* ==
-* !=
-* >=
-* <=
-* and
-* or
+VNState must call `DialogueSystem.update(elapsed)` in its update loop for text effects to animate.
 
 ---
 
 # Runtime Flow
 
-The general runtime process:
+1. TitleState plays title music via AudioSystem
+2. User clicks PLAY, title music fades out
+3. VNState loads and creates SceneRunner
+4. SceneRunner loads scene JSON via SceneParser
+5. SceneRunner executes starting node
+6. VNCommands routes actions to subsystems
+7. Subsystems update visuals, audio, gameplay
+8. DialogueSystem updates text effects each frame
+9. SceneRunner advances to next node
+10. Process repeats until end node
+11. SceneManager loads next scene
 
-1. VNState loads SceneRunner
-2. SceneRunner loads scene JSON through SceneParser
-3. SceneRunner grabs node "start" and executes it
-4. VNCommands dispatches to specific subsystems
-5. Subsystems update visuals or gameplay
-6. DialogueSystem updates text effects each frame
-7. SceneRunner advances to next node
-8. Process repeats until an end node
-9. SceneManager loads next VN scene or returns to rhythm mode
+---
 
-This structure ensures deterministic control of narrative progression.
+# Development
+
+## Adding Node Types
+
+1. Add case in SceneRunner.runNode()
+2. Add handler in VNCommands
+3. Implement subsystem behavior
+
+## Adding Transitions
+
+1. Add method in BackgroundSystem
+2. Add case in transition switch
+3. Implement transition logic
+
+## Adding Text Effects
+
+1. Add effect type to TextEffectSystem
+2. Implement effect logic
+3. Add parsing case in DialogueSystem
+
+## Extending Characters
+
+Character system supports expansion without affecting SceneRunner or VNCommands. Add poses, transitions, and positions as needed.
 
 ---
 
 # Debugging
 
-Checks to perform if the VN shows a black screen:
+## Common Issues
 
-1. Main.hx must call `VNState.new` instead of `VNState`
-2. JSON file must exist at the correct path
-3. JSON must contain `"start"` and matching `"id"` nodes
-4. VNState must add all groups to the state
-5. Background path must be correct and asset must exist
-6. VNState must call `DialogueSystem.update(elapsed)` for text effects
-7. Browser console (F12) will show:
+### Audio Overlap
+**Cause:** Using FlxG.sound.playMusic() instead of AudioSystem  
+**Fix:** Always use AudioSystem.playMusic() in all states
 
-   * Trace logs from DialogueSystem
-   * Background transitions
-   * SceneRunner progress
-   * Condition evaluations
-   * Node traversal
-   * Text effect activation
+### Unknown Node Type
+**Cause:** Using `"type": "music"` instead of action node  
+**Fix:** Use `"type": "action"` with `"action": "play_music"`
 
-These logs confirm engine behavior even before visual UI is implemented.
+### Text Effects Not Animating
+**Cause:** DialogueSystem.update() not called  
+**Fix:** Call DialogueSystem.update(elapsed) in VNState.update()
 
----
+### Character Positioning Wrong
+**Cause:** Missing or incorrect placement data  
+**Fix:** Create placement file in `assets/data/placements/`
 
-# Implemented Systems
+## Console Output
 
-## Fully Implemented
-* **DialogueSystem** - Text display with effect support
-* **TextEffectSystem** - 6 text animation effects
-* **BackgroundSystem** - Background transitions
-* **CharacterSystem** - Character display and posing
-* **CharacterRenderer** - Multi-layer sprite rendering
-* **EffectSystem** - Screen effects (shake, flash, glitch)
-* **SceneParser** - JSON validation and loading
-* **SceneRunner** - Node execution state machine
-* **VNCommands** - Command routing
-
-## Partially Implemented
-* **AudioSystem** - Basic structure (needs implementation)
-* **ChoiceSystem** - Basic structure (needs UI)
-* **ConditionParser** - Basic structure (needs full expression parsing)
+Press F12 in browser to view:
+- AudioSystem transition logs
+- SceneRunner node execution
+- DialogueSystem text display
+- Background transitions
+- Character operations
+- Condition evaluations
 
 ---
 
-# Use Cases for Text Effects
+# Implementation Status
 
-## Horror Scenarios
-- **Glitch**: System corruption, reality breaking
-- **Shake**: Fear, anxiety, instability
-- Combined with screen effects for maximum impact
+## Completed Systems
 
-## Emotional Moments
-- **Shake**: Nervousness, trembling
-- **Fade**: Weakness, fading consciousness
+- AudioSystem (music transitions, sound effects)
+- DialogueSystem (text display with effects)
+- TextEffectSystem (6 animation types)
+- BackgroundSystem (7 transition modes)
+- CharacterSystem (multi-layer sprites, positioning)
+- CharacterRenderer (sprite layering)
+- PlacementManager (custom positioning)
+- EffectSystem (screen effects)
+- SceneParser (JSON validation)
+- SceneRunner (node execution)
+- VNCommands (action routing)
+- TitleState (menu and audio integration)
+- VNState (scene rendering)
 
-## Supernatural
-- **Wave**: Ghost speech, ethereal voices
-- **Fade**: Spectral presence
+## In Development
 
-## Magical Effects
-- **Rainbow**: Spells, magical power
-- **Wave**: Mystical energy
-
-## Dramatic Reveals
-- **Typewriter**: Important messages, computer readouts
-- **Glitch**: Corrupted data, broken memories
-
----
-
-# Roadmap
-
-## Completed
-* Text effects system (shake, glitch, wave, rainbow, fade, typewriter)
-* Background transition system
-* Character display system
-* Screen effects (shake, flash, glitch)
-* Clean architecture with separation of concerns
-
-## In Progress
-* Character rot variants and distressed poses
-* Full ConditionParser for rot scoring logic
-* Choice UI implementation
-
-## Planned
-* Full AudioSystem implementation (crossfades, spatial audio)
-* Horror effect enhancements for Act 3 and 4
-* Rhythm gameplay integration polish
-* Puppeteer mode commands for Act 4 behavior
-* Persistent data system to track player choices, rot scores, and flags
-* Per-character text effect animations
-* Shader-based advanced effects
+- ChoiceSystem UI polish
+- ConditionParser expression support
+- RhythmBridge gameplay integration
 
 ---
 
-# Performance Notes
+# Performance
 
-The text effects system is highly optimized:
-- Lightweight (simple math operations)
-- Only active when text is visible
-- Automatic cleanup when dialogue changes
+- Text effects use simple math operations
+- Effects only active when text visible
+- Automatic cleanup on dialogue change
 - No memory leaks or accumulation
+- Audio system prevents overlap
+- Efficient crossfading with FlxTween
 - Minimal CPU overhead
+
+---
+
+# Best Practices
+
+## Audio
+
+1. Always use AudioSystem for music
+2. Fade between scenes for smooth transitions
+3. Use appropriate transition durations
+4. Stop or fade out music before state changes
+
+## Scenes
+
+1. Use descriptive node IDs
+2. Keep scenes focused and manageable
+3. Validate JSON before testing
+4. Use text effects sparingly for impact
+
+## Characters
+
+1. Define all poses in characters.json
+2. Use placement files for complex scenes
+3. Leverage emphasis system for dialogue
+4. Use appropriate transition durations
+
+## Effects
+
+1. Combine text and screen effects carefully
+2. Match effect intensity to mood
+3. Don't overuse effects
+4. Test effects with actual dialogue
