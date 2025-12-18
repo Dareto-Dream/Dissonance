@@ -1,6 +1,6 @@
 package rhythm;
 
-import vn.CharacterSystem;
+import core.rendering.CharacterSystem;
 import rhythm.ChartData.PoseType;
 
 /**

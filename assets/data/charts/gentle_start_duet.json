@@ -1,0 +1,17 @@
+{
+  "song": "gentle_start_duet",
+  "bpm": 120,
+  "player": "mc",
+  "singers": ["harumi"],
+  "notes": [
+    {
+      "mustHitSection": true,
+      "playerLaneCount": 4,
+      "sectionBeats": 4,
+      "sectionNotes": [
+        [1000, 0, 0, 0],
+        [1500, 1, 0, 0]
+      ]
+    }
+  ]
+}

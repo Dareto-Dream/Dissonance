@@ -2,6 +2,7 @@ package vn;
 
 import flixel.FlxG;
 import rhythm.RhythmState;
+import core.rendering.CharacterSystem;
 
 /**
  * RhythmBridge - VN to Rhythm integration
@@ -31,12 +32,14 @@ class RhythmBridge {
     /**
      * Start a rhythm game session
      * 
-     * @param song Song identifier (used to find chart and music)
-     * @param characterSystem Reference to VN character system
+     * @param song Song identifier
      * @param done Callback when song completes
      */
-    public static function start(song:String, characterSystem:CharacterSystem, done:RhythmResult->Void):Void {
+    public static function start(song:String, done:RhythmResult->Void):Void {
         trace("START RHYTHM: " + song);
+        
+        // Get the character system from VN
+        var characterSystem = CharacterSystem.get();
         
         // Build chart path
         var chartPath = 'assets/data/charts/${song}.json';
@@ -45,8 +48,9 @@ class RhythmBridge {
         var rhythmState = new RhythmState(chartPath, characterSystem);
         
         // Store completion callback
-        // In production, RhythmState would call this when song ends
-        Reflect.setField(rhythmState, "onComplete", done);
+        if (done != null) {
+            Reflect.setField(rhythmState, "onComplete", done);
+        }
         
         FlxG.switchState(rhythmState);
     }

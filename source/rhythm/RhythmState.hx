@@ -6,7 +6,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.input.keyboard.FlxKey;
 import rhythm.*;
-import vn.CharacterSystem;
+import core.rendering.CharacterSystem;
+import rhythm.JudgementSystem.HitRating;
 
 /**
  * RhythmState - Main rhythm game state

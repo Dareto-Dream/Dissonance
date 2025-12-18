@@ -179,4 +179,63 @@ class CharacterSystem
 	{
 		placementManager.reset();
 	}
+	
+	// ========================================================================
+	// RHYTHM GAME INTEGRATION
+	// ========================================================================
+	
+	/**
+	 * Play an animation (rhythm game wrapper for setPose)
+	 * This allows the rhythm system to trigger character animations
+	 * 
+	 * @param name Character ID
+	 * @param animName Animation/pose name (e.g., "singLEFT", "singDOWN", "idle", "miss")
+	 */
+	public function playAnimation(name:String, animName:String):Void
+	{
+		var r = characters.get(name);
+		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Cannot play animation for unknown character '" + name + "'");
+			return;
+		}
+		
+		r.setPose(animName);
+	}
+	
+	/**
+	 * Enable/disable animation looping for hold notes
+	 * In rhythm gameplay, hold notes should keep the sing animation playing
+	 * 
+	 * @param name Character ID
+	 * @param looping Whether to loop the current animation
+	 */
+	public function setLooping(name:String, looping:Bool):Void
+	{
+		var r = characters.get(name);
+		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Cannot set looping for unknown character '" + name + "'");
+			return;
+		}
+		
+		r.isLooping = looping;
+		trace('[CharacterSystem] Set looping=${looping} for $name');
+	}
+	
+	/**
+	 * Check if a character has a specific pose
+	 * Useful for fallback behavior (e.g., if "miss" doesn't exist, use "idle")
+	 * 
+	 * @param name Character ID
+	 * @param pose Pose name
+	 * @return True if pose exists
+	 */
+	public function hasPose(name:String, pose:String):Bool
+	{
+		var r = characters.get(name);
+		if (r == null) return false;
+		
+		return r.poses.exists(pose);
+	}
 }

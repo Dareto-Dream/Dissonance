@@ -20,6 +20,10 @@ class CharacterRenderer extends FlxGroup
 	
 	public var currentPosition:String = "center";
 	
+	// Rhythm game state tracking
+	public var isLooping:Bool = false;
+	public var currentPose:String = "idle";
+	
 	// Store layer offsets from pose data
 	private var layerOffsets:Map<String, {x:Float, y:Float}> = new Map();
 
@@ -222,6 +226,9 @@ class CharacterRenderer extends FlxGroup
 			
 			trace('[CharacterRenderer]   Layer "$frame" -> sprite pos (${spr.x}, ${spr.y}) = base ($baseX, $baseY) + offset ($offsetX, $offsetY)');
 		}
+		
+		// Track current pose for rhythm game
+		currentPose = poseName;
 	}
 
 	/**
@@ -380,5 +387,17 @@ class CharacterRenderer extends FlxGroup
 				spr.alpha = 0.6;
 			}
 		}
+	}
+	
+	// ========================================================================
+	// RHYTHM GAME HELPERS
+	// ========================================================================
+	
+	/**
+	 * Check if animation should loop (for hold notes)
+	 */
+	public function shouldLoop():Bool
+	{
+		return isLooping;
 	}
 }

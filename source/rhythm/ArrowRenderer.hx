@@ -32,22 +32,23 @@ import rhythm.JudgementSystem.HitRating;
  */
 class ArrowRenderer extends FlxSpriteGroup {
     // Configuration
-    private var laneCount:Int;
-    private var centerX:Float;
-    private var centerY:Float;
-    private var radius:Float;
+    public var laneCount:Int;
+    public var centerX:Float;
+    public var centerY:Float;
+    public var radius:Float;
     
     // Visual elements
     private var receptors:Array<FlxSprite>;
     private var noteVisuals:Map<Note, NoteVisual>;
     
     // Colors for fallback rendering
-    private static var LANE_COLORS:Array<FlxColor> = [
+    public static var LANE_COLORS:Array<FlxColor> = [
         0xFFC24B99, // Purple (left)
         0xFF00FFFF, // Cyan (down)
         0xFF12FA05, // Green (up)
         0xFFF9393F  // Red (right)
     ];
+    public var conductor:Conductor;
     
     /**
      * Constructor
@@ -176,7 +177,7 @@ class ArrowRenderer extends FlxSpriteGroup {
      * @param lane Lane index
      * @return Angle in radians
      */
-    private function getLaneAngle(lane:Int):Float {
+    public function getLaneAngle(lane:Int):Float {
         // Start at top (-90°), distribute evenly
         var startAngle = -Math.PI / 2;
         var angleStep = (Math.PI * 2) / laneCount;
