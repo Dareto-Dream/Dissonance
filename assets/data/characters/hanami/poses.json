@@ -43,31 +43,6 @@
           "y": 0
         }
       ]
-    },
-    "singLEFT": {
-      "layers": [
-        {"frame": "singLEFT", "x": 0, "y": 0}
-      ]
-    },
-    "singDOWN": {
-      "layers": [
-        {"frame": "singDOWN", "x": 0, "y": 0}
-      ]
-    },
-    "singUP": {
-      "layers": [
-        {"frame": "singUP", "x": 0, "y": 0}
-      ]
-    },
-    "singRIGHT": {
-      "layers": [
-        {"frame": "singRIGHT", "x": 0, "y": 0}
-      ]
-    },
-    "idle": {
-      "layers": [
-        {"frame": "idle", "x": 0, "y": 0}
-      ]
     }
   }
 }

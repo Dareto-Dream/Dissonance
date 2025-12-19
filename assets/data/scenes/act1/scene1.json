@@ -135,7 +135,7 @@
     {
       "id": "find_clubroom",
       "type": "narration",
-      "text": "The music club room should be on the third floor. Room 1-1.",
+      "text": "The music club room should be on the third floor. Room 3-B.",
       "next": "approach_door"
     },
     {
@@ -370,6 +370,14 @@
       "character": "hanami",
       "pose": "gentle",
       "text": "It's okay. I'll guide you through it. Music is just about feeling, you know?",
+      "next": "setup_duet"
+    },
+    {
+      "id": "setup_duet",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/gentle_start.ogg",
+      "volume": 0.4,
       "next": "duet_start"
     },
     {

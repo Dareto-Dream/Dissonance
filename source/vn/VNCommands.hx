@@ -113,9 +113,8 @@ class VNCommands {
     }
 
     public static function startRhythm(node:Dynamic, runner:SceneRunner):Void {
-        RhythmBridge.start(node.song, (result) -> {
-        trace('[VNCommands] Rhythm game finished - Score: ${result.score}, Combo: ${result.combo}');
-        runner.goto(nextNode(node));
+        RhythmBridge.start(node.song, () -> {
+            runner.goto(nextNode(node));
         });
     }
 
