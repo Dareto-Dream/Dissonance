@@ -77,6 +77,8 @@ class RhythmState extends FlxState {
      */
     override public function create():Void {
         super.create();
+
+        characterSystem.enableRhythmMode();
         
         // Set background color
         bgColor = FlxColor.fromRGB(20, 20, 30);
@@ -322,10 +324,11 @@ class RhythmState extends FlxState {
             FlxG.sound.music.stop();
         }
         
+        // Disable rhythm mode and reset characters
+        characterSystem.disableRhythmMode();
         animBridge.resetAll();
         
         // Return to VN (this would call the callback in actual integration)
-        // For now, just close state
         FlxG.switchState(()->new FlxState()); // Placeholder
     }
 }
