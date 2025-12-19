@@ -1,8 +1,8 @@
 package vn;
 
+import core.rendering.CharacterSystem;
 import flixel.FlxG;
 import rhythm.RhythmState;
-import core.rendering.CharacterSystem;
 
 /**
  * RhythmBridge - VN to Rhythm integration
@@ -52,6 +52,6 @@ class RhythmBridge {
             Reflect.setField(rhythmState, "onComplete", done);
         }
         
-        FlxG.switchState(rhythmState);
+        FlxG.switchState(()-> rhythmState);
     }
 }

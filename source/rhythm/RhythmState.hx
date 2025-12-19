@@ -1,12 +1,12 @@
 package rhythm;
 
-import flixel.FlxState;
+import core.rendering.CharacterSystem;
 import flixel.FlxG;
+import flixel.FlxState;
+import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.input.keyboard.FlxKey;
 import rhythm.*;
-import core.rendering.CharacterSystem;
 import rhythm.JudgementSystem.HitRating;
 
 /**
@@ -326,6 +326,6 @@ class RhythmState extends FlxState {
         
         // Return to VN (this would call the callback in actual integration)
         // For now, just close state
-        FlxG.switchState(new FlxState()); // Placeholder
+        FlxG.switchState(()->new FlxState()); // Placeholder
     }
 }
