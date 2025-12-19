@@ -362,7 +362,7 @@ class CharacterRenderer extends FlxGroup
 		// Stop any currently playing animations
 		for (spr in currentAnimatingSprites)
 		{
-			if (spr.animation.curAnim != null)
+			if (spr != null && spr.animation != null && spr.animation.curAnim != null)
 			{
 				spr.animation.stop();
 			}
@@ -380,21 +380,34 @@ class CharacterRenderer extends FlxGroup
 		}
 		
 		var pose = poses.get(poseName);
-		if (pose == null || pose.layers == null) return;
+		if (pose == null || pose.layers == null)
+		{
+			trace("[CharacterRenderer] Pose has no layers");
+			return;
+		}
 		
 		layerOffsets.clear();
 		var layerArr:Array<Dynamic> = cast pose.layers;
 		
 		trace('[CharacterRenderer] Setting rhythm pose "$poseName" for $name');
 		
-		// FALLBACK: If no rhythm atlas, use VN layers as static fallback
-		if (!hasRhythmAtlas || rhythmLayers.iterator().hasNext() == false)
+		// Check if we have any rhythm layers at all
+		var hasAnyRhythmLayers = false;
+		for (_ in rhythmLayers.keys())
 		{
-			trace('[CharacterRenderer] No rhythm atlas for $name, using VN layers as fallback');
+			hasAnyRhythmLayers = true;
+			break;
+		}
+		
+		// FALLBACK: If no rhythm layers at all, use VN layers
+		if (!hasRhythmAtlas || !hasAnyRhythmLayers)
+		{
+			trace('[CharacterRenderer] No rhythm layers for $name, using VN layers as fallback');
 			setPoseVN(poseName);
 			return;
 		}
 		
+		// Process each layer
 		for (entry in layerArr)
 		{
 			if (entry == null || entry.frame == null) continue;
@@ -402,16 +415,22 @@ class CharacterRenderer extends FlxGroup
 			var baseFrame:String = entry.frame;
 			var spr = rhythmLayers.get(baseFrame);
 			
+			// NULL CHECK - Critical for preventing errors
 			if (spr == null)
 			{
-				trace("[CharacterRenderer] WARNING: Rhythm frame '" + baseFrame + "' not found, trying VN fallback");
+				trace("[CharacterRenderer] WARNING: Rhythm sprite for '" + baseFrame + "' is null, trying VN fallback");
 				
 				// Try VN layer as fallback
 				var vnSpr = vnLayers.get(baseFrame);
 				if (vnSpr != null)
 				{
 					vnSpr.visible = true;
-					vnSpr.animation.frameName = baseFrame;
+					
+					// Safely set frame name
+					if (vnSpr.animation != null)
+					{
+						vnSpr.animation.frameName = baseFrame;
+					}
 					
 					var offsetX:Float = entry.x;
 					var offsetY:Float = entry.y;
@@ -421,13 +440,18 @@ class CharacterRenderer extends FlxGroup
 					vnSpr.y = baseY + offsetY;
 					vnSpr.scale.set(config.scale, config.scale);
 				}
+				else
+				{
+					trace("[CharacterRenderer] WARNING: No VN fallback for '" + baseFrame + "' either");
+				}
 				continue;
 			}
 			
+			// spr is confirmed not null here
 			spr.visible = true;
 			
-			// Play animation if it exists
-			if (spr.animation.exists(baseFrame))
+			// CRITICAL NULL CHECK: Safely check animation before calling exists()
+			if (spr.animation != null && spr.animation.exists(baseFrame))
 			{
 				spr.animation.play(baseFrame, true); // Force restart
 				currentAnimatingSprites.push(spr);
@@ -437,11 +461,15 @@ class CharacterRenderer extends FlxGroup
 			{
 				// Fallback to static frame
 				var staticFrame = baseFrame + "0000";
-				if (rhythmFrames.getByName(staticFrame) != null)
+				if (spr.animation != null && rhythmFrames != null && rhythmFrames.getByName(staticFrame) != null)
 				{
 					spr.animation.frameName = staticFrame;
+					trace('[CharacterRenderer] Using static frame "$staticFrame"');
 				}
-				trace('[CharacterRenderer] No animation for "$baseFrame", using static frame');
+				else
+				{
+					trace('[CharacterRenderer] No animation for "$baseFrame", no static fallback available');
+				}
 			}
 			
 			var offsetX:Float = entry.x;
@@ -648,7 +676,7 @@ class CharacterRenderer extends FlxGroup
 			// Stop all animations when exiting rhythm mode
 			for (spr in currentAnimatingSprites)
 			{
-				if (spr.animation.curAnim != null)
+				if (spr != null && spr.animation != null && spr.animation.curAnim != null)
 				{
 					spr.animation.stop();
 				}
