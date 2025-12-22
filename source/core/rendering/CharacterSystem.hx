@@ -1,8 +1,8 @@
 package core.rendering;
 
-import flixel.group.FlxGroup;
-import core.scene.PlacementManager;
 import core.scene.PlacementManager.PlacementData;
+import core.scene.PlacementManager;
+import flixel.group.FlxGroup;
 
 class CharacterSystem
 {
@@ -11,7 +11,7 @@ class CharacterSystem
 	public static function get()
 		return instance;
 
-	public var characters:Map<String, CharacterRenderer> = [];
+	public var characters:Map<String, CharacterRenderer> = new Map();
 	public var group:FlxGroup;
 	
 	public var placementManager:PlacementManager;
@@ -163,7 +163,18 @@ class CharacterSystem
 			var r = characters.get(charName);
 			if (r != null)
 			{
-				for (spr in r.layers)
+				// Reset VN layers
+				for (spr in r.vnLayers)
+				{
+					if (spr.visible)
+					{
+						spr.scale.set(r.config.scale, r.config.scale);
+						spr.alpha = 1.0;
+					}
+				}
+				
+				// Reset rhythm layers
+				for (spr in r.rhythmLayers)
 				{
 					if (spr.visible)
 					{
@@ -178,5 +189,93 @@ class CharacterSystem
 	public function resetPlacements():Void
 	{
 		placementManager.reset();
+	}
+	
+	// ========================================================================
+	// RHYTHM GAME INTEGRATION
+	// ========================================================================
+	
+	/**
+	 * Play an animation (rhythm game wrapper for setPose)
+	 * This allows the rhythm system to trigger character animations
+	 * 
+	 * @param name Character ID
+	 * @param animName Animation/pose name (e.g., "singLEFT", "singDOWN", "idle", "miss")
+	 */
+	public function playAnimation(name:String, animName:String):Void
+	{
+		var r = characters.get(name);
+		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Cannot play animation for unknown character '" + name + "'");
+			return;
+		}
+		
+		r.setPose(animName);
+	}
+	
+	/**
+	 * Enable/disable animation looping for hold notes
+	 * In rhythm gameplay, hold notes should keep the sing animation playing
+	 * 
+	 * @param name Character ID
+	 * @param looping Whether to loop the current animation
+	 */
+	public function setLooping(name:String, looping:Bool):Void
+	{
+		var r = characters.get(name);
+		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Cannot set looping for unknown character '" + name + "'");
+			return;
+		}
+		
+		r.isLooping = looping;
+		trace('[CharacterSystem] Set looping=${looping} for $name');
+	}
+	
+	/**
+	 * Check if a character has a specific pose
+	 * Useful for fallback behavior (e.g., if "miss" doesn't exist, use "idle")
+	 * 
+	 * @param name Character ID
+	 * @param pose Pose name
+	 * @return True if pose exists
+	 */
+	public function hasPose(name:String, pose:String):Bool
+	{
+		var r = characters.get(name);
+		if (r == null) return false;
+		
+		return r.poses.exists(pose);
+	}
+	// ========================================================================
+	// RHYTHM MODE MANAGEMENT
+	// ========================================================================
+	
+	/**
+	 * Enable rhythm mode for all characters
+	 * Switches character rendering to use rhythm atlases with animations
+	 */
+	public function enableRhythmMode():Void
+	{
+		for (r in characters)
+		{
+			r.setRhythmMode(true);
+		}
+		trace("[CharacterSystem] Enabled rhythm mode for all characters");
+	}
+	
+	/**
+	 * Disable rhythm mode for all characters
+	 * Returns character rendering to VN mode (static poses)
+	 */
+	public function disableRhythmMode():Void
+	{
+		for (r in characters)
+		{
+			r.setRhythmMode(false);
+		}
+		trace("[CharacterSystem] Disabled rhythm mode for all characters");
 	}
 }

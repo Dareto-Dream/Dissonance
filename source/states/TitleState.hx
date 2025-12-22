@@ -123,7 +123,7 @@ class TitleState extends FlxState
 		}
 		
 		// Play title music using AudioSystem (not FlxG.sound)
-		AudioSystem.playMusic("assets/music/dissonance.ogg", 0.7);
+		AudioSystem.playMusic("assets/music/title.ogg", 0.7);
 	}
 	
 	private function createBackground():Void
