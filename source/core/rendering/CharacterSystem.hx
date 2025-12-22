@@ -65,7 +65,7 @@ class CharacterSystem
 
 	/**
 	 * Show a character with placement support
-	 * FIXED: Properly applies custom positions by setting absolute coordinates
+	 * FIXED: Correct order of operations
 	 */
 	public function show(name:String, pose:String, position:String, transition:String, duration:Float, ?nodeId:String)
 	{
@@ -76,43 +76,31 @@ class CharacterSystem
 			return;
 		}
 
-		// Set pose first (this positions sprites based on pose data)
-		r.setPose(pose);
-		trace('[CharacterSystem] Set pose "$pose" for $name');
-
-		// Check for custom placement data
+		// CRITICAL FIX: Set position FIRST, then pose
+		// This ensures layers are positioned correctly
+		
 		var customPosition:Null<PlacementData> = null;
 		if (nodeId != null)
 		{
-			// Apply placements for this node first
 			placementManager.applyNode(nodeId);
 			customPosition = placementManager.getPosition(name);
-			
-			if (customPosition != null)
-			{
-				trace('[CharacterSystem] Found custom placement for $name at node $nodeId');
-			}
-			else
-			{
-				trace('[CharacterSystem] No custom placement for $name at node $nodeId');
-			}
 		}
 
 		if (customPosition != null)
 		{
-			// Use custom placement - set ABSOLUTE position
 			trace('[CharacterSystem] ✓ Using CUSTOM placement for $name: (${customPosition.x}, ${customPosition.y}) slot=${customPosition.slot}');
-			
-			// FIXED: Use setAbsolutePosition instead of adding offsets
 			r.setAbsolutePosition(customPosition.x, customPosition.y);
 			r.currentPosition = customPosition.slot;
 		}
 		else
 		{
-			// Use default slot-based positioning
 			trace('[CharacterSystem] Using DEFAULT slot positioning for $name: $position');
 			r.setPositionKeyword(position);
 		}
+
+		// NOW set the pose - layers will be positioned correctly
+		r.setPose(pose);
+		trace('[CharacterSystem] Set pose "$pose" for $name');
 
 		// Apply transition
 		if (transition != null && transition != "")

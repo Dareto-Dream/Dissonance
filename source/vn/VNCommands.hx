@@ -56,48 +56,70 @@ class VNCommands {
             case "set_bg":
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
-                trace('SHOW_CHARACTER action:', node.character, node.pose, node.position, 'node_id:', node.id);
-                // UPDATED: Pass node.id for placement lookup
-                CharacterSystem.get().show(
-                    node.character, 
-                    node.pose, 
-                    node.position, 
-                    node.transition, 
-                    node.duration,
-                    node.id  // NEW: Pass node ID for placement lookup
-                );
+                trace('[VNCommands] SHOW_CHARACTER: ${node.character}, pose: ${node.pose}, position: ${node.position}');
+                
+                var charSys = CharacterSystem.get();
+                if (charSys == null)
+                {
+                    trace("[VNCommands] ERROR: CharacterSystem is NULL!");
+                }
+                else
+                {
+                    var character:String = node.character;
+                    var pose:String = node.pose != null ? node.pose : "default";
+                    var position:String = node.position != null ? node.position : "center";
+                    var transition:String = node.transition != null ? node.transition : "";
+                    var duration:Float = node.duration != null ? node.duration : 0.4;
+                    
+                    charSys.show(character, pose, position, transition, duration, node.id);
+                    trace('[VNCommands] ✓ Character shown');
+                }
 
             case "hide_character":
-                CharacterSystem.get().hide(node.character, node.transition, node.duration);
+                var charSys = CharacterSystem.get();
+                if (charSys != null)
+                {
+                    charSys.hide(node.character, node.transition, node.duration);
+                }
 
             case "shake_screen":
                 EffectSystem.shake(node.intensity, node.duration);
+                
             case "flash":
                 EffectSystem.flash(node.color, node.duration);
+                
             case "glitch":
                 EffectSystem.glitch(node.intensity, node.duration);
+                
             case "play_sound":
                 AudioSystem.playSound(node.sound, node.volume);
+                
             case "play_music":
-                // Use transition and duration from node if specified
                 var transition = node.transition != null ? node.transition : null;
                 var duration = node.duration != null ? node.duration : null;
                 AudioSystem.playMusic(node.track, node.volume, transition, duration);
+                
             case "stop_music":
                 AudioSystem.stopMusic();
+                
             case "fade_out_music":
                 var duration = node.duration != null ? node.duration : 1.0;
                 AudioSystem.fadeOutMusic(duration);
+                
             case "set_default_bgm":
                 var volume = node.volume != null ? node.volume : 1.0;
                 AudioSystem.setDefaultBGM(node.track, volume);
+                
             case "play_default_bgm":
                 var volume = node.volume != null ? node.volume : 1.0;
                 AudioSystem.playDefaultBGM(volume);
+                
             case "set_text_effect":
                 DialogueSystem.setEffect(node);
+                
             case "clear_text_effect":
                 DialogueSystem.clearEffect();
+                
             default:
                 throw "Unknown VN action: " + node.action;
         }
