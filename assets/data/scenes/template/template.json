@@ -27,7 +27,6 @@
       "action": "show_character",
       "character": "tiffany",
       "pose": "default_smile",
-      "position": "right",
       "transition": "slide_right",
       "duration": 0.4,
       "next": "n4"
@@ -76,7 +75,6 @@
       "action": "show_character",
       "character": "cassian",
       "pose": "annoyed",
-      "position": "left",
       "transition": "slide_left",
       "duration": 0.3,
       "next": "n9"

@@ -142,7 +142,7 @@
       "id": "approach_door",
       "type": "action",
       "action": "set_bg",
-      "background": "assets/images/bg/noticeboard/day1.png",
+      "background": "assets/images/bg/noticeboard/poster.png",
       "transition": "fade",
       "duration": 0.4,
       "next": "door_narration"

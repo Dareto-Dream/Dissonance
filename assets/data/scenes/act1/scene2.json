@@ -31,7 +31,6 @@
       "action": "show_character",
       "character": "hanami",
       "pose": "smile",
-      "position": "center",
       "transition": "fade",
       "duration": 0.4,
       "next": "n5"
@@ -182,7 +181,6 @@
       "action": "show_character",
       "character": "tiffany",
       "pose": "default_smile",
-      "position": "right",
       "transition": "slide_left",
       "duration": 0.4,
       "next": "n22"
@@ -220,7 +218,6 @@
       "action": "show_character",
       "character": "cassian",
       "pose": "neutral",
-      "position": "far_right",
       "transition": "slide_left",
       "duration": 0.3,
       "next": "n26"
@@ -273,7 +270,6 @@
       "action": "show_character",
       "character": "laura",
       "pose": "friendly",
-      "position": "left",
       "transition": "fade",
       "duration": 0.5,
       "next": "n32"

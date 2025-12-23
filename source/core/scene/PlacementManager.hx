@@ -27,12 +27,11 @@ class PlacementManager
 
 	/**
 	 * Load placement data from JSON file
-	 * Automatically prepends "assets/data/" if not present
+	 * Supports both slot-based and custom coordinate positioning
 	 */
 	public function loadPlacements(placementPath:String):Bool
 	{
 		try {
-			// Always construct full path
 			var fullPath = "assets/data/" + placementPath;
 			
 			trace('[PlacementManager] Attempting to load: $fullPath');
@@ -49,7 +48,6 @@ class PlacementManager
 			sceneId = data.scene_id;
 			placements.clear();
 
-			// Parse the placements object
 			var placementsObj:Dynamic = data.placements;
 			var nodeIds:Array<String> = Reflect.fields(placementsObj);
 
@@ -62,11 +60,24 @@ class PlacementManager
 				for (charId in characterIds)
 				{
 					var posData:Dynamic = Reflect.field(nodeData, charId);
-					characterMap.set(charId, {
-						x: posData.x,
-						y: posData.y,
-						slot: posData.slot
-					});
+					
+					// Build placement data - support both formats
+					var placement:PlacementData = {};
+					
+					// Check if custom coordinates provided
+					if (Reflect.hasField(posData, "x") && Reflect.hasField(posData, "y"))
+					{
+						placement.x = posData.x;
+						placement.y = posData.y;
+					}
+					
+					// Check if slot provided (used if no x/y, or as documentation)
+					if (Reflect.hasField(posData, "slot"))
+					{
+						placement.slot = posData.slot;
+					}
+					
+					characterMap.set(charId, placement);
 				}
 
 				placements.set(nodeId, characterMap);
@@ -154,10 +165,25 @@ class PlacementManager
 
 /**
  * Position data for a character
+ * Supports both slot-based and custom coordinate positioning
  */
 typedef PlacementData =
 {
-	var x:Float;
-	var y:Float;
-	var slot:String;
+    /**
+     * Custom X coordinate (optional)
+     * If present, takes precedence over slot
+     */
+    var ?x:Float;
+    
+    /**
+     * Custom Y coordinate (optional)
+     * If present, takes precedence over slot
+     */
+    var ?y:Float;
+    
+    /**
+     * Slot name (optional)
+     * Used if x/y not present, or as documentation
+     */
+    var ?slot:String;
 }

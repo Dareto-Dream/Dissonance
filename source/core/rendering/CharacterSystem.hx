@@ -64,10 +64,10 @@ class CharacterSystem
 	}
 
 	/**
-	 * Show a character with placement support
-	 * FIXED: Correct order of operations
+	 * Show a character with hybrid placement support
+	 * Supports both slot-based and custom coordinate positioning
 	 */
-	public function show(name:String, pose:String, position:String, transition:String, duration:Float, ?nodeId:String)
+	public function show(name:String, pose:String, transition:String, duration:Float, ?nodeId:String)
 	{
 		var r = characters.get(name);
 		if (r == null)
@@ -76,32 +76,72 @@ class CharacterSystem
 			return;
 		}
 
-		// CRITICAL FIX: Set position FIRST, then pose
-		// This ensures layers are positioned correctly
-		
-		var customPosition:Null<PlacementData> = null;
+		// Try to get position from placement file
+		var placementData:Null<PlacementData> = null;
 		if (nodeId != null)
 		{
 			placementManager.applyNode(nodeId);
-			customPosition = placementManager.getPosition(name);
+			placementData = placementManager.getPosition(name);
 		}
 
-		if (customPosition != null)
+		if (placementData != null)
 		{
-			trace('[CharacterSystem] ✓ Using CUSTOM placement for $name: (${customPosition.x}, ${customPosition.y}) slot=${customPosition.slot}');
-			r.setAbsolutePosition(customPosition.x, customPosition.y);
-			r.currentPosition = customPosition.slot;
+			// Check if custom coordinates provided
+			if (placementData.x != null && placementData.y != null)
+			{
+				// Use custom coordinates
+				trace('[CharacterSystem] Using CUSTOM placement for $name: (${placementData.x}, ${placementData.y})');
+				r.setAbsolutePosition(placementData.x, placementData.y);
+				
+				// Store slot for reference if provided
+				if (placementData.slot != null)
+				{
+					r.currentPosition = placementData.slot;
+				}
+			}
+			else if (placementData.slot != null)
+			{
+				// Use slot-based positioning
+				trace('[CharacterSystem] Using SLOT placement for $name: ${placementData.slot}');
+				r.setPositionKeyword(placementData.slot);
+			}
+			else
+			{
+				// Placement data exists but is invalid
+				trace('[CharacterSystem] WARNING: Invalid placement data for $name (no x/y or slot)');
+				
+				// Fall through to state persistence check below
+				if (r.currentPosition != null && r.currentPosition != "")
+				{
+					trace('[CharacterSystem] $name keeping current position: ${r.currentPosition}');
+				}
+				else
+				{
+					trace('[CharacterSystem] $name defaulting to center');
+					r.setPositionKeyword("center");
+				}
+			}
 		}
 		else
 		{
-			trace('[CharacterSystem] Using DEFAULT slot positioning for $name: $position');
-			r.setPositionKeyword(position);
+			// No placement data for this node - use state persistence
+			if (r.currentPosition != null && r.currentPosition != "")
+			{
+				// Character already has a position, keep it
+				trace('[CharacterSystem] $name keeping current position: ${r.currentPosition}');
+			}
+			else
+			{
+				// First appearance, use default
+				trace('[CharacterSystem] $name first appearance, using default center');
+				r.setPositionKeyword("center");
+			}
 		}
-
-		// NOW set the pose - layers will be positioned correctly
+		
+		// Set pose AFTER positioning
 		r.setPose(pose);
 		trace('[CharacterSystem] Set pose "$pose" for $name');
-
+		
 		// Apply transition
 		if (transition != null && transition != "")
 		{

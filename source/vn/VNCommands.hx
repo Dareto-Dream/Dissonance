@@ -67,7 +67,9 @@ class VNCommands {
                 {
                     var character:String = node.character;
                     var pose:String = node.pose != null ? node.pose : "default";
-                    var position:String = node.position != null ? node.position : "center";
+                    var position:String = Reflect.hasField(node, "position") && node.position != null 
+                        ? node.position 
+                        : "center";
                     var transition:String = node.transition != null ? node.transition : "";
                     var duration:Float = node.duration != null ? node.duration : 0.4;
                     
