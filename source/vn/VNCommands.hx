@@ -56,9 +56,7 @@ class VNCommands {
             case "set_bg":
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
-                trace('[VNCommands] SHOW_CHARACTER: ${node.character}, pose: ${node.pose}, position: ${node.position}');
-                
-                var charSys = CharacterSystem.get();
+                var charSys = CharacterSystem.get();  // ← ADD THIS LINE
                 if (charSys == null)
                 {
                     trace("[VNCommands] ERROR: CharacterSystem is NULL!");
@@ -67,16 +65,12 @@ class VNCommands {
                 {
                     var character:String = node.character;
                     var pose:String = node.pose != null ? node.pose : "default";
-                    var position:String = Reflect.hasField(node, "position") && node.position != null 
-                        ? node.position 
-                        : "center";
                     var transition:String = node.transition != null ? node.transition : "";
                     var duration:Float = node.duration != null ? node.duration : 0.4;
                     
-                    charSys.show(character, pose, position, transition, duration, node.id);
+                    charSys.show(character, pose, transition, duration, node.id);
                     trace('[VNCommands] ✓ Character shown');
                 }
-
             case "hide_character":
                 var charSys = CharacterSystem.get();
                 if (charSys != null)

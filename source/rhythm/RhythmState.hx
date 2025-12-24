@@ -11,23 +11,8 @@ import rhythm.JudgementSystem.HitRating;
 
 /**
  * RhythmState - Main rhythm game state
- * 
- * This is the orchestrator that brings all systems together.
- * It manages the lifecycle of a rhythm game session.
- * 
- * Key responsibilities:
- * - Initialize all systems
- * - Load chart and music
- * - Handle input and map to lanes
- * - Update all systems every frame
- * - Manage score and combo
- * - Handle pause and completion
- * 
- * Usage:
- *   FlxG.switchState(new RhythmState("assets/data/charts/song.json", characterSystem));
  */
 class RhythmState extends FlxState {
-    // Core systems
     private var conductor:Conductor;
     private var chartHandler:ChartHandler;
     private var noteHandler:NoteHandler;
@@ -35,181 +20,180 @@ class RhythmState extends FlxState {
     private var renderer:ArrowRenderer;
     private var animBridge:CharacterAnimationBridge;
     
-    // Reference to VN system
     private var characterSystem:CharacterSystem;
     
-    // Configuration
     private var chartPath:String;
-    private var scrollSpeed:Float = 400; // Pixels per second
-    private var spawnTime:Float = 2000; // Milliseconds ahead to spawn
+    private var scrollSpeed:Float = 400;
+    private var spawnTime:Float = 2000;
     
-    // Input mapping (4-lane default)
     private var keyBindings:Array<FlxKey> = [
-        FlxKey.A,     // Lane 0 (left)
-        FlxKey.S,     // Lane 1 (down)
-        FlxKey.W,     // Lane 2 (up)
-        FlxKey.D      // Lane 3 (right)
+        FlxKey.A, FlxKey.S, FlxKey.W, FlxKey.D
     ];
     
-    // Gameplay state
     private var score:Int = 0;
     private var combo:Int = 0;
     private var health:Float = 1.0;
     private var songStarted:Bool = false;
     
-    // UI
+    private var allNotesSpawned:Bool = false;
+    private var songEndTimer:Float = 0;
+    private var songEndDelay:Float = 2.0;
+    
+    public var onSongComplete:Void->Void = null;
+    
     private var scoreText:FlxText;
     private var comboText:FlxText;
+    private var debugText:FlxText;
+    private var detailedDebugText:FlxText;
+    private var endText:FlxText;
     
-    /**
-     * Constructor
-     * @param chartPath Path to chart JSON file
-     * @param characterSystem Reference to VN character system
-     */
-    public function new(chartPath:String, characterSystem:CharacterSystem) {
+    // Safety tracking
+    private var lastUpdateTime:Float = 0;
+    private var hangDetected:Bool = false;
+    
+    public function new(chartPath:String, characterSystem:CharacterSystem, ?onComplete:Void->Void) {
         super();
         this.chartPath = chartPath;
         this.characterSystem = characterSystem;
+        this.onSongComplete = onComplete;
     }
     
-    /**
-     * Create - Initialize everything
-     */
     override public function create():Void {
         super.create();
 
         characterSystem.enableRhythmMode();
         
-        // Set background color
         bgColor = FlxColor.fromRGB(20, 20, 30);
         
-        // Load chart
         chartHandler = new ChartHandler(chartPath);
-        
-        // Initialize conductor
         conductor = new Conductor(chartHandler.getBPM(), chartHandler.getOffset());
-        
-        // Initialize judgement system
         judgement = new JudgementSystem();
-        
-        // Initialize note handler
         noteHandler = new NoteHandler(conductor, judgement);
         
-        // Connect events
         noteHandler.onNoteHit.add(onNoteHit);
         noteHandler.onNoteMiss.add(onNoteMiss);
         noteHandler.onNPCNote.add(onNPCNote);
         noteHandler.onHoldReleased.add(onHoldReleased);
         
-        // Initialize renderer (circle in center of screen)
         var centerX = FlxG.width / 2;
         var centerY = FlxG.height / 2;
         var radius = 200;
         renderer = new ArrowRenderer(4, centerX, centerY, radius);
+        renderer.conductor = conductor;
+        renderer.scrollSpeed = scrollSpeed;
         add(renderer);
         
-        // Store conductor reference in renderer for updates
-        Reflect.setField(renderer, "conductor", conductor);
-        
-        // Initialize animation bridge
         animBridge = new CharacterAnimationBridge(
             characterSystem,
             chartHandler.getPlayer(),
             chartHandler.getSingers()
         );
         
-        // Create UI
         createUI();
-        
-        // Start music
         startSong();
+        
+        lastUpdateTime = haxe.Timer.stamp();
     }
     
-    /**
-     * Create UI elements
-     */
     private function createUI():Void {
-        // Score display
         scoreText = new FlxText(10, 10, 200, "Score: 0");
         scoreText.setFormat(null, 20, FlxColor.WHITE);
         add(scoreText);
         
-        // Combo display
         comboText = new FlxText(10, 40, 200, "");
         comboText.setFormat(null, 16, FlxColor.YELLOW);
         add(comboText);
+        
+        debugText = new FlxText(10, FlxG.height - 60, 700, "");
+        debugText.setFormat(null, 12, FlxColor.LIME);
+        add(debugText);
+        
+        detailedDebugText = new FlxText(10, FlxG.height - 30, 700, "");
+        detailedDebugText.setFormat(null, 10, FlxColor.CYAN);
+        add(detailedDebugText);
+        
+        endText = new FlxText(0, FlxG.height / 2 - 50, FlxG.width, "");
+        endText.setFormat(null, 32, FlxColor.WHITE, "center");
+        endText.visible = false;
+        add(endText);
     }
     
-    /**
-     * Start the song
-     */
     private function startSong():Void {
-        // Load and play music
         var musicPath = 'assets/music/${chartHandler.getSongName()}.ogg';
         
         try {
-            FlxG.sound.playMusic(musicPath, 1.0);
+            FlxG.sound.playMusic(musicPath, 1.0, false);
             conductor.start(FlxG.sound.music.time);
             songStarted = true;
-            trace('Song started: ${chartHandler.getSongName()}');
+            trace('Song started: ${chartHandler.getSongName()} at ${chartHandler.getBPM()} BPM');
+            trace('Total notes in chart: ${chartHandler.getTotalNoteCount()}');
         } catch (e:Dynamic) {
-            trace('ERROR: Could not load music at ${musicPath}: ${e}');
-            // Continue without music for testing
+            trace('WARNING: Could not load music at ${musicPath}: ${e}');
+            trace('Continuing without music for testing...');
+            songStarted = true;
         }
     }
     
-    /**
-     * Main update loop
-     */
     override public function update(elapsed:Float):Void {
+        // Hang detection
+        var currentTime = haxe.Timer.stamp();
+        var timeSinceLastUpdate = currentTime - lastUpdateTime;
+        
+        if (timeSinceLastUpdate > 1.0 && !hangDetected) {
+            trace('WARNING: Long frame detected! ${timeSinceLastUpdate}s');
+            hangDetected = true;
+        }
+        lastUpdateTime = currentTime;
+        
         super.update(elapsed);
         
         if (!songStarted) return;
         
-        // Update conductor (timing authority)
-        conductor.update();
+        // Update systems with try-catch for safety
+        try {
+            conductor.update();
+            spawnNotes();
+            handleInput();
+            noteHandler.update();
+            updateDebugInfo();
+            checkSongEnd(elapsed);
+        } catch (e:Dynamic) {
+            trace('CRITICAL ERROR in update: ${e}');
+            trace('Song position: ${conductor.songPosition * 1000}ms');
+            exitToVN(); // Emergency exit
+        }
         
-        // Spawn new notes
-        spawnNotes();
-        
-        // Handle input
-        handleInput();
-        
-        // Update note handler
-        noteHandler.update();
-        
-        // Update note visuals
-        updateNoteVisuals();
-        
-        // Check for song end
-        checkSongEnd();
-        
-        // ESC to quit
         if (FlxG.keys.justPressed.ESCAPE) {
+            trace('Manual exit');
             exitToVN();
         }
     }
     
-    /**
-     * Spawn notes that need to appear
-     */
     private function spawnNotes():Void {
         var songPosMs = conductor.songPosition * 1000;
         var newNotes = chartHandler.getNotesToSpawn(songPosMs, spawnTime);
         
+        if (newNotes.length > 0) {
+            trace('Spawning ${newNotes.length} notes at ${songPosMs}ms');
+        }
+        
+        if (newNotes.length == 0 && !allNotesSpawned) {
+            var hasMoreNotes = chartHandler.hasMoreNotes();
+            if (!hasMoreNotes) {
+                allNotesSpawned = true;
+                trace('All notes spawned at ${songPosMs}ms (${chartHandler.getCurrentNoteIndex()}/${chartHandler.getTotalNoteCount()})');
+            }
+        }
+        
         for (chartNote in newNotes) {
             var note = noteHandler.spawnNote(chartNote);
             
-            // Only render player notes
             if (chartNote.isPlayer) {
                 renderer.addNote(note);
             }
         }
     }
     
-    /**
-     * Handle player input
-     */
     private function handleInput():Void {
         for (lane in 0...keyBindings.length) {
             var key = keyBindings[lane];
@@ -224,111 +208,138 @@ class RhythmState extends FlxState {
         }
     }
     
-    /**
-     * Update note visual positions
-     * CRITICAL: Pass song position, not frame time
-     */
-    private function updateNoteVisuals():Void {
-        var songPosMs = conductor.songPosition * 1000;
+    private function updateDebugInfo():Void {
+        var songPosMs = Std.int(conductor.songPosition * 1000);
+        var activeNotes = noteHandler.getActiveCount();
+        var musicTime = FlxG.sound.music != null ? Std.int(FlxG.sound.music.time) : 0;
         
-        // Renderer handles its own update, just make sure conductor is accessible
-        // Note positions are calculated from song position inside NoteVisual
+        debugText.text = 'Time: ${songPosMs}ms | Music: ${musicTime}ms | Notes: ${activeNotes} | Health: ${Std.int(health * 100)}%';
+        
+        if (allNotesSpawned) {
+            debugText.text += ' | Ending in: ${Math.ceil(Math.max(0, songEndDelay - songEndTimer))}s';
+        }
+        
+        // Detailed breakdown
+        var counts = noteHandler.getActiveCountsByType();
+        detailedDebugText.text = 'Player: ${counts.player} | NPC: ${counts.npc} | Holds: ${counts.holds} | Chart: ${chartHandler.getCurrentNoteIndex()}/${chartHandler.getTotalNoteCount()}';
     }
     
-    /**
-     * Callback: Note was hit
-     */
     private function onNoteHit(note:Note, rating:HitRating):Void {
-        // Update score
         var points = judgement.getScoreForRating(rating);
         score += points;
         combo++;
         
-        // Update UI
         scoreText.text = 'Score: ${score}';
         comboText.text = combo > 0 ? 'Combo: ${combo}' : '';
         
-        // Play hit animation
         renderer.playHitAnimation(note.lane, rating);
-        
-        // Trigger character animation
         animBridge.onPlayerNoteHit(note.lane, note.isHold);
         
-        // Health bonus
         health = Math.min(1.0, health + 0.02);
+        
+        // Only remove regular notes immediately
+        // Hold notes stay active until released
+        if (!note.isHold) {
+            renderer.removeNote(note);
+        }
     }
     
-    /**
-     * Callback: Note was missed
-     */
     private function onNoteMiss(note:Note):Void {
         combo = 0;
         comboText.text = '';
         
-        // Trigger miss animation
         animBridge.onPlayerNoteMiss(note.lane);
         
-        // Health penalty
         health = Math.max(0, health - 0.05);
         
-        // Remove from renderer
         renderer.removeNote(note);
+        
+        if (health <= 0) {
+            trace('Game Over!');
+            showGameOver();
+        }
     }
     
-    /**
-     * Callback: NPC note triggered
-     */
     private function onNPCNote(singerIndex:Int, poseIndex:Int, isHold:Bool):Void {
         animBridge.onNPCNote(singerIndex, poseIndex, isHold);
     }
     
-    /**
-     * Callback: Hold released
-     */
     private function onHoldReleased(note:Note, accuracy:Float):Void {
         animBridge.onPlayerNoteRelease();
         
-        // Bonus points for good hold accuracy
         if (accuracy > 0.9) {
             score += 50;
             scoreText.text = 'Score: ${score}';
         }
+        
+        // Remove hold note visual when released
+        renderer.removeNote(note);
+        
+        trace('Hold released at ${note.time}ms with accuracy ${accuracy}');
     }
     
-    /**
-     * Check if song has ended
-     */
-    private function checkSongEnd():Void {
-        if (FlxG.sound.music != null && FlxG.sound.music.playing) {
-            return;
+    private function checkSongEnd(elapsed:Float):Void {
+        if (allNotesSpawned) {
+            var activeNotes = noteHandler.getActiveCount();
+            
+            if (activeNotes == 0) {
+                songEndTimer += elapsed;
+                
+                if (songEndTimer >= songEndDelay) {
+                    trace('Song complete - all notes finished');
+                    finishSong();
+                    return;
+                }
+            } else {
+                songEndTimer = 0;
+            }
         }
         
-        // Song finished
-        finishSong();
+        if (FlxG.sound.music != null && !FlxG.sound.music.playing) {
+            songEndTimer += elapsed;
+            
+            if (songEndTimer >= 1.0) {
+                trace('Song complete - music ended');
+                finishSong();
+            }
+        }
     }
     
-    /**
-     * Finish song and return to VN
-     */
+    private function showGameOver():Void {
+        endText.text = "GAME OVER\nFinal Score: " + score;
+        endText.visible = true;
+        
+        haxe.Timer.delay(() -> {
+            exitToVN();
+        }, 2000);
+    }
+    
     private function finishSong():Void {
-        trace('Song complete! Score: ${score}');
-        exitToVN();
+        endText.text = "SONG COMPLETE!\nScore: " + score + "\nCombo: " + combo;
+        endText.visible = true;
+        
+        trace('Song finished! Final Score: ${score}');
+        
+        haxe.Timer.delay(() -> {
+            exitToVN();
+        }, 2000);
     }
     
-    /**
-     * Exit back to VN
-     */
     private function exitToVN():Void {
-        // Clean up
+        trace('Exiting to VN...');
+        
         if (FlxG.sound.music != null) {
             FlxG.sound.music.stop();
         }
         
-        // Disable rhythm mode and reset characters
         characterSystem.disableRhythmMode();
         animBridge.resetAll();
         
-        // Return to VN (this would call the callback in actual integration)
-        FlxG.switchState(()->new FlxState()); // Placeholder
+        if (onSongComplete != null) {
+            onSongComplete();
+        } else {
+            trace('No callback provided, returning to blank state');
+            FlxG.switchState(new FlxState());
+        }
     }
 }
