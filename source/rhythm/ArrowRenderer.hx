@@ -1,334 +1,258 @@
 package rhythm;
 
 import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup;
-import flixel.util.FlxColor;
-import flixel.tweens.FlxTween;
-import openfl.Assets;
-import rhythm.Note;
+import flixel.group.FlxGroup;
+import flixel.util.FlxTimer;
 import rhythm.JudgementSystem.HitRating;
+import rhythm.Note.NoteKind;
+import rhythm.Note;
+
+using flixel.util.FlxSpriteUtil;
 
 /**
- * ArrowRenderer - Visual note rendering in circle layout
+ * ArrowRenderer
+ * =============
+ * Visual-only arrow lane renderer.
+ *
+ * Reacts to gameplay events.
+ * Never polls input or time.
  */
-class ArrowRenderer extends FlxSpriteGroup {
-    public var laneCount:Int;
-    public var centerX:Float;
-    public var centerY:Float;
-    public var radius:Float;
-    
-    private var receptors:Array<FlxSprite>;
-    private var noteVisuals:Map<Note, NoteVisual>;
-    
-    public static var LANE_COLORS:Array<FlxColor> = [
-        0xFFC24B99, // Purple (left)
-        0xFF00FFFF, // Cyan (down)
-        0xFF12FA05, // Green (up)
-        0xFFF9393F  // Red (right)
-    ];
-    
-    public var conductor:Conductor;
-    public var scrollSpeed:Float = 400;
-    
-    public function new(laneCount:Int, centerX:Float, centerY:Float, radius:Float) {
-        super();
-        
-        this.laneCount = laneCount;
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.radius = radius;
-        
-        this.receptors = [];
-        this.noteVisuals = new Map();
-        
-        createReceptors();
-    }
-    
-    private function createReceptors():Void {
-        for (lane in 0...laneCount) {
-            var angle = getLaneAngle(lane);
-            var receptor = createReceptorSprite(lane);
-            
-            // Position on circle - AFTER sprite is fully created
-            receptor.x = centerX + Math.cos(angle) * radius - receptor.width / 2;
-            receptor.y = centerY + Math.sin(angle) * radius - receptor.height / 2;
-            
-            receptors.push(receptor);
-            add(receptor);
-        }
-    }
-    
-    private function createReceptorSprite(lane:Int):FlxSprite {
-        var sprite = new FlxSprite();
-        var loaded = false;
-        
-        // Try to load asset
-        var assetPath = 'assets/images/rhythm/receptor_${lane}.png';
-        
-        try {
-            if (Assets.exists(assetPath)) {
-                sprite.loadGraphic(assetPath);
-                loaded = true;
-                trace('Loaded receptor asset: ${assetPath} (${sprite.width}x${sprite.height})');
-            }
-        } catch (e:Dynamic) {
-            // Asset doesn't exist, will use fallback
-        }
-        
-        // Fallback: draw a shape
-        if (!loaded) {
-            sprite.makeGraphic(64, 64, FlxColor.TRANSPARENT);
-            var color = LANE_COLORS[lane % LANE_COLORS.length];
-            drawArrow(sprite, color, lane);
-            trace('Created fallback receptor for lane ${lane} (64x64)');
-        }
-        
-        return sprite;
-    }
-    
-    private function drawArrow(sprite:FlxSprite, color:FlxColor, direction:Int):Void {
-        // Draw filled rectangle as base
-        for (x in 20...44) {
-            for (y in 20...44) {
-                sprite.pixels.setPixel32(x, y, color);
-            }
-        }
-        
-        // Draw arrow tip based on direction
-        switch (direction % 4) {
-            case 0: // Left arrow
-                for (y in 24...40) {
-                    for (x in (10 + Std.int((y - 24) / 2))...(20)) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                    for (x in (10 + Std.int((39 - y) / 2))...(20)) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                }
-            case 1: // Down arrow
-                for (x in 24...40) {
-                    for (y in 44...(54 - Std.int(Math.abs(32 - x) / 2))) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                }
-            case 2: // Up arrow
-                for (x in 24...40) {
-                    for (y in (10 + Std.int(Math.abs(32 - x) / 2))...20) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                }
-            case 3: // Right arrow
-                for (y in 24...40) {
-                    for (x in 44...(54 - Std.int((y - 24) / 2))) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                    for (x in 44...(54 - Std.int((39 - y) / 2))) {
-                        sprite.pixels.setPixel32(x, y, color);
-                    }
-                }
-        }
-        
-        // Update the graphic
-        sprite.dirty = true;
-        sprite.updateFramePixels();
-    }
-    
-    public function getLaneAngle(lane:Int):Float {
-        var startAngle = -Math.PI / 2;
-        var angleStep = (Math.PI * 2) / laneCount;
-        return startAngle + (lane * angleStep);
-    }
-    
-    public function updateLaneCount(newCount:Int):Void {
-        if (newCount == laneCount) return;
-        
-        for (receptor in receptors) {
-            remove(receptor);
-            receptor.destroy();
-        }
-        receptors = [];
-        
-        laneCount = newCount;
-        createReceptors();
-        
-        for (note => visual in noteVisuals) {
-            visual.updateLane(this);
-        }
-    }
-    
-    public function addNote(note:Note):Void {
-        var visual = new NoteVisual(note, this);
-        noteVisuals.set(note, visual);
-        add(visual);
-    }
-    
-    public function removeNote(note:Note):Void {
-        if (!noteVisuals.exists(note)) return;
-        
-        var visual = noteVisuals.get(note);
-        remove(visual);
-        visual.destroy();
-        noteVisuals.remove(note);
-    }
-    
-    override public function update(elapsed:Float):Void {
-        super.update(elapsed);
-        
-        if (conductor != null) {
-            var songPosMs = conductor.songPosition * 1000;
-            
-            for (note => visual in noteVisuals) {
-                visual.updatePosition(songPosMs, scrollSpeed);
-            }
-        }
-        
-        // Cull notes that are far off screen
-        var toRemove = [];
-        for (note => visual in noteVisuals) {
-            if (visual.y < -200 || visual.y > 1000 || visual.x < -200 || visual.x > 1600) {
-                toRemove.push(note);
-            }
-        }
-        
-        for (note in toRemove) {
-            removeNote(note);
-        }
-    }
-    
-    public function playHitAnimation(lane:Int, rating:HitRating):Void {
-        if (lane < 0 || lane >= receptors.length) return;
-        
-        var receptor = receptors[lane];
-        
-        var scale = switch (rating) {
-            case PERFECT: 1.3;
-            case GREAT: 1.2;
-            case GOOD: 1.1;
-            default: 1.0;
-        }
-        
-        FlxTween.tween(receptor.scale, {x: scale, y: scale}, 0.1, {
-            onComplete: (_) -> {
-                FlxTween.tween(receptor.scale, {x: 1.0, y: 1.0}, 0.1);
-            }
-        });
-        
-        receptor.color = FlxColor.WHITE;
-        FlxTween.color(receptor, 0.2, FlxColor.WHITE, LANE_COLORS[lane % LANE_COLORS.length]);
-    }
-    
-    public function getReceptorPosition(lane:Int):{x:Float, y:Float} {
-        var angle = getLaneAngle(lane);
-        return {
-            x: centerX + Math.cos(angle) * radius,
-            y: centerY + Math.sin(angle) * radius
-        };
-    }
-    
-    public function clearNotes():Void {
-        for (note => visual in noteVisuals) {
-            remove(visual);
-            visual.destroy();
-        }
-        noteVisuals.clear();
-    }
-}
+class ArrowRenderer extends FlxGroup
+{
+    private static inline var LANES:Int = 4;
 
-/**
- * NoteVisual - Individual note sprite
- */
-class NoteVisual extends FlxSprite {
-    private var note:Note;
-    private var renderer:ArrowRenderer;
-    private var targetAngle:Float;
-    
-    public function new(note:Note, renderer:ArrowRenderer) {
-        super();
-        
-        this.note = note;
-        this.renderer = renderer;
-        this.targetAngle = renderer.getLaneAngle(note.lane);
-        
-        // Create the graphic FIRST
-        loadGraphicForType(note.noteType);
-        
-        // THEN set initial position (now that width/height are known)
-        var initialPosition = calculatePosition(10000); // Start far out
-        this.x = initialPosition.x;
-        this.y = initialPosition.y;
-    }
-    
-    private function loadGraphicForType(type:Int):Void {
-        var typeName = switch (type) {
-            case 0: "normal";
-            case 1: "swing";
-            case 2: "orbit";
-            case 3: "glitch";
-            case 4: "forced";
-            default: "normal";
-        }
-        
-        var assetPath = 'assets/images/rhythm/note_${typeName}.png';
-        var loaded = false;
-        
-        try {
-            if (Assets.exists(assetPath)) {
-                loadGraphic(assetPath);
-                loaded = true;
-                trace('Loaded note graphic: ${assetPath} (${width}x${height})');
-            }
-        } catch (e:Dynamic) {
-            // Asset doesn't exist, will use fallback
-        }
-        
-        if (!loaded) {
-            // Fallback: draw a circle
-            makeGraphic(48, 48, FlxColor.TRANSPARENT);
-            
-            var color = ArrowRenderer.LANE_COLORS[note.lane % ArrowRenderer.LANE_COLORS.length];
-            
-            // Draw filled circle
-            for (x in 0...48) {
-                for (y in 0...48) {
-                    var dx = x - 24;
-                    var dy = y - 24;
-                    if (dx * dx + dy * dy <= 20 * 20) {
-                        pixels.setPixel32(x, y, color);
-                    }
-                }
-            }
-            
-            // Update the graphic
-            dirty = true;
-            updateFramePixels();
-            
-            trace('Created fallback note for lane ${note.lane} (48x48)');
-        }
-    }
+    private var arrows:Array<FlxSprite> = [];
+
+    // ------------------------------------------------------------------
+    // Asset configuration (can be injected or overridden)
+    // ------------------------------------------------------------------
+
+    /**
+     * Path to arrow receptor spritesheet.
+     * Expected format: Single PNG with 4 frames (64x64 each)
+     * Frame order: [idle, press, hit, miss]
+     * 
+     * Set this BEFORE calling new() if you need a custom path.
+     */
+    public static var ARROW_ASSET_PATH:String = "assets/images/ui/arrows/receptor.png";
     
     /**
-     * Calculate position based on time until hit
-     * Returns {x, y} coordinates
+     * Frame dimensions for arrow sprites.
      */
-    private function calculatePosition(songPositionMs:Float):{x:Float, y:Float} {
-        var timeUntilHit = (note.time - songPositionMs) / 1000;
-        var distanceFromCenter = timeUntilHit * renderer.scrollSpeed;
-        var currentRadius = renderer.radius + distanceFromCenter;
+    public static var ARROW_FRAME_WIDTH:Int = 64;
+    public static var ARROW_FRAME_HEIGHT:Int = 64;
+
+    /**
+     * Enable debug rendering (colored boxes) if assets fail to load.
+     */
+    public static var DEBUG_FALLBACK:Bool = false;
+
+    public function new()
+    {
+        super();
+
+        createArrows();
+    }
+
+    // ------------------------------------------------------------------
+    // Setup
+    // ------------------------------------------------------------------
+
+    private function createArrows():Void
+    {
+        trace("[ArrowRenderer] Creating ${LANES} arrow receptors");
+        trace("[ArrowRenderer] Asset path: ${ARROW_ASSET_PATH}");
+
+        for (i in 0...LANES)
+        {
+            var arrow = new FlxSprite(100 + i * 150, 600);
+            
+            // Attempt to load spritesheet
+            var loadSuccess = tryLoadArrowAsset(arrow);
+
+            if (loadSuccess)
+            {
+                // Asset loaded successfully - set up animations
+                arrow.animation.add("idle", [0], 0, false);
+                arrow.animation.add("press", [1], 0, false);
+                arrow.animation.add("hit", [2], 0, false);
+                arrow.animation.add("miss", [3], 0, false);
+                arrow.animation.play("idle");
+                
+                trace('[ArrowRenderer] Receptor ${i}: Asset loaded');
+            }
+            else
+            {
+                // Asset failed - use debug fallback
+                if (DEBUG_FALLBACK)
+                {
+                    createDebugArrow(arrow, i);
+                    trace('[ArrowRenderer] Receptor ${i}: Using debug fallback');
+                }
+                else
+                {
+                    trace('[ArrowRenderer] Receptor ${i}: FAILED (no fallback enabled)');
+                }
+            }
+
+            arrows.push(arrow);
+            add(arrow);
+        }
+
+        trace("[ArrowRenderer] Setup complete");
+    }
+
+    /**
+     * Attempt to load arrow asset.
+     * Returns true if successful, false if asset missing/invalid.
+     */
+    private function tryLoadArrowAsset(sprite:FlxSprite):Bool
+    {
+        try
+        {
+            sprite.loadGraphic(
+                ARROW_ASSET_PATH,
+                true,
+                ARROW_FRAME_WIDTH,
+                ARROW_FRAME_HEIGHT
+            );
+            
+            // Verify we got frames
+            return sprite.frames != null && sprite.frames.frames.length >= 4;
+        }
+        catch (e:Dynamic)
+        {
+            trace('[ArrowRenderer] Asset load failed: ${e}');
+            return false;
+        }
+    }
+
+    /**
+     * Create debug fallback rendering (colored boxes for testing).
+     */
+    private function createDebugArrow(sprite:FlxSprite, index:Int):Void
+    {
+        // Create a simple colored square
+        sprite.makeGraphic(64, 64, getDebugColor(index));
         
-        return {
-            x: renderer.centerX + Math.cos(targetAngle) * currentRadius - width / 2,
-            y: renderer.centerY + Math.sin(targetAngle) * currentRadius - height / 2
+        // Optional: add a border
+        sprite.drawRect(0, 0, 64, 64, getDebugColor(index), {thickness: 2, color: 0xFFFFFFFF});
+    }
+
+    /**
+     * Get debug color for receptor index.
+     */
+    private function getDebugColor(index:Int):Int
+    {
+        return switch (index)
+        {
+            case 0: 0xFFFF0000; // Red (LEFT)
+            case 1: 0xFF00FF00; // Green (DOWN)
+            case 2: 0xFF0000FF; // Blue (UP)
+            case 3: 0xFFFFFF00; // Yellow (RIGHT)
+            default: 0xFFFFFFFF; // White
         };
     }
-    
-    public function updatePosition(songPositionMs:Float, scrollSpeed:Float):Void {
-        var pos = calculatePosition(songPositionMs);
-        this.x = pos.x;
-        this.y = pos.y;
+
+    // ------------------------------------------------------------------
+    // Event hooks (called by RhythmState)
+    // ------------------------------------------------------------------
+
+    /**
+     * Called when a note is spawned.
+     * Optional hook if you want receptors to glow early.
+     */
+    public function spawnNote(note:Note):Void
+    {
+        // Intentionally empty for now.
+        // Future use: pre-glow, anticipation effects.
     }
-    
-    public function updateLane(renderer:ArrowRenderer):Void {
-        this.renderer = renderer;
-        this.targetAngle = renderer.getLaneAngle(note.lane);
+
+    /**
+     * Called when a note is successfully hit.
+     */
+    public function onNoteHit(note:Note, rating:HitRating):Void
+    {
+        // Only render player notes
+        if (!note.isPlayerNote()) return;
+
+        var arrow = arrows[note.inputLane];
+
+        // Try animation if available
+        if (arrow.animation != null && arrow.animation.exists("hit"))
+        {
+            arrow.animation.play("hit", true);
+
+            // Return to idle after a short flash
+            new FlxTimer().start(0.06, function(t:FlxTimer) {
+                if (arrow.animation.exists("idle"))
+                    arrow.animation.play("idle");
+            });
+        }
+        else
+        {
+            // Debug fallback: flash white
+            arrow.color = 0xFFFFFFFF;
+            new FlxTimer().start(0.06, function(t:FlxTimer) {
+                arrow.color = getDebugColor(note.inputLane);
+            });
+        }
+    }
+
+    /**
+     * Called when a note is missed.
+     */
+    public function onNoteMiss(note:Note):Void
+    {
+        // Only render player notes
+        if (!note.isPlayerNote()) return;
+
+        var arrow = arrows[note.inputLane];
+
+        // Try animation if available
+        if (arrow.animation != null && arrow.animation.exists("miss"))
+        {
+            arrow.animation.play("miss", true);
+
+            new FlxTimer().start(0.1, function(t:FlxTimer) {
+                if (arrow.animation.exists("idle"))
+                    arrow.animation.play("idle");
+            });
+        }
+        else
+        {
+            // Debug fallback: flash dark
+            arrow.color = 0xFF444444;
+            new FlxTimer().start(0.1, function(t:FlxTimer) {
+                arrow.color = getDebugColor(note.inputLane);
+            });
+        }
+    }
+
+    /**
+     * Called when player presses a lane with no valid note.
+     */
+    public function onGhostTap(lane:Int):Void
+    {
+        var arrow = arrows[lane];
+
+        // Try animation if available
+        if (arrow.animation != null && arrow.animation.exists("press"))
+        {
+            arrow.animation.play("press", true);
+
+            new FlxTimer().start(0.05, function(t:FlxTimer) {
+                if (arrow.animation.exists("idle"))
+                    arrow.animation.play("idle");
+            });
+        }
+        else
+        {
+            // Debug fallback: brief darken
+            arrow.color = 0xFFAAAAAA;
+            new FlxTimer().start(0.05, function(t:FlxTimer) {
+                arrow.color = getDebugColor(lane);
+            });
+        }
     }
 }

@@ -3,7 +3,7 @@
     "song": "gentle_start_duet",
     "bpm": 120,
     "offset": 0.0,
-    "player": "mc",
+    "player": "player",
     "singers": ["hanami"],
     "notes": [
       {

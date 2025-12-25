@@ -1,76 +1,77 @@
 package rhythm;
 
 /**
- * ChartData.hx - Type definitions for rhythm charts
- * 
- * This file defines the structure of chart data.
- * It matches the Psych-style JSON format with compact note arrays.
- * 
- * Note format:
- * - Player notes: [time_ms, lane, hold_ms, note_type]
- * - NPC notes: [time_ms, lane, hold_ms]
+ * ChartData
+ * =========
+ * Typed representation of a Psych-style chart JSON.
+ *
+ * This file intentionally contains:
+ * - NO gameplay logic
+ * - NO timing logic
+ * - NO expansion logic
+ *
+ * It is purely a structured data container.
  */
-
-/**
- * A single note after parsing
- * This is what the game actually uses (parsed from compact arrays)
- */
-typedef ChartNote = {
-    time:Float,              // Time in milliseconds
-    lane:Int,                // Lane index (0-based)
-    length:Float,            // Hold duration in ms (0 for tap)
-    noteType:Int,            // 0=NORMAL, 1=SWING, 2=ORBIT, 3=GLITCH, 4=FORCED
-    isPlayer:Bool,           // true if player note, false if NPC
-    ?singerIndex:Int,        // NPC only: which singer (0-based)
-    ?poseIndex:Int           // NPC only: which pose (0=left, 1=down, 2=up, 3=right)
+typedef ChartData =
+{
+    var song:ChartSong;
 }
 
 /**
- * A section of the chart
- * Sections have ownership (player or NPCs) and contain notes
+ * Root song object.
  */
-typedef ChartSection = {
-    sectionNotes:Array<Array<Dynamic>>,  // Raw note arrays from JSON
-    mustHitSection:Bool,                  // true = player, false = NPCs
-    ?playerLaneCount:Int,                 // How many lanes for player (if mustHitSection)
-    lengthInSteps:Int,                    // Section length
-    bpm:Float                             // BPM for this section
+typedef ChartSong =
+{
+    var song:String;
+    var bpm:Float;
+    var offset:Float;
+
+    var player:String;
+    var singers:Array<String>;
+
+    var notes:Array<ChartSection>;
 }
 
 /**
- * The complete chart data structure
- * This is the root of the JSON file
+ * One chart section.
+ *
+ * Sections are ORGANIZATIONAL, not temporal authorities.
+ * Timing always comes from absolute note times.
  */
-typedef ChartData = {
-    song:String,              // Song identifier
-    bpm:Float,                // Default BPM
-    offset:Float,             // Audio offset in seconds
-    player:String,            // Player character ID (always "mc")
-    singers:Array<String>,    // NPC character IDs in order
-    notes:Array<ChartSection> // All sections
+typedef ChartSection =
+{
+    var sectionNotes:Array<ChartRawNote>;
+
+    var mustHitSection:Bool;
+    var lengthInSteps:Int;
+
+    // Optional / Psych-style extensions
+    @:optional var bpm:Float;
+    @:optional var playerLaneCount:Int;
 }
 
 /**
- * Note type constants
- * Use these instead of magic numbers
+ * Raw note entry as it appears in the chart JSON.
+ *
+ * Format (Psych-style):
+ * [ timeMs, lane, holdMs?, noteType? ]
  */
-class NoteType {
-    public static inline var NORMAL:Int = 0;
-    public static inline var SWING:Int = 1;
-    public static inline var ORBIT:Int = 2;
-    public static inline var GLITCH:Int = 3;
-    public static inline var FORCED:Int = 4;
-}
+typedef ChartRawNote = Array<Float>;
 
 /**
- * Pose mapping for NPC notes
- * poseIndex % 4 maps to these
+ * Constants related to chart interpretation.
+ *
+ * These DO NOT enforce gameplay logic — they only document intent.
  */
-class PoseType {
-    public static inline var LEFT:Int = 0;
-    public static inline var DOWN:Int = 1;
-    public static inline var UP:Int = 2;
-    public static inline var RIGHT:Int = 3;
-    
-    public static var NAMES:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+class ChartConstants
+{
+    // noteType values (from your chart examples)
+    public static inline var NOTE_NORMAL:Int = 0;
+    public static inline var NOTE_SWING:Int  = 1;
+
+    // Safety indices for raw note arrays
+    public static inline var IDX_TIME:Int  = 0;
+    public static inline var IDX_LANE:Int  = 1;
+    public static inline var IDX_HOLD:Int  = 2;
+    public static inline var IDX_TYPE:Int  = 3;
 }

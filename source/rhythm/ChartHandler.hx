@@ -1,175 +1,274 @@
 package rhythm;
 
-import haxe.Json;
-import openfl.Assets;
 import rhythm.ChartData;
+import rhythm.Note.NoteKind;
+import rhythm.Note.NoteOwner;
+import rhythm.Note;
 
 /**
- * ChartHandler - Chart loading and parsing
+ * ChartHandler
+ * ============
+ * Expands Psych-style chart data into a flat, deterministic list of
+ * runtime Notes.
+ *
+ * After construction:
+ * - Notes are absolute-time (ms)
+ * - Notes are fully split (no lengths)
+ * - Notes are globally sorted
+ *
+ * Gameplay systems never touch raw chart data again.
  */
-class ChartHandler {
-    private var chart:ChartData;
-    private var parsedNotes:Array<ChartNote>;
-    private var noteIndex:Int = 0;
-    
-    public function new(chartPath:String) {
-        loadChart(chartPath);
-        parseAllNotes();
-        validate();
-    }
-    
-    private function loadChart(path:String):Void {
-        try {
-            var rawText = Assets.getText(path);
-            var rawData:Dynamic = Json.parse(rawText);
-            
-            if (Reflect.hasField(rawData, "song")) {
-                chart = rawData.song;
-            } else {
-                chart = rawData;
+class ChartHandler
+{
+    private var notes:Array<Note>;
+    private var index:Int = 0;
+
+    public function new(chart:ChartData, conductor:Conductor)
+    {
+        notes = [];
+
+        var sectionIndex = 0;
+        var chartIndex = 0;
+
+        for (section in chart.song.notes)
+        {
+            // Section-local BPM override (future-proof)
+            var sectionBpm =
+                section.bpm != null ? section.bpm : chart.song.bpm;
+
+            // Pre-calc step length for this section
+            var crochetMs = 60000.0 / sectionBpm;
+            var stepMs = crochetMs / 4.0;
+
+            for (raw in section.sectionNotes)
+            {
+                var timeMs:Float = raw[ChartConstants.IDX_TIME];
+                var lane:Int = Std.int(raw[ChartConstants.IDX_LANE]);
+
+                var holdMs:Float =
+                    raw.length > ChartConstants.IDX_HOLD
+                        ? raw[ChartConstants.IDX_HOLD]
+                        : 0;
+
+                var noteType:Int =
+                    raw.length > ChartConstants.IDX_TYPE
+                        ? Std.int(raw[ChartConstants.IDX_TYPE])
+                        : ChartConstants.NOTE_NORMAL;
+
+                var isSwing = (noteType == ChartConstants.NOTE_SWING);
+
+                // ------------------------------------------------------------------
+                // DECODE LANE (canonical interpretation)
+                // ------------------------------------------------------------------
+                var decoded = decodeLane(lane, section.mustHitSection, section.playerLaneCount);
+
+                if (holdMs <= 0)
+                {
+                    // --------------------
+                    // TAP NOTE
+                    // --------------------
+                    var tap = new Note(
+                        timeMs,
+                        lane,
+                        NoteKind.TAP,
+                        decoded.owner,
+                        isSwing
+                    );
+
+                    tap.sectionIndex = sectionIndex;
+                    tap.chartIndex = chartIndex++;
+
+                    // Set decoded fields
+                    tap.inputLane = decoded.inputLane;
+                    tap.animLane = decoded.animLane;
+                    tap.singerIndex = decoded.singerIndex;
+
+                    notes.push(tap);
+                }
+                else
+                {
+                    // --------------------
+                    // HOLD HEAD
+                    // --------------------
+                    var head = new Note(
+                        timeMs,
+                        lane,
+                        NoteKind.HOLD_HEAD,
+                        decoded.owner,
+                        isSwing
+                    );
+
+                    head.sectionIndex = sectionIndex;
+                    head.chartIndex = chartIndex++;
+
+                    // Set decoded fields
+                    head.inputLane = decoded.inputLane;
+                    head.animLane = decoded.animLane;
+                    head.singerIndex = decoded.singerIndex;
+
+                    notes.push(head);
+
+                    // --------------------
+                    // HOLD TICKS (per step)
+                    // --------------------
+                    var t = timeMs + stepMs;
+                    var endTime = timeMs + holdMs;
+
+                    while (t < endTime - stepMs)
+                    {
+                        var tick = new Note(
+                            t,
+                            lane,
+                            NoteKind.HOLD_TICK,
+                            decoded.owner,
+                            isSwing
+                        );
+
+                        tick.sectionIndex = sectionIndex;
+                        tick.chartIndex = chartIndex++;
+
+                        // Set decoded fields
+                        tick.inputLane = decoded.inputLane;
+                        tick.animLane = decoded.animLane;
+                        tick.singerIndex = decoded.singerIndex;
+
+                        notes.push(tick);
+                        t += stepMs;
+                    }
+
+                    // --------------------
+                    // HOLD TAIL
+                    // --------------------
+                    var tail = new Note(
+                        endTime,
+                        lane,
+                        NoteKind.HOLD_TAIL,
+                        decoded.owner,
+                        isSwing
+                    );
+
+                    tail.sectionIndex = sectionIndex;
+                    tail.chartIndex = chartIndex++;
+
+                    // Set decoded fields
+                    tail.inputLane = decoded.inputLane;
+                    tail.animLane = decoded.animLane;
+                    tail.singerIndex = decoded.singerIndex;
+
+                    notes.push(tail);
+                }
             }
-            
-            trace('Chart loaded: ${chart.song} (${chart.bpm} BPM)');
-        } catch (e:Dynamic) {
-            trace('ERROR: Failed to load chart at ${path}: ${e}');
-            chart = {
-                song: "fallback",
-                bpm: 120,
-                offset: 0,
-                player: "mc",
-                singers: [],
-                notes: []
+
+            sectionIndex++;
+        }
+
+        // CRITICAL: deterministic global ordering
+        notes.sort(sortNotes);
+    }
+
+    // ------------------------------------------------------------------
+    // Canonical lane decoder
+    // ------------------------------------------------------------------
+
+    /**
+     * Decode raw lane index into semantic gameplay fields.
+     * 
+     * This is the SINGLE SOURCE OF TRUTH for lane interpretation.
+     * All gameplay logic MUST use decoded fields, never raw lane.
+     */
+    private static function decodeLane(
+        lane:Int,
+        mustHitSection:Bool,
+        playerLaneCount:Null<Int>
+    ):{ owner:NoteOwner, inputLane:Int, animLane:Int, singerIndex:Int }
+    {
+        if (mustHitSection)
+        {
+            // Player section - playerLaneCount MUST be present
+            if (playerLaneCount == null)
+            {
+                throw 'Chart error: playerLaneCount missing in mustHitSection (lane ${lane})';
+            }
+
+            if (lane < playerLaneCount)
+            {
+                // Player note
+                return {
+                    owner: PLAYER,
+                    inputLane: lane,
+                    animLane: lane % 4,
+                    singerIndex: -1
+                };
+            }
+            else
+            {
+                // NPC note in player section
+                var npcLane = lane - playerLaneCount;
+                return {
+                    owner: OPPONENT,
+                    inputLane: -1,
+                    animLane: npcLane % 4,
+                    singerIndex: Std.int(Math.floor(npcLane / 4))
+                };
+            }
+        }
+        else
+        {
+            // NPC section - playerLaneCount NOT consulted
+            return {
+                owner: OPPONENT,
+                inputLane: -1,
+                animLane: lane % 4,
+                singerIndex: Std.int(Math.floor(lane / 4))
             };
         }
     }
-    
-    private function parseAllNotes():Void {
-        parsedNotes = [];
-        
-        for (section in chart.notes) {
-            if (section.mustHitSection) {
-                parsePlayerSection(section);
-            } else {
-                parseNPCSection(section);
-            }
-        }
-        
-        parsedNotes.sort((a, b) -> Std.int(a.time - b.time));
-        
-        trace('Parsed ${parsedNotes.length} total notes');
+
+    // ------------------------------------------------------------------
+    // Sorting
+    // ------------------------------------------------------------------
+
+    private static function sortNotes(a:Note, b:Note):Int
+    {
+        if (a.timeMs < b.timeMs) return -1;
+        if (a.timeMs > b.timeMs) return 1;
+
+        // Same timestamp: use kind priority
+        var pa = a.sortPriority();
+        var pb = b.sortPriority();
+
+        if (pa != pb) return pa - pb;
+
+        // Final tie-breaker: original chart order
+        return a.chartIndex - b.chartIndex;
     }
-    
-    private function parsePlayerSection(section:ChartSection):Void {
-        var laneCount = section.playerLaneCount != null ? section.playerLaneCount : 4;
-        
-        for (noteData in section.sectionNotes) {
-            var time:Float = noteData[0];
-            var lane:Int = noteData[1];
-            var hold:Float = noteData[2];
-            var noteType:Int = noteData.length >= 4 ? noteData[3] : NoteType.NORMAL;
-            
-            if (lane < 0 || lane >= laneCount) {
-                trace('Warning: Invalid player lane ${lane} (max ${laneCount - 1}) at time ${time}');
-                continue;
-            }
-            
-            parsedNotes.push({
-                time: time,
-                lane: lane,
-                length: hold,
-                noteType: noteType,
-                isPlayer: true
-            });
-        }
+
+    // ------------------------------------------------------------------
+    // Public API (read-only tape)
+    // ------------------------------------------------------------------
+
+    public inline function hasNext():Bool
+    {
+        return index < notes.length;
     }
-    
-    private function parseNPCSection(section:ChartSection):Void {
-        for (noteData in section.sectionNotes) {
-            var time:Float = noteData[0];
-            var lane:Int = noteData[1];
-            var hold:Float = noteData[2];
-            
-            var singerIndex = Math.floor(lane / 4);
-            var poseIndex = lane % 4;
-            
-            if (singerIndex >= chart.singers.length) {
-                trace('Warning: NPC lane ${lane} resolves to invalid singer ${singerIndex} at time ${time}');
-                continue;
-            }
-            
-            parsedNotes.push({
-                time: time,
-                lane: lane,
-                length: hold,
-                noteType: NoteType.NORMAL,
-                isPlayer: false,
-                singerIndex: singerIndex,
-                poseIndex: poseIndex
-            });
-        }
+
+    public inline function peek():Note
+    {
+        return notes[index];
     }
-    
-    private function validate():Void {
-        if (chart.player == null || chart.player == "") {
-            trace('Warning: Chart missing player identifier');
-        }
-        
-        if (chart.singers == null || chart.singers.length == 0) {
-            trace('Warning: Chart has no NPC singers defined');
-        }
-        
-        if (parsedNotes.length == 0) {
-            trace('Warning: Chart has no notes');
-        }
+
+    public inline function pop():Note
+    {
+        return notes[index++];
     }
-    
-    public function getNotesToSpawn(songPosition:Float, spawnTime:Float):Array<ChartNote> {
-        var result = [];
-        var spawnThreshold = songPosition + spawnTime;
-        
-        while (noteIndex < parsedNotes.length) {
-            var note = parsedNotes[noteIndex];
-            
-            if (note.time <= spawnThreshold) {
-                result.push(note);
-                noteIndex++;
-            } else {
-                break;
-            }
-        }
-        
-        return result;
+
+    public inline function reset():Void
+    {
+        index = 0;
     }
-    
-    /**
-     * Check if there are more notes to spawn
-     * @return true if more notes remain
-     */
-    public function hasMoreNotes():Bool {
-        return noteIndex < parsedNotes.length;
+
+    public inline function remainingCount():Int
+    {
+        return notes.length - index;
     }
-    
-    /**
-     * Get total note count
-     */
-    public function getTotalNoteCount():Int {
-        return parsedNotes.length;
-    }
-    
-    /**
-     * Get current spawn index
-     */
-    public function getCurrentNoteIndex():Int {
-        return noteIndex;
-    }
-    
-    public function reset():Void {
-        noteIndex = 0;
-    }
-    
-    public function getBPM():Float { return chart.bpm; }
-    public function getOffset():Float { return chart.offset; }
-    public function getSingers():Array<String> { return chart.singers; }
-    public function getPlayer():String { return chart.player; }
-    public function getSongName():String { return chart.song; }
 }

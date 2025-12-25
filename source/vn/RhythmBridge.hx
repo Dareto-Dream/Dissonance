@@ -5,21 +5,21 @@ import flixel.FlxG;
 import rhythm.RhythmState;
 
 /**
- * RhythmBridge - VN to Rhythm integration
- * 
- * This is the interface between the VN engine and the rhythm game.
- * When a VN scene reaches a "game" node, it calls RhythmBridge.start().
- * 
- * The rhythm game plays, then calls done() when complete.
- * Control returns to the VN with results.
- * 
- * Usage (from VNCommands):
- *   RhythmBridge.start("song_name", characterSystem, (result) -> {
- *       trace('Score: ${result.score}');
- *       sceneRunner.advance(); // Continue VN
- *   });
+ * RhythmBridge
+ * ============
+ * VN → Rhythm game integration layer.
+ *
+ * This class is the ONLY place where the VN system
+ * is allowed to start a rhythm game.
+ *
+ * Responsibilities:
+ * - Build chart paths
+ * - Inject runtime data into RhythmState
+ * - Switch game state
+ * - Receive completion callback
+ *
+ * RhythmState itself remains reusable and decoupled.
  */
-
 typedef RhythmResult = {
     score:Int,
     combo:Int,
@@ -28,30 +28,44 @@ typedef RhythmResult = {
     completed:Bool
 }
 
-class RhythmBridge {
+class RhythmBridge
+{
     /**
-     * Start a rhythm game session
-     * 
-     * @param song Song identifier
-     * @param done Callback when song completes
+     * Start a rhythm game session.
+     *
+     * @param song   Song identifier (used for chart + audio lookup)
+     * @param done   Callback invoked when rhythm game finishes
      */
-    public static function start(song:String, done:RhythmResult->Void):Void {
-        trace("START RHYTHM: " + song);
-        
-        // Get the character system from VN
-        var characterSystem = CharacterSystem.get();
-        
-        // Build chart path
+    public static function start(
+        song:String,
+        done:RhythmResult->Void
+    ):Void
+    {
+        trace("[RhythmBridge] START RHYTHM: " + song);
+
+        // --------------------------------------------------
+        // Resolve paths
+        // --------------------------------------------------
+
         var chartPath = 'assets/data/charts/${song}.json';
-        
-        // Switch to rhythm state
-        var rhythmState = new RhythmState(chartPath, characterSystem);
-        
-        // Store completion callback
-        if (done != null) {
-            Reflect.setField(rhythmState, "onComplete", done);
-        }
-        
-        FlxG.switchState(()-> rhythmState);
+
+        // --------------------------------------------------
+        // Create rhythm state (NO constructor args)
+        // --------------------------------------------------
+
+        var rhythmState = new RhythmState();
+
+        // Inject required runtime data
+        rhythmState.song = song;
+        rhythmState.chartPath = chartPath;
+
+        // Inject completion callback (optional)
+        rhythmState.onComplete = done;
+
+        // --------------------------------------------------
+        // Switch state
+        // --------------------------------------------------
+
+        FlxG.switchState(() -> rhythmState);
     }
 }
