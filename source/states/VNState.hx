@@ -12,8 +12,10 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
+import rhythm.RhythmCompletionBridge;
 import vn.VNCommands;
 import vn.VNConfig;
+import vn.VNReturnContext;
 
 class VNState extends FlxState
 {
@@ -40,9 +42,58 @@ class VNState extends FlxState
 
 		FlxG.mouse.visible = true;
 
-		// Reset static systems when creating a new state
+		// --------------------------------------------------
+		// CRITICAL: ESTABLISH SCENE CONTEXT FIRST
+		// --------------------------------------------------
+		// Scene data and narrative identifiers MUST be valid
+		// BEFORE any add() calls or system initializations
+		
+		// Check if we're returning from rhythm gameplay
+		var returnContext:VNReturnContext = null;
+		if (VNReturnContext.hasPending())
+		{
+			trace('[VNState] Detected return from rhythm gameplay');
+			returnContext = VNReturnContext.consume();
+		}
+		
+		// Determine which scene to load
+		var sceneToLoad:String;
+		var resumeNode:String = null;
+		
+		if (returnContext != null)
+		{
+			// Returning from rhythm - use context scene path
+			sceneToLoad = returnContext.scenePath;
+			resumeNode = returnContext.resumeNodeId;
+			trace('[VNState] Resuming scene: ${sceneToLoad} at node: ${resumeNode}');
+		}
+		else
+		{
+			// Normal VN start - use constructor scene path
+			sceneToLoad = scenePath;
+			trace('[VNState] Starting new scene: ${sceneToLoad}');
+		}
+		
+		// Create SceneRunner FIRST - this loads and parses scene data
+		// All narrative identifiers are now valid
+		runner = new SceneRunner(sceneToLoad);
+		
+		// If resuming from rhythm, position at correct node
+		if (resumeNode != null)
+		{
+			runner.currentNode = resumeNode;
+			trace('[VNState] SceneRunner positioned at resume node: ${resumeNode}');
+		}
+		
+		// --------------------------------------------------
+		// NOW SAFE: Scene data is loaded, identifiers are valid
+		// Systems can now safely reference scene-specific data
+		// --------------------------------------------------
+		
+		// Reset static systems
 		BackgroundSystem.reset();
-
+		
+		// Set VN state reference for rhythm transitions
 		VNCommands.setVNState(this);
 
 		// --------------------------------------------------
@@ -74,6 +125,7 @@ class VNState extends FlxState
 		}
 
 		// Let CharacterSystem build sprites/renderers and attach to charGroup
+		// Safe now - SceneRunner exists, scene identifiers are valid
 		CharacterSystem.init(charGroup, charDefs);
 
 		// --------------------------------------------------
@@ -98,9 +150,33 @@ class VNState extends FlxState
 		}
 
 		// --------------------------------------------------
-		// START SCENE
+		// RHYTHM CALLBACK EXECUTION
 		// --------------------------------------------------
-		runner = new SceneRunner(scenePath);
+		// CRITICAL: Execute rhythm callback AFTER all systems are initialized
+		// and SceneRunner is positioned at the correct node
+		if (RhythmCompletionBridge.hasPendingCallback())
+		{
+			trace('[VNState] Executing pending rhythm completion callback');
+			
+			// This will call the callback that was passed to RhythmBridge.start()
+			// At this point:
+			// - Scene data is fully loaded and parsed
+			// - SceneRunner is positioned at the correct resume node
+			// - VN renderers are fully initialized
+			// - CharacterSystem is valid
+			// - All narrative identifiers are valid
+			// - Safe to execute VN logic
+			RhythmCompletionBridge.executePendingCallback();
+			
+			trace('[VNState] Rhythm callback executed successfully');
+		}
+
+		// --------------------------------------------------
+		// START SCENE EXECUTION
+		// --------------------------------------------------
+		// Now safe to start scene runner
+		// If we came from rhythm, we're already at the correct node
+		// If new scene, we start from the beginning
 		runner.next();
 	}
 

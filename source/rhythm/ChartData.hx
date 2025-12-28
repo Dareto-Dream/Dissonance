@@ -28,6 +28,7 @@ typedef ChartSong =
 
     var player:String;
     var singers:Array<String>;
+    @:optional var stage:String;
 
     var notes:Array<ChartSection>;
 }

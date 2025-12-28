@@ -2,6 +2,7 @@ package rhythm;
 
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.FlxSprite;
 import openfl.Assets;
 import rhythm.ArrowRenderer;
 import rhythm.CharacterAnimationBridge;
@@ -31,7 +32,7 @@ class RhythmState extends FlxState
 
     public var song:String;
     public var chartPath:String;
-    public var returnState:flixel.FlxState; // VN state to return to after completion
+    public var returnStateFactory:Void->flixel.FlxState; // Factory to rebuild VN state after completion
     public var onComplete:Dynamic; // RhythmResult -> Void (kept loose for now)
 
     // --------------------------------------------------
@@ -74,6 +75,16 @@ class RhythmState extends FlxState
         var chart:ChartData = cast haxe.Json.parse(
             Assets.getText(chartPath)
         );
+
+        // --------------------------------------------------
+        // Load background stage (if provided)
+        // --------------------------------------------------
+
+        var stageSprite = createStageSprite(chart.song.stage);
+        if (stageSprite != null)
+        {
+            add(stageSprite);
+        }
 
         // --------------------------------------------------
         // Load music
@@ -249,6 +260,41 @@ class RhythmState extends FlxState
     }
 
     // --------------------------------------------------
+    // Stage background loading
+    // --------------------------------------------------
+
+    private function createStageSprite(stageId:String):FlxSprite
+    {
+        if (stageId == null || stageId == "")
+        {
+            trace("[RhythmState] No stage specified in chart; skipping stage background");
+            return null;
+        }
+
+        var stagePath = 'assets/images/stages/${stageId}.png';
+        var sprite = new FlxSprite(0, 0);
+
+        if (Assets.exists(stagePath))
+        {
+            trace('[RhythmState] Loading stage background: ${stagePath}');
+            sprite.loadGraphic(stagePath);
+        }
+        else
+        {
+            trace('[RhythmState] Stage image not found at ${stagePath}, using placeholder');
+            sprite.makeGraphic(FlxG.width, FlxG.height, 0xff101018);
+        }
+
+        // Fit to screen and keep static
+        sprite.setGraphicSize(FlxG.width, FlxG.height);
+        sprite.updateHitbox();
+        sprite.scrollFactor.set(0, 0);
+        sprite.antialiasing = true;
+
+        return sprite;
+    }
+
+    // --------------------------------------------------
     // Completion
     // --------------------------------------------------
 
@@ -280,14 +326,14 @@ class RhythmState extends FlxState
         // 2. Call RhythmCompletionBridge.executePendingCallback()
         // 3. Execute callback safely with valid renderers
         
-        if (returnState != null)
+        if (returnStateFactory != null)
         {
-            trace("[RhythmState] Returning to VN state");
-            FlxG.switchState(() -> returnState);
+            trace("[RhythmState] Returning to VN state (rebuilding new instance)");
+            FlxG.switchState(() -> returnStateFactory());
         }
         else
         {
-            trace("[RhythmState] WARNING: No returnState provided, cannot transition back to VN");
+            trace("[RhythmState] WARNING: No returnStateFactory provided, cannot transition back to VN");
             // Fallback: Call immediately (will likely crash)
             if (onComplete != null)
             {

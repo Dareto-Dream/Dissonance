@@ -29,6 +29,7 @@ class VNCommands {
         vnState = state;
         trace('[VNCommands] VN state reference set');
     }
+    
     public static function showDialogue(node:Dynamic, runner:SceneRunner):Void {
         var charSys = CharacterSystem.get();
         
@@ -74,7 +75,7 @@ class VNCommands {
             case "set_bg":
                 BackgroundSystem.set(node.background, node.transition, node.duration);
             case "show_character":
-                var charSys = CharacterSystem.get();  // ← ADD THIS LINE
+                var charSys = CharacterSystem.get();
                 if (charSys == null)
                 {
                     trace("[VNCommands] ERROR: CharacterSystem is NULL!");
@@ -154,9 +155,30 @@ class VNCommands {
             throw '[VNCommands] ERROR: vnState not set. Call VNCommands.setVNState(this) in VN state.create()';
         }
         
+        // ---------------------------------------------------------------
+        // CRITICAL: Store return context BEFORE entering rhythm
+        // ---------------------------------------------------------------
+        // Calculate the node to resume at after rhythm completes
+        var resumeNode = nextNode(node);
+        
+        // Get the current scene path from the runner
+        var scenePath = runner.getScenePath();
+        
+        // Store context so VN can resume at the correct location
+        VNReturnContext.store(scenePath, resumeNode);
+        
+        trace('[VNCommands] Stored return context: scene=$scenePath, resumeNode=$resumeNode');
+        
+        // ---------------------------------------------------------------
+        // Start rhythm game with callback
+        // ---------------------------------------------------------------
+        // NOTE: This callback will be executed AFTER VN state is rebuilt
+        // and SceneRunner has been restored to resumeNode
         RhythmBridge.start(node.song, vnState, (result) -> {
-            trace('[VNCommands] Rhythm game finished - Score: ${result.score}, Combo: ${result.combo}');
-            runner.goto(nextNode(node));
+            trace('[VNCommands] Rhythm result: Score=${result.score}, Combo=${result.combo}, Completed=${result.completed}');
+            // At this point, SceneRunner is already at resumeNode
+            // This callback can perform additional logic based on results
+            // For now, we just log and continue
         });
     }
 

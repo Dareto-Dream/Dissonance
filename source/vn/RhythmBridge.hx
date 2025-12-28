@@ -3,6 +3,7 @@ package vn;
 import core.rendering.CharacterSystem;
 import flixel.FlxG;
 import flixel.FlxState;
+import Type;
 import rhythm.RhythmCompletionBridge;
 import rhythm.RhythmState;
 
@@ -36,7 +37,7 @@ class RhythmBridge
      * Start a rhythm game session.
      *
      * @param song   Song identifier (used for chart + audio lookup)
-     * @param vnState  VN state to return to after rhythm completes
+     * @param vnState  VN state to return to after rhythm completes (a NEW instance will be built)
      * @param done   Callback invoked when rhythm game finishes (called AFTER returning to VN)
      */
     public static function start(
@@ -62,7 +63,18 @@ class RhythmBridge
         // Inject required runtime data
         rhythmState.song = song;
         rhythmState.chartPath = chartPath;
-        rhythmState.returnState = vnState; // CRITICAL: Where to return after completion
+        
+        // CRITICAL: Always rebuild VN state when returning
+        // Reusing the old instance is invalid because FlxG destroys it during the switch
+        var vnStateClass = Type.getClass(vnState);
+        rhythmState.returnStateFactory = () -> {
+            var nextState = Type.createInstance(vnStateClass, []);
+            if (nextState == null)
+            {
+                trace('[RhythmBridge] ERROR: returnStateFactory produced null');
+            }
+            return nextState;
+        };
 
         // Inject completion callback (optional)
         // IMPORTANT: This will be called AFTER returning to VN state

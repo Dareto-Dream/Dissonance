@@ -8,14 +8,26 @@ class SceneRunner {
     public var parser:SceneParser;
     public var currentNode:String;
     public var active:Bool = false;
+    
+    // Store the scene path for return context
+    private var scenePath:String;
 
     public function new(scenePath:String) {
+        this.scenePath = scenePath;
         parser = new SceneParser(scenePath);
         currentNode = parser.startNode;
         active = true;
         
         // Auto-load placement file based on scene_id
         loadPlacementFile();
+    }
+    
+    /**
+     * Get the scene path for this runner.
+     * Used by VNCommands to store return context before rhythm gameplay.
+     */
+    public function getScenePath():String {
+        return scenePath;
     }
     
     /**
