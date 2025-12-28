@@ -50,6 +50,20 @@ source/
 │   ├── VNConfig.hx            Configuration
 │   └── RhythmBridge.hx        Gameplay integration
 │
+├── rhythm/
+│   ├── RhythmState.hx          Gameplay state lifecycle
+│   ├── Conductor.hx            Authoritative timing source
+│   ├── ChartData.hx            Psych-style chart schema
+│   ├── ChartHandler.hx         Chart expansion + lane decoding
+│   ├── NoteHandler.hx          Spawning + hit/miss logic
+│   ├── JudgementSystem.hx      Timing windows + ratings
+│   ├── Note.hx                 Runtime note model
+│   ├── ArrowRenderer.hx        Receptor UI rendering
+│   ├── NoteRenderer.hx         Note visual rendering
+│   ├── CharacterSpriteManager.hx Data-driven character sprites
+│   ├── CharacterAnimationBridge.hx Gameplay → animation router
+│   └── RhythmCompletionBridge.hx Deferred VN callback executor
+│
 └── util/
     └── SceneManager.hx        Scene transitions
 ```
@@ -609,6 +623,137 @@ Combined shake and flash for horror.
   "duration": 0.8
 }
 ```
+
+---
+
+# Rhythm Engine
+
+## Overview
+
+The rhythm engine is a fully decoupled gameplay loop that can be launched from VN scenes via `RhythmBridge`. It is designed around deterministic timing and event-driven rendering:
+
+- **RhythmState** (`source/rhythm/RhythmState.hx`) orchestrates gameplay and connects systems.
+- **Conductor** (`source/rhythm/Conductor.hx`) is the single authoritative timing source (ms-only).
+- **ChartHandler** (`source/rhythm/ChartHandler.hx`) expands Psych-style charts into sorted runtime notes and decodes lanes.
+- **NoteHandler** (`source/rhythm/NoteHandler.hx`) spawns notes, judges input, and emits events.
+- **JudgementSystem** (`source/rhythm/JudgementSystem.hx`) scores timing windows (SICK/GOOD/BAD/MISS).
+- **ArrowRenderer** + **NoteRenderer** render receptors and moving notes.
+- **CharacterSpriteManager** + **CharacterAnimationBridge** load characters and play sing/idle animations.
+- **RhythmCompletionBridge** defers VN callbacks until VN renderers are ready.
+
+## Data Locations
+
+- **Charts:** `assets/data/charts/<song>.json`
+- **Music:** `assets/music/<song>.ogg`
+- **Stage backgrounds:** `assets/images/stages/<stage>.png` (optional)
+- **Arrow UI:** `assets/images/ui/arrows/receptor.png`
+- **Notes:** `assets/images/ui/arrows/note.png`
+- **Rhythm character configs:** `assets/data/characters/<id>/<id>.json`
+- **Rhythm character atlases:** `assets/images/<image>.png` + `.xml` (from the JSON `image` field)
+
+## Chart Format (Psych-style)
+
+Charts are JSON files with a `song` root. Notes are stored as absolute timestamps (ms), not beats.
+
+```json
+{
+  "song": {
+    "song": "gentle_start_duet",
+    "bpm": 120,
+    "offset": 0.0,
+    "stage": "stage1",
+    "player": "player",
+    "singers": ["hanami"],
+    "notes": [
+      {
+        "sectionNotes": [
+          [0, 0, 0, 0],
+          [500, 1, 0, 0]
+        ],
+        "mustHitSection": true,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 120
+      }
+    ]
+  }
+}
+```
+
+**Note entry format:** `[timeMs, lane, holdMs?, noteType?]`
+
+- `timeMs` is absolute (authoritative).
+- `lane` is decoded into **input lanes** and **animation lanes** by `ChartHandler`.
+- `holdMs` > 0 creates HOLD_HEAD, HOLD_TICK(s), and HOLD_TAIL slices.
+- `noteType` currently supports `0` (normal) and `1` (swing).
+
+### Lane Decoding Rules
+
+`ChartHandler.decodeLane` defines the canonical mapping:
+
+- **mustHitSection = true**
+  - `lane < playerLaneCount` → player note (`inputLane = lane`)
+  - `lane >= playerLaneCount` → opponent note (`singerIndex` derived from lane groups of 4)
+- **mustHitSection = false**
+  - All lanes are opponent notes (`inputLane = -1`)
+
+Always use decoded fields (`inputLane`, `animLane`, `singerIndex`) from `Note`, not raw `lane`.
+
+## Rhythm Character Data
+
+Rhythm characters are loaded from `assets/data/characters/<id>/<id>.json` and drive sprite/animation setup.
+
+```json
+{
+  "animations": [
+    {
+      "anim": "singLEFT",
+      "name": "singLEFT",
+      "fps": 5,
+      "loop": false,
+      "offsets": [272, 831],
+      "indices": []
+    }
+  ],
+  "image": "characters/hanami/hanami_rhythm",
+  "position": [0, 0],
+  "scale": 0.4,
+  "flip_x": true,
+  "sing_duration": 6.1
+}
+```
+
+**Key fields used by the engine:**
+
+- `image` → atlas basename under `assets/images/` (expects `.png` + `.xml`)
+- `animations` → maps engine keys (`anim`) to atlas prefixes (`name`)
+- `position` → base sprite position
+- `scale` → global scale multiplier
+- `flip_x` → horizontal flip
+- `sing_duration` → beat-based sing hold duration
+
+**Animation keys used by the engine:**
+`idle`, `singLEFT`, `singDOWN`, `singUP`, `singRIGHT`, `miss`, `singRelease`
+
+## Gameplay Flow (VN → Rhythm → VN)
+
+1. VN node `{"type": "game", "song": "<id>"}` calls `RhythmBridge.start`.
+2. `RhythmBridge` injects chart path + completion callback into `RhythmState`.
+3. `RhythmState` loads the chart, music, stage, and spawns gameplay systems.
+4. `NoteHandler` emits events to renderers and animation bridge.
+5. On song completion, `RhythmCompletionBridge` stores result and callback.
+6. VN state is rebuilt, and the callback is executed safely after VN renderers initialize.
+
+## Input Mapping (current)
+
+Player lanes are mapped to keyboard input in `RhythmState.handleInput()`:
+
+- Lane 0 → `A`
+- Lane 1 → `S`
+- Lane 2 → `D`
+- Lane 3 → `F`
+
+This is currently fixed and can be extended later for configurable inputs.
 
 ---
 
