@@ -8,9 +8,27 @@ import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
 import core.scene.SceneRunner;
 import flixel.FlxG;
+import flixel.FlxState;
 import util.SceneManager;
 
 class VNCommands {
+    // ------------------------------------------------------------------
+    // VN State reference (for rhythm game transitions)
+    // ------------------------------------------------------------------
+    
+    private static var vnState:FlxState;
+    
+    /**
+     * Set the VN state reference.
+     * MUST be called when VN state initializes.
+     * 
+     * Example in VN State.create():
+     *   VNCommands.setVNState(this);
+     */
+    public static function setVNState(state:FlxState):Void {
+        vnState = state;
+        trace('[VNCommands] VN state reference set');
+    }
     public static function showDialogue(node:Dynamic, runner:SceneRunner):Void {
         var charSys = CharacterSystem.get();
         
@@ -131,9 +149,14 @@ class VNCommands {
     }
 
     public static function startRhythm(node:Dynamic, runner:SceneRunner):Void {
-        RhythmBridge.start(node.song, (result) -> {
-        trace('[VNCommands] Rhythm game finished - Score: ${result.score}, Combo: ${result.combo}');
-        runner.goto(nextNode(node));
+        // Validate vnState is set
+        if (vnState == null) {
+            throw '[VNCommands] ERROR: vnState not set. Call VNCommands.setVNState(this) in VN state.create()';
+        }
+        
+        RhythmBridge.start(node.song, vnState, (result) -> {
+            trace('[VNCommands] Rhythm game finished - Score: ${result.score}, Combo: ${result.combo}');
+            runner.goto(nextNode(node));
         });
     }
 

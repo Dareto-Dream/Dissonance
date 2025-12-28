@@ -31,6 +31,7 @@ class RhythmState extends FlxState
 
     public var song:String;
     public var chartPath:String;
+    public var returnState:flixel.FlxState; // VN state to return to after completion
     public var onComplete:Dynamic; // RhythmResult -> Void (kept loose for now)
 
     // --------------------------------------------------
@@ -255,16 +256,43 @@ class RhythmState extends FlxState
     {
         trace("[RhythmState] Song complete");
 
+        // Build result
+        var result = {
+            score: 0,
+            combo: 0,
+            accuracy: 0.0,
+            health: 1.0,
+            completed: true
+        };
+
         if (onComplete != null)
         {
-            // Stub result for now — scoring comes later
-            onComplete({
-                score: 0,
-                combo: 0,
-                accuracy: 0.0,
-                health: 1.0,
-                completed: true
-            });
+            // CRITICAL FIX: Store callback for deferred execution
+            // Do NOT call onComplete here - VN renderers don't exist yet
+            rhythm.RhythmCompletionBridge.storeResult(result, onComplete);
+            
+            trace("[RhythmState] Stored completion callback for deferred execution");
+        }
+
+        // Switch back to VN state
+        // VN state's create/resume will:
+        // 1. Initialize VN renderers
+        // 2. Call RhythmCompletionBridge.executePendingCallback()
+        // 3. Execute callback safely with valid renderers
+        
+        if (returnState != null)
+        {
+            trace("[RhythmState] Returning to VN state");
+            FlxG.switchState(() -> returnState);
+        }
+        else
+        {
+            trace("[RhythmState] WARNING: No returnState provided, cannot transition back to VN");
+            // Fallback: Call immediately (will likely crash)
+            if (onComplete != null)
+            {
+                onComplete(result);
+            }
         }
     }
 }

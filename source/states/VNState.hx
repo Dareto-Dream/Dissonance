@@ -12,6 +12,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
+import vn.VNCommands;
 import vn.VNConfig;
 
 class VNState extends FlxState
@@ -41,6 +42,8 @@ class VNState extends FlxState
 
 		// Reset static systems when creating a new state
 		BackgroundSystem.reset();
+
+		VNCommands.setVNState(this);
 
 		// --------------------------------------------------
 		// BACKGROUND LAYER

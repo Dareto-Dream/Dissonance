@@ -2,6 +2,8 @@ package vn;
 
 import core.rendering.CharacterSystem;
 import flixel.FlxG;
+import flixel.FlxState;
+import rhythm.RhythmCompletionBridge;
 import rhythm.RhythmState;
 
 /**
@@ -34,10 +36,12 @@ class RhythmBridge
      * Start a rhythm game session.
      *
      * @param song   Song identifier (used for chart + audio lookup)
-     * @param done   Callback invoked when rhythm game finishes
+     * @param vnState  VN state to return to after rhythm completes
+     * @param done   Callback invoked when rhythm game finishes (called AFTER returning to VN)
      */
     public static function start(
         song:String,
+        vnState:FlxState,
         done:RhythmResult->Void
     ):Void
     {
@@ -58,8 +62,10 @@ class RhythmBridge
         // Inject required runtime data
         rhythmState.song = song;
         rhythmState.chartPath = chartPath;
+        rhythmState.returnState = vnState; // CRITICAL: Where to return after completion
 
         // Inject completion callback (optional)
+        // IMPORTANT: This will be called AFTER returning to VN state
         rhythmState.onComplete = done;
 
         // --------------------------------------------------
