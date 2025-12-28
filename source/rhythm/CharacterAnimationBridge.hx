@@ -1,6 +1,7 @@
 package rhythm;
 
 import flixel.FlxBasic;
+import rhythm.CharacterSpriteManager;
 import rhythm.Conductor;
 import rhythm.JudgementSystem.HitRating;
 import rhythm.Note.NoteKind;
@@ -23,11 +24,29 @@ import rhythm.Note;
 class CharacterAnimationBridge extends FlxBasic
 {
     private var conductor:Conductor;
+    private var characterSprites:CharacterSpriteManager;
+    private var lastBeat:Int = -1; // Track last beat to avoid spam
+    
+    // Map generic role names to actual character IDs
+    private var characterMap:Map<String, String> = new Map();
 
-    public function new(conductor:Conductor)
+    public function new(conductor:Conductor, characterSprites:CharacterSpriteManager)
     {
         super();
         this.conductor = conductor;
+        this.characterSprites = characterSprites;
+    }
+    
+    /**
+     * Register a character ID for a role.
+     * 
+     * @param role Generic role name ("player", "opponent", "opponent1", etc.)
+     * @param characterID Actual character ID from chart ("hanami", "tiffany", etc.)
+     */
+    public function registerCharacter(role:String, characterID:String):Void
+    {
+        characterMap.set(role, characterID);
+        trace('[CharacterAnimationBridge] Registered ${role} -> ${characterID}');
     }
 
     override public function update(elapsed:Float):Void
@@ -67,9 +86,11 @@ class CharacterAnimationBridge extends FlxBasic
     {
         var beat = conductor.getBeatIndex();
 
-        if ((beat & 1) == 0)
+        // Only trigger on beat change (avoid per-frame spam)
+        if (beat != lastBeat && (beat & 1) == 0)
         {
             playIdleBop();
+            lastBeat = beat;
         }
     }
 
@@ -127,6 +148,19 @@ class CharacterAnimationBridge extends FlxBasic
 
     private function triggerAnimation(character:String, anim:String):Void
     {
-        // Hook into your actual character renderer here
+        // Resolve generic role to actual character ID
+        var characterID = characterMap.exists(character) ? characterMap.get(character) : character;
+        
+        // DIAGNOSTIC: Log character resolution
+        if (characterMap.exists(character))
+        {
+            trace('[CharacterAnimationBridge] triggerAnimation: role="${character}" -> ID="${characterID}", anim="${anim}"');
+        }
+        else
+        {
+            trace('[CharacterAnimationBridge] WARNING: Role "${character}" not mapped, using as-is, anim="${anim}"');
+        }
+        
+        characterSprites.play(characterID, anim);
     }
 }

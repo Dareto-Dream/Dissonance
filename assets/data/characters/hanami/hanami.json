@@ -1,0 +1,55 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [272, 831],
+			"anim": "idle",
+			"fps": 5,
+			"name": "idle",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [272, 831],
+			"anim": "singLEFT",
+			"fps": 5,
+			"name": "singLEFT",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [272, 831],
+			"anim": "singDOWN",
+			"fps": 5,
+			"name": "singDOWN",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [272, 831],
+			"anim": "singUP",
+			"fps": 5,
+			"name": "singUP",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [272, 831],
+			"anim": "singRIGHT",
+			"fps": 5,
+			"name": "singRIGHT",
+			"indices": []
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"image": "characters/hanami/hanami_rhythm",
+	"position": [0, 0],
+	"healthicon": "dad",
+	"flip_x": true,
+	"healthbar_colors": [175, 102, 206],
+	"camera_position": [0, 0],
+	"sing_duration": 6.1,
+	"scale": 0.4,
+	"_editor_isPlayer": false
+}

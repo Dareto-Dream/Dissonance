@@ -5,6 +5,7 @@ import flixel.FlxState;
 import openfl.Assets;
 import rhythm.ArrowRenderer;
 import rhythm.CharacterAnimationBridge;
+import rhythm.CharacterSpriteManager;
 import rhythm.ChartData;
 import rhythm.ChartHandler;
 import rhythm.Conductor;
@@ -12,6 +13,7 @@ import rhythm.JudgementSystem.HitRating;
 import rhythm.JudgementSystem;
 import rhythm.Note;
 import rhythm.NoteHandler;
+import rhythm.NoteRenderer;
 
 /**
  * RhythmState
@@ -45,6 +47,8 @@ class RhythmState extends FlxState
     // --------------------------------------------------
 
     private var arrowRenderer:ArrowRenderer;
+    private var noteRenderer:NoteRenderer;
+    private var characterSprites:CharacterSpriteManager;
     private var characterBridge:CharacterAnimationBridge;
 
     // --------------------------------------------------
@@ -94,9 +98,62 @@ class RhythmState extends FlxState
         // --------------------------------------------------
 
         arrowRenderer = new ArrowRenderer();
-        characterBridge = new CharacterAnimationBridge(conductor);
+        noteRenderer = new NoteRenderer(conductor, arrowRenderer);
+        
+        // --------------------------------------------------
+        // Initialize character sprites
+        // --------------------------------------------------
+        
+        characterSprites = new CharacterSpriteManager();
+        
+        // Load player character
+        trace('[RhythmState] Loading player character: ${chart.song.player}');
+        var playerSprite = characterSprites.loadCharacter(chart.song.player);
+        if (playerSprite != null)
+        {
+            // Apply position from character data
+            var basePos = characterSprites.getBasePosition(chart.song.player);
+            playerSprite.setPosition(basePos.x, basePos.y);
+            trace('[RhythmState]   Player positioned at: [${basePos.x}, ${basePos.y}]');
+            
+            add(playerSprite);
+        }
+        
+        // Load NPC characters
+        for (i in 0...chart.song.singers.length)
+        {
+            var singerID = chart.song.singers[i];
+            trace('[RhythmState] Loading NPC character ${i}: ${singerID}');
+            
+            var npcSprite = characterSprites.loadCharacter(singerID);
+            if (npcSprite != null)
+            {
+                // Apply position from character data
+                var basePos = characterSprites.getBasePosition(singerID);
+                
+                // Offset NPC positions slightly if multiple NPCs
+                var xOffset = i * 100; // Simple horizontal spacing for now
+                npcSprite.setPosition(basePos.x + xOffset, basePos.y);
+                trace('[RhythmState]   NPC positioned at: [${basePos.x + xOffset}, ${basePos.y}]');
+                
+                add(npcSprite);
+            }
+        }
+        
+        // Initialize animation bridge (with character sprite manager)
+        characterBridge = new CharacterAnimationBridge(conductor, characterSprites);
+        
+        // Register character mappings (role -> character ID)
+        characterBridge.registerCharacter("player", chart.song.player);
+        
+        for (i in 0...chart.song.singers.length)
+        {
+            var role = i == 0 ? "opponent" : 'opponent${i}';
+            characterBridge.registerCharacter(role, chart.song.singers[i]);
+        }
 
         add(arrowRenderer);
+        add(noteRenderer);
         add(characterBridge);
 
         // --------------------------------------------------
@@ -168,17 +225,19 @@ class RhythmState extends FlxState
 
     private function onNoteSpawn(note:Note):Void
     {
-        arrowRenderer.spawnNote(note);
+        noteRenderer.spawnNote(note);
     }
 
     private function onNoteHit(note:Note, rating:HitRating):Void
     {
+        noteRenderer.removeNote(note);
         arrowRenderer.onNoteHit(note, rating);
         characterBridge.onNoteHit(note, rating);
     }
 
     private function onNoteMiss(note:Note):Void
     {
+        noteRenderer.removeNote(note);
         arrowRenderer.onNoteMiss(note);
         characterBridge.onNoteMiss(note);
     }

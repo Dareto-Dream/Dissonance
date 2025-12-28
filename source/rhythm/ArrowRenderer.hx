@@ -1,13 +1,13 @@
 package rhythm;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
+import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import rhythm.JudgementSystem.HitRating;
 import rhythm.Note.NoteKind;
 import rhythm.Note;
-
-using flixel.util.FlxSpriteUtil;
 
 /**
  * ArrowRenderer
@@ -45,7 +45,48 @@ class ArrowRenderer extends FlxGroup
     /**
      * Enable debug rendering (colored boxes) if assets fail to load.
      */
-    public static var DEBUG_FALLBACK:Bool = false;
+    public static var DEBUG_FALLBACK:Bool = true;
+
+    // ------------------------------------------------------------------
+    // Layout configuration
+    // ------------------------------------------------------------------
+
+    /**
+     * Layout mode for receptors.
+     * "radial" = circular arrangement around center point
+     * "linear" = horizontal line (legacy, not recommended)
+     */
+    public static var LAYOUT_MODE:String = "radial";
+
+    /**
+     * Center X position for radial layout.
+     * -1 = auto (screen center)
+     */
+    public static var LAYOUT_CENTER_X:Float = -1;
+
+    /**
+     * Center Y position for radial layout.
+     * -1 = auto (screen center with downward bias)
+     */
+    public static var LAYOUT_CENTER_Y:Float = -1;
+
+    /**
+     * Radius from center for radial layout.
+     * Tuned for visible note travel time.
+     */
+    public static var LAYOUT_RADIUS:Float = 150;
+
+    /**
+     * Starting angle for radial layout.
+     * -Math.PI/2 = top, then clockwise
+     */
+    public static var LAYOUT_START_ANGLE:Float = -Math.PI / 2;
+
+    /**
+     * Downward bias offset for auto-centered layout.
+     * Positive = lower on screen
+     */
+    public static var LAYOUT_CENTER_Y_OFFSET:Float = 50;
 
     public function new()
     {
@@ -61,11 +102,16 @@ class ArrowRenderer extends FlxGroup
     private function createArrows():Void
     {
         trace("[ArrowRenderer] Creating ${LANES} arrow receptors");
+        trace("[ArrowRenderer] Layout mode: ${LAYOUT_MODE}");
         trace("[ArrowRenderer] Asset path: ${ARROW_ASSET_PATH}");
+
+        // Calculate layout positions
+        var positions = calculateReceptorPositions();
 
         for (i in 0...LANES)
         {
-            var arrow = new FlxSprite(100 + i * 150, 600);
+            var pos = positions[i];
+            var arrow = new FlxSprite(pos.x, pos.y);
             
             // Attempt to load spritesheet
             var loadSuccess = tryLoadArrowAsset(arrow);
@@ -79,7 +125,7 @@ class ArrowRenderer extends FlxGroup
                 arrow.animation.add("miss", [3], 0, false);
                 arrow.animation.play("idle");
                 
-                trace('[ArrowRenderer] Receptor ${i}: Asset loaded');
+                trace('[ArrowRenderer] Receptor ${i}: Asset loaded at (${pos.x}, ${pos.y})');
             }
             else
             {
@@ -87,7 +133,7 @@ class ArrowRenderer extends FlxGroup
                 if (DEBUG_FALLBACK)
                 {
                     createDebugArrow(arrow, i);
-                    trace('[ArrowRenderer] Receptor ${i}: Using debug fallback');
+                    trace('[ArrowRenderer] Receptor ${i}: Debug fallback at (${pos.x}, ${pos.y})');
                 }
                 else
                 {
@@ -100,6 +146,53 @@ class ArrowRenderer extends FlxGroup
         }
 
         trace("[ArrowRenderer] Setup complete");
+    }
+
+    /**
+     * Calculate receptor positions based on layout mode.
+     */
+    private function calculateReceptorPositions():Array<{x:Float, y:Float}>
+    {
+        var positions:Array<{x:Float, y:Float}> = [];
+
+        if (LAYOUT_MODE == "radial")
+        {
+            // Determine center point
+            var centerX = LAYOUT_CENTER_X >= 0 ? LAYOUT_CENTER_X : FlxG.width / 2;
+            var centerY = LAYOUT_CENTER_Y >= 0 ? LAYOUT_CENTER_Y : (FlxG.height / 2) + LAYOUT_CENTER_Y_OFFSET;
+
+            trace('[ArrowRenderer] Radial layout: center=(${centerX}, ${centerY}), radius=${LAYOUT_RADIUS}');
+
+            var anglePerLane = (Math.PI * 2) / LANES;
+
+            for (i in 0...LANES)
+            {
+                var angle = LAYOUT_START_ANGLE + (i * anglePerLane);
+                
+                // Calculate position on circle
+                var x = centerX + Math.cos(angle) * LAYOUT_RADIUS;
+                var y = centerY + Math.sin(angle) * LAYOUT_RADIUS;
+
+                // Center the sprite on the calculated point
+                x -= ARROW_FRAME_WIDTH / 2;
+                y -= ARROW_FRAME_HEIGHT / 2;
+
+                positions.push({x: x, y: y});
+            }
+        }
+        else // Linear fallback
+        {
+            trace('[ArrowRenderer] Linear layout (legacy)');
+            for (i in 0...LANES)
+            {
+                positions.push({
+                    x: 100 + i * 150,
+                    y: 600
+                });
+            }
+        }
+
+        return positions;
     }
 
     /**
@@ -132,11 +225,15 @@ class ArrowRenderer extends FlxGroup
      */
     private function createDebugArrow(sprite:FlxSprite, index:Int):Void
     {
-        // Create a simple colored square
         sprite.makeGraphic(64, 64, getDebugColor(index));
-        
-        // Optional: add a border
-        sprite.drawRect(0, 0, 64, 64, getDebugColor(index), {thickness: 2, color: 0xFFFFFFFF});
+
+        FlxSpriteUtil.drawRect(
+            sprite,
+            0, 0,
+            64, 64,
+            0x00000000,
+            { thickness: 2, color: 0xFFFFFFFF }
+        );
     }
 
     /**
@@ -151,6 +248,22 @@ class ArrowRenderer extends FlxGroup
             case 2: 0xFF0000FF; // Blue (UP)
             case 3: 0xFFFFFF00; // Yellow (RIGHT)
             default: 0xFFFFFFFF; // White
+        };
+    }
+
+    /**
+     * Get the screen position of a receptor by input lane.
+     * Returns center point of the receptor sprite.
+     */
+    public function getReceptorPosition(inputLane:Int):{x:Float, y:Float}
+    {
+        if (inputLane < 0 || inputLane >= arrows.length)
+            return {x: 0, y: 0};
+
+        var arrow = arrows[inputLane];
+        return {
+            x: arrow.x + (ARROW_FRAME_WIDTH / 2),
+            y: arrow.y + (ARROW_FRAME_HEIGHT / 2)
         };
     }
 

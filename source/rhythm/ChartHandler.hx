@@ -182,6 +182,8 @@ class ChartHandler
         playerLaneCount:Null<Int>
     ):{ owner:NoteOwner, inputLane:Int, animLane:Int, singerIndex:Int }
     {
+        var result:{ owner:NoteOwner, inputLane:Int, animLane:Int, singerIndex:Int };
+        
         if (mustHitSection)
         {
             // Player section - playerLaneCount MUST be present
@@ -193,7 +195,7 @@ class ChartHandler
             if (lane < playerLaneCount)
             {
                 // Player note
-                return {
+                result = {
                     owner: PLAYER,
                     inputLane: lane,
                     animLane: lane % 4,
@@ -204,7 +206,7 @@ class ChartHandler
             {
                 // NPC note in player section
                 var npcLane = lane - playerLaneCount;
-                return {
+                result = {
                     owner: OPPONENT,
                     inputLane: -1,
                     animLane: npcLane % 4,
@@ -215,13 +217,19 @@ class ChartHandler
         else
         {
             // NPC section - playerLaneCount NOT consulted
-            return {
+            result = {
                 owner: OPPONENT,
                 inputLane: -1,
                 animLane: lane % 4,
                 singerIndex: Std.int(Math.floor(lane / 4))
             };
         }
+        
+        // DIAGNOSTIC: Log decode results
+        var ownerStr = result.owner == PLAYER ? "PLAYER" : "OPPONENT";
+        trace('[ChartHandler.decodeLane] lane=${lane}, mustHit=${mustHitSection}, playerLanes=${playerLaneCount} => owner=${ownerStr}, inputLane=${result.inputLane}, animLane=${result.animLane}, singerIndex=${result.singerIndex}');
+        
+        return result;
     }
 
     // ------------------------------------------------------------------

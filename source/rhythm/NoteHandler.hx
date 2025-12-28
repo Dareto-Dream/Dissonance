@@ -69,6 +69,7 @@ class NoteHandler
         var nowMs = conductor.songPositionMs;
 
         spawnNotes(nowMs);
+        handleOpponentAutoplay(nowMs);
         handleMisses(nowMs);
     }
 
@@ -133,6 +134,50 @@ class NoteHandler
 
         consumeNote(tail);
         onNoteHit.dispatch(tail, rating);
+    }
+
+    // ------------------------------------------------------------------
+    // Opponent autoplay
+    // ------------------------------------------------------------------
+
+    /**
+     * Handle opponent notes automatically on timing.
+     * Opponents "auto-hit" notes when their scheduled time arrives.
+     * This is separate from player hit/miss logic.
+     */
+    private function handleOpponentAutoplay(nowMs:Float):Void
+    {
+        var autoplayWindow = 50.0; // Small window around note time for autoplay
+        var toAutoplay:Array<Note> = [];
+
+        for (note in activeNotes)
+        {
+            // Only process opponent notes
+            if (note.isPlayerNote()) continue;
+            if (note.judged) continue;
+
+            // Check if note time has been reached (within small window)
+            var timeDiff = Math.abs(nowMs - note.timeMs);
+            
+            if (timeDiff <= autoplayWindow && nowMs >= note.timeMs)
+            {
+                toAutoplay.push(note);
+            }
+        }
+
+        for (note in toAutoplay)
+        {
+            // Only trigger animations for TAP and HOLD_HEAD
+            // HOLD_TICK and HOLD_TAIL don't trigger sing animations
+            if (note.kind == NoteKind.TAP || note.kind == NoteKind.HOLD_HEAD)
+            {
+                // Trigger animation event with perfect rating (autoplay)
+                onNoteHit.dispatch(note, HitRating.SICK);
+            }
+
+            // Consume the note
+            consumeNote(note);
+        }
     }
 
     // ------------------------------------------------------------------
