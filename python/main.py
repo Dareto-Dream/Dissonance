@@ -32,6 +32,7 @@ from modules.xml.xml_creator import XMLCreator
 from modules.effects.text_effects import TextEffectPreview
 from modules.placement.scene_placement import ScenePlacement
 from modules.conditions.condition_editor import ConditionEditor
+from modules.rhythm.chart_editor import ChartEditor
 
 
 class DissonanceEditor:
@@ -76,7 +77,8 @@ class DissonanceEditor:
             "XML Creator": None,
             "Text Effects": None,
             "Scene Placement": None,
-            "Condition Editor": None
+            "Condition Editor": None,
+            "Chart Editor": None
         }
         
         self.current_module = None
@@ -153,6 +155,12 @@ class DissonanceEditor:
             )
         elif module_name == "Condition Editor":
             self.current_module = ConditionEditor(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Chart Editor":
+            self.current_module = ChartEditor(
                 workspace_rect,
                 self.theme,
                 self.project_root
