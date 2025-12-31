@@ -4,7 +4,7 @@ A comprehensive, modular Python/Pygame editor for creating visual novel content 
 
 ## Features
 
-### 🎭 Story Editor
+### Story Editor
 - Visual node-based scene graph editor
 - Support for all engine node types (dialogue, narration, action, choice, conditional, jump, game, end)
 - Interactive drag-and-drop node placement
@@ -13,17 +13,17 @@ A comprehensive, modular Python/Pygame editor for creating visual novel content 
 - Export to JSON scene files
 - Keyboard shortcuts for rapid workflow
 
-### 🖼️ Pose Editor
+### Pose Editor
 - Character pose composition interface
 - Layer-based sprite assembly
 - Real-time preview
 - XML atlas integration
 
-### 📦 XML Tools
+### XML Tools
 - **XML Viewer**: Browse and preview texture atlas contents
 - **XML Creator**: Generate texture atlases from sprite folders
 
-### ✨ Text Effects Preview
+### Text Effects Preview
 - Live preview of all text effects:
   - Shake (nervousness, fear)
   - Glitch (corruption, horror)
@@ -32,12 +32,12 @@ A comprehensive, modular Python/Pygame editor for creating visual novel content 
   - Fade (mysterious, weak)
   - Typewriter (dramatic reveals)
 
-### 🎨 Scene Placement
+### Scene Placement
 - Visual character and background positioning
 - Preview final scene composition
 - Export position metadata
 
-### 🔀 Condition Editor
+### Condition Editor
 - Visual conditional expression builder
 - Support for rot score logic
 - Flag management

@@ -1,7 +1,10 @@
 """Chart Editor Module - build rhythm charts with lanes, players, and characters."""
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
+import json
+import os
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 import pygame
 import pygame.freetype
@@ -18,21 +21,28 @@ COLOR_OPTIONS = [
     ("Teal", (80, 200, 200)),
 ]
 
+NOTE_TYPE_COLORS = [
+    (80, 140, 255),   # Normal - Blue
+    (255, 100, 255),  # Special 1 - Pink
+    (100, 255, 100),  # Special 2 - Green  
+    (255, 200, 80),   # Special 3 - Yellow
+]
+
 
 class ChartEditor:
-    """Simple chart editor inspired by Psych Engine style charts."""
+    """Chart editor with audio loading, hold notes, special notes, and save/load functionality."""
 
     def __init__(self, workspace_rect, theme, project_root):
-        del project_root  # Reserved for future exporting/loading
         self.rect = workspace_rect
         self.theme = theme
+        self.project_root = project_root
         self.font = pygame.freetype.SysFont("Arial", 14)
         self.title_font = pygame.freetype.SysFont("Arial", 22, bold=True)
         self.small_font = pygame.freetype.SysFont("Arial", 12)
 
         self.margin = 20
         self.left_panel_width = 320
-        self.toolbar_height = 70
+        self.toolbar_height = 140
 
         self.song_input = TextInput(pygame.Rect(0, 0, 200, 28), self.font, placeholder="Song name", text="")
         self.bpm_input = TextInput(pygame.Rect(0, 0, 120, 28), self.font, placeholder="BPM", text="120")
@@ -67,14 +77,33 @@ class ChartEditor:
         )
         self._load_player_inputs()
 
-        self.grid_rows = 32
+        self.grid_rows = 128
         self.grid_scroll = 0
         self.row_height = 24
         self.lane_width = 40
         self.header_height = 30
-        self.notes = set()
+        self.notes = {}  # (row, lane) -> {"sustain": duration_ms, "type": 0-3}
+        
+        self.hold_note_start = None
+        self.placing_hold = False
+        self.current_note_type = 0  # 0=normal, 1-3=special
 
-        self.status_message = "Click a lane cell to toggle notes."
+        self.audio_file: Optional[str] = None
+        self.audio_loaded = False
+        self.audio_playing = False
+        self.audio_position = 0.0
+        self.audio_length = 0.0
+        self.waveform_data: List[float] = []
+        self.metronome_enabled = True
+        self.snap_to_beat = True
+        
+        self.playback_speed = 1.0
+        self.last_beat_time = 0.0
+        
+        self.dragging_timeline = False
+        self.placing_notes_mode = False
+
+        self.status_message = "Load an audio file to begin charting. Hold Shift+Click for hold notes."
         self.status_color = self.theme.text_secondary
         self.status_timer = 0.0
 
@@ -137,6 +166,299 @@ class ChartEditor:
             self.rect.height - self.margin * 2,
         )
 
+    def _load_audio_file(self, filepath: str):
+        """Load an audio file for charting."""
+        try:
+            pygame.mixer.init()
+            pygame.mixer.music.load(filepath)
+            self.audio_file = filepath
+            self.audio_loaded = True
+            self.audio_position = 0.0
+            
+            try:
+                import wave
+                with wave.open(filepath, 'rb') as wav:
+                    frames = wav.getnframes()
+                    rate = wav.getframerate()
+                    self.audio_length = frames / float(rate)
+            except:
+                self.audio_length = 180.0
+            
+            self._generate_waveform(filepath)
+            self._set_status(f"Loaded: {Path(filepath).name}", self.theme.accent_green)
+            
+            try:
+                bpm = float(self.bpm_input.get_value())
+                beats_needed = int((self.audio_length / 60.0) * bpm * 1.5)
+                self.grid_rows = max(128, beats_needed)
+            except:
+                pass
+                
+        except Exception as e:
+            self._set_status(f"Failed to load audio: {e}", self.theme.accent_red)
+
+    def _generate_waveform(self, filepath: str):
+        """Generate simplified waveform data for visualization."""
+        self.waveform_data = []
+        try:
+            import wave
+            with wave.open(filepath, 'rb') as wav:
+                frames = wav.readframes(wav.getnframes())
+                import struct
+                samples = struct.unpack(f"{len(frames)//2}h", frames)
+                
+                chunk_size = max(1, len(samples) // 500)
+                for i in range(0, len(samples), chunk_size):
+                    chunk = samples[i:i+chunk_size]
+                    if chunk:
+                        avg = sum(abs(s) for s in chunk) / len(chunk)
+                        normalized = avg / 32768.0
+                        self.waveform_data.append(normalized)
+        except:
+            self.waveform_data = [0.0] * 100
+
+    def _browse_audio_file(self):
+        """Open file browser to select audio file."""
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            
+            filetypes = [
+                ("Audio Files", "*.wav *.mp3 *.ogg"),
+                ("WAV Files", "*.wav"),
+                ("MP3 Files", "*.mp3"),
+                ("OGG Files", "*.ogg"),
+                ("All Files", "*.*")
+            ]
+            
+            filepath = filedialog.askopenfilename(
+                title="Select Audio File",
+                filetypes=filetypes,
+                initialdir=self.project_root / "assets" / "music" if self.project_root else None
+            )
+            
+            root.destroy()
+            
+            if filepath:
+                self._load_audio_file(filepath)
+        except Exception as e:
+            self._set_status(f"Error browsing files: {e}", self.theme.accent_red)
+
+    def _load_chart_file(self):
+        """Load a chart JSON file."""
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            
+            filepath = filedialog.askopenfilename(
+                title="Load Chart",
+                filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")],
+                initialdir=self.project_root / "assets" / "data" if self.project_root else None
+            )
+            
+            root.destroy()
+            
+            if filepath:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                self._import_chart_data(data)
+                self._set_status(f"Loaded chart: {Path(filepath).name}", self.theme.accent_green)
+        except Exception as e:
+            self._set_status(f"Error loading chart: {e}", self.theme.accent_red)
+
+    def _import_chart_data(self, data: dict):
+        """Import chart data from JSON."""
+        song_data = data.get("song", {})
+        
+        self.song_input.set_value(song_data.get("song", ""))
+        self.bpm_input.set_value(str(song_data.get("bpm", 120)))
+        
+        self.notes.clear()
+        
+        sections = song_data.get("notes", [])
+        for section in sections:
+            section_notes = section.get("sectionNotes", [])
+            player_lane_count = section.get("playerLaneCount", 4)
+            must_hit = section.get("mustHitSection", True)
+            
+            for note in section_notes:
+                if len(note) < 2:
+                    continue
+                    
+                time_ms = note[0]
+                lane = note[1]
+                sustain = note[2] if len(note) > 2 else 0
+                note_type = note[3] if len(note) > 3 else 0
+                
+                try:
+                    bpm = float(self.bpm_input.get_value())
+                    beat_duration_ms = (60.0 / bpm) * 1000
+                    row = int(time_ms / (beat_duration_ms / 4))
+                    
+                    if not must_hit:
+                        lane += player_lane_count
+                    
+                    self.notes[(row, lane)] = {
+                        "sustain": sustain,
+                        "type": note_type
+                    }
+                except:
+                    pass
+
+    def _save_chart(self):
+        """Save chart to JSON file."""
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            
+            default_name = self.song_input.get_value() or "chart"
+            filepath = filedialog.asksaveasfilename(
+                title="Save Chart",
+                defaultextension=".json",
+                filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")],
+                initialfile=f"{default_name}.json",
+                initialdir=self.project_root / "assets" / "data" if self.project_root else None
+            )
+            
+            root.destroy()
+            
+            if filepath:
+                chart_data = self._export_chart_data()
+                with open(filepath, 'w') as f:
+                    json.dump(chart_data, f, indent=2)
+                self._set_status(f"Saved: {Path(filepath).name}", self.theme.accent_green)
+        except Exception as e:
+            self._set_status(f"Error saving: {e}", self.theme.accent_red)
+
+    def _export_chart_data(self) -> dict:
+        """Export current chart to JSON format."""
+        try:
+            bpm = float(self.bpm_input.get_value())
+        except:
+            bpm = 120
+        
+        beat_duration_ms = (60.0 / bpm) * 1000
+        
+        player1_lanes = self.players[0]["lanes"] if self.players else 4
+        
+        notes_by_section = {}
+        for (row, lane), note_data in self.notes.items():
+            time_ms = row * (beat_duration_ms / 4)
+            section_index = int(time_ms // (beat_duration_ms * 16))
+            
+            if section_index not in notes_by_section:
+                notes_by_section[section_index] = []
+            
+            must_hit = lane < player1_lanes
+            actual_lane = lane if must_hit else lane - player1_lanes
+            
+            note_entry = [
+                int(time_ms),
+                actual_lane,
+                note_data.get("sustain", 0),
+                note_data.get("type", 0)
+            ]
+            
+            notes_by_section[section_index].append({
+                "note": note_entry,
+                "mustHit": must_hit
+            })
+        
+        sections = []
+        if notes_by_section:
+            max_section = max(notes_by_section.keys())
+            for i in range(max_section + 1):
+                section_notes = notes_by_section.get(i, [])
+                
+                must_hit = True
+                if section_notes:
+                    must_hit = section_notes[0]["mustHit"]
+                
+                formatted_notes = [n["note"] for n in section_notes]
+                
+                sections.append({
+                    "sectionNotes": formatted_notes,
+                    "mustHitSection": must_hit,
+                    "playerLaneCount": player1_lanes,
+                    "lengthInSteps": 16,
+                    "bpm": bpm
+                })
+        
+        return {
+            "song": {
+                "song": self.song_input.get_value() or "untitled",
+                "bpm": bpm,
+                "offset": 0.0,
+                "stage": "stage1",
+                "player": "player",
+                "singers": [char["name"] for char in self.characters],
+                "notes": sections
+            }
+        }
+
+    def _play_audio(self):
+        """Start or resume audio playback."""
+        if not self.audio_loaded:
+            self._set_status("No audio loaded", self.theme.accent_red)
+            return
+        
+        try:
+            if not self.audio_playing:
+                pygame.mixer.music.play(start=self.audio_position)
+                self.audio_playing = True
+                self.placing_notes_mode = True
+                self._set_status("Playing - Click lanes to chart", self.theme.accent_green)
+        except Exception as e:
+            self._set_status(f"Playback error: {e}", self.theme.accent_red)
+
+    def _pause_audio(self):
+        """Pause audio playback."""
+        if self.audio_playing:
+            pygame.mixer.music.pause()
+            self.audio_playing = False
+            self.placing_notes_mode = False
+            self._set_status("Paused", self.theme.text_secondary)
+
+    def _stop_audio(self):
+        """Stop audio playback and reset position."""
+        pygame.mixer.music.stop()
+        self.audio_playing = False
+        self.audio_position = 0.0
+        self.placing_notes_mode = False
+        self.grid_scroll = 0
+        self._set_status("Stopped", self.theme.text_secondary)
+
+    def _set_audio_position(self, position: float):
+        """Set audio playback position."""
+        if not self.audio_loaded:
+            return
+        
+        self.audio_position = max(0.0, min(position, self.audio_length))
+        
+        if self.audio_playing:
+            pygame.mixer.music.stop()
+            pygame.mixer.music.play(start=self.audio_position)
+        
+        try:
+            bpm = float(self.bpm_input.get_value())
+            beat_duration = 60.0 / bpm
+            current_beat = self.audio_position / beat_duration
+            self.grid_scroll = current_beat * self.row_height
+        except:
+            pass
+
     def handle_event(self, event):
         self.song_input.handle_event(event)
         self.bpm_input.handle_event(event)
@@ -147,13 +469,77 @@ class ChartEditor:
         self.character_color_dropdown.handle_event(event)
         self.player_character_dropdown.handle_event(event)
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if self.audio_playing:
+                    self._pause_audio()
+                else:
+                    self._play_audio()
+                return
+            elif event.key == pygame.K_l and (event.mod & pygame.KMOD_CTRL):
+                self._browse_audio_file()
+                return
+            elif event.key == pygame.K_o and (event.mod & pygame.KMOD_CTRL):
+                self._load_chart_file()
+                return
+            elif event.key == pygame.K_s and (event.mod & pygame.KMOD_CTRL):
+                self._save_chart()
+                return
+            elif event.key == pygame.K_m:
+                self.metronome_enabled = not self.metronome_enabled
+                status = "enabled" if self.metronome_enabled else "disabled"
+                self._set_status(f"Metronome {status}", self.theme.text_secondary)
+                return
+            elif event.key == pygame.K_s and not (event.mod & pygame.KMOD_CTRL):
+                self.snap_to_beat = not self.snap_to_beat
+                status = "enabled" if self.snap_to_beat else "disabled"
+                self._set_status(f"Beat snap {status}", self.theme.text_secondary)
+                return
+            elif event.key == pygame.K_1:
+                self.current_note_type = 0
+                self._set_status("Normal notes", self.theme.text_secondary)
+                return
+            elif event.key == pygame.K_2:
+                self.current_note_type = 1
+                self._set_status("Special note type 1", self.theme.text_secondary)
+                return
+            elif event.key == pygame.K_3:
+                self.current_note_type = 2
+                self._set_status("Special note type 2", self.theme.text_secondary)
+                return
+            elif event.key == pygame.K_4:
+                self.current_note_type = 3
+                self._set_status("Special note type 3", self.theme.text_secondary)
+                return
+
         if event.type == pygame.MOUSEWHEEL:
             if self._grid_rect().collidepoint(pygame.mouse.get_pos()):
                 self._scroll_grid(-event.y * self.row_height)
+            elif self._timeline_rect().collidepoint(pygame.mouse.get_pos()):
+                self._scroll_grid(-event.y * self.row_height * 4)
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             pos = event.pos
-            if self._add_character_button().collidepoint(pos):
+            
+            timeline_rect = self._timeline_rect()
+            if timeline_rect.collidepoint(pos):
+                self._handle_timeline_click(pos, timeline_rect)
+                self.dragging_timeline = True
+                return
+            
+            if self._load_audio_button().collidepoint(pos):
+                self._browse_audio_file()
+            elif self._play_button().collidepoint(pos):
+                self._play_audio()
+            elif self._pause_button().collidepoint(pos):
+                self._pause_audio()
+            elif self._stop_button().collidepoint(pos):
+                self._stop_audio()
+            elif self._load_chart_button().collidepoint(pos):
+                self._load_chart_file()
+            elif self._save_chart_button().collidepoint(pos):
+                self._save_chart()
+            elif self._add_character_button().collidepoint(pos):
                 self._add_character()
             elif self._remove_character_button().collidepoint(pos):
                 self._remove_character()
@@ -166,10 +552,74 @@ class ChartEditor:
             else:
                 self._handle_list_click(pos)
                 if self._grid_rect().collidepoint(pos):
-                    self._toggle_grid_note(pos)
+                    mods = pygame.key.get_mods()
+                    if mods & pygame.KMOD_SHIFT:
+                        self._start_hold_note(pos)
+                    else:
+                        self._toggle_grid_note(pos)
+
+        if event.type == pygame.MOUSEMOTION:
+            if self.dragging_timeline:
+                timeline_rect = self._timeline_rect()
+                self._handle_timeline_click(event.pos, timeline_rect)
+            elif self.placing_hold:
+                self._update_hold_note(event.pos)
 
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.dragging_timeline = False
+            if self.placing_hold:
+                self._finish_hold_note()
             self._commit_player_inputs()
+
+    def _handle_timeline_click(self, pos, timeline_rect):
+        """Handle clicking on the timeline to seek."""
+        if not self.audio_loaded:
+            return
+        
+        relative_x = pos[0] - timeline_rect.x
+        progress = relative_x / timeline_rect.width
+        new_position = progress * self.audio_length
+        self._set_audio_position(new_position)
+
+    def _timeline_rect(self) -> pygame.Rect:
+        """Get rectangle for audio timeline."""
+        grid_rect = self._grid_rect()
+        return pygame.Rect(
+            grid_rect.x,
+            self.rect.y + self.margin + 78,
+            grid_rect.width,
+            40
+        )
+
+    def _load_audio_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start, self.rect.y + self.margin + 10, 100, 28)
+
+    def _play_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start + 110, self.rect.y + self.margin + 10, 60, 28)
+
+    def _pause_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start + 180, self.rect.y + self.margin + 10, 60, 28)
+
+    def _stop_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start + 250, self.rect.y + self.margin + 10, 60, 28)
+
+    def _load_chart_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start, self.rect.y + self.margin + 43, 100, 28)
+
+    def _save_chart_button(self) -> pygame.Rect:
+        left_panel = self._left_panel_rect()
+        x_start = left_panel.right + self.margin * 2
+        return pygame.Rect(x_start + 110, self.rect.y + self.margin + 43, 100, 28)
 
     def _scroll_grid(self, delta):
         view_height = max(0, self._grid_rect().height - self.header_height)
@@ -190,40 +640,122 @@ class ChartEditor:
                 self._load_player_inputs()
                 return
 
-    def _toggle_grid_note(self, pos):
+    def _start_hold_note(self, pos):
+        """Start placing a hold note."""
         grid_rect = self._grid_rect()
+        if not grid_rect.collidepoint(pos):
+            return
+
         layout = self._lane_layout()
         lane_count = len(layout)
         if lane_count == 0:
             return
+
         lane_width = self._lane_width(grid_rect, lane_count)
-        if pos[1] < grid_rect.y + self.header_height:
+        rel_x = pos[0] - grid_rect.x
+        rel_y = pos[1] - (grid_rect.y + self.header_height)
+
+        lane = int(rel_x // lane_width)
+        row = int((rel_y + self.grid_scroll) // self.row_height)
+
+        if 0 <= lane < lane_count and 0 <= row < self.grid_rows:
+            if self.snap_to_beat:
+                row = (row // 4) * 4
+            
+            self.hold_note_start = (row, lane)
+            self.placing_hold = True
+            self._set_status("Drag to set hold duration, release to place", self.theme.accent_blue)
+
+    def _update_hold_note(self, pos):
+        """Update hold note while dragging."""
+        if not self.placing_hold or not self.hold_note_start:
             return
-        x = pos[0] - grid_rect.x
-        y = pos[1] - grid_rect.y - self.header_height + self.grid_scroll
-        lane = int(x // lane_width)
-        row = int(y // self.row_height)
-        if lane < 0 or lane >= lane_count or row < 0 or row >= self.grid_rows:
+        
+        grid_rect = self._grid_rect()
+        if not grid_rect.collidepoint(pos):
             return
-        key = (row, lane)
-        if key in self.notes:
-            self.notes.remove(key)
-        else:
-            self.notes.add(key)
+        
+        rel_y = pos[1] - (grid_rect.y + self.header_height)
+        end_row = int((rel_y + self.grid_scroll) // self.row_height)
+        
+        if self.snap_to_beat:
+            end_row = (end_row // 4) * 4
+
+    def _finish_hold_note(self):
+        """Finish placing hold note."""
+        if not self.placing_hold or not self.hold_note_start:
+            return
+        
+        pos = pygame.mouse.get_pos()
+        grid_rect = self._grid_rect()
+        
+        if grid_rect.collidepoint(pos):
+            rel_y = pos[1] - (grid_rect.y + self.header_height)
+            end_row = int((rel_y + self.grid_scroll) // self.row_height)
+            
+            if self.snap_to_beat:
+                end_row = (end_row // 4) * 4
+            
+            start_row, lane = self.hold_note_start
+            duration_rows = max(0, end_row - start_row)
+            
+            try:
+                bpm = float(self.bpm_input.get_value())
+                beat_duration_ms = (60.0 / bpm) * 1000
+                sustain_ms = int(duration_rows * (beat_duration_ms / 4))
+                
+                self.notes[(start_row, lane)] = {
+                    "sustain": sustain_ms,
+                    "type": self.current_note_type
+                }
+                self._set_status(f"Added hold note: {sustain_ms}ms", self.theme.accent_green)
+            except:
+                self._set_status("Error creating hold note", self.theme.accent_red)
+        
+        self.hold_note_start = None
+        self.placing_hold = False
+
+    def _toggle_grid_note(self, pos):
+        """Toggle a regular note."""
+        grid_rect = self._grid_rect()
+        if not grid_rect.collidepoint(pos):
+            return
+
+        layout = self._lane_layout()
+        lane_count = len(layout)
+        if lane_count == 0:
+            return
+
+        lane_width = self._lane_width(grid_rect, lane_count)
+        rel_x = pos[0] - grid_rect.x
+        rel_y = pos[1] - (grid_rect.y + self.header_height)
+
+        lane = int(rel_x // lane_width)
+        row = int((rel_y + self.grid_scroll) // self.row_height)
+
+        if 0 <= lane < lane_count and 0 <= row < self.grid_rows:
+            if self.snap_to_beat:
+                row = (row // 4) * 4
+            
+            note = (row, lane)
+            if note in self.notes:
+                del self.notes[note]
+                self._set_status(f"Removed note at beat {row + 1}, lane {lane + 1}", self.theme.text_secondary)
+            else:
+                self.notes[note] = {
+                    "sustain": 0,
+                    "type": self.current_note_type
+                }
+                type_name = "normal" if self.current_note_type == 0 else f"special {self.current_note_type}"
+                self._set_status(f"Added {type_name} note at beat {row + 1}, lane {lane + 1}", self.theme.accent_green)
 
     def _add_character(self):
-        name = self.character_name_input.get_value()
-        if not name:
-            self._set_status("Enter a character name before adding.", self.theme.accent_yellow)
-            return
-        if name in self._character_names():
-            self._set_status("Character name already exists.", self.theme.accent_yellow)
-            return
+        name = self.character_name_input.get_value() or f"Character {len(self.characters) + 1}"
         color = self.character_color_dropdown.get_value()
         self.characters.append({"name": name, "color": color})
         self.character_name_input.set_value("")
         self._update_player_character_options()
-        self._set_status(f"Added character '{name}'.", self.theme.accent_green)
+        self._set_status(f"Added character: {name}", self.theme.accent_green)
 
     def _remove_character(self):
         if not self.characters:
@@ -231,19 +763,16 @@ class ChartEditor:
         removed = self.characters.pop(self.selected_character_index)
         if self.selected_character_index >= len(self.characters):
             self.selected_character_index = max(0, len(self.characters) - 1)
-        for player in self.players:
-            if player.get("character") == removed["name"]:
-                player["character"] = self._character_names()[0] if self.characters else ""
         self._update_player_character_options()
-        self._set_status(f"Removed character '{removed['name']}'.", self.theme.accent_yellow)
+        self._set_status(f"Removed character: {removed['name']}", self.theme.accent_red)
 
     def _add_player(self):
-        index = len(self.players) + 1
-        default_char = self._character_names()[0] if self.characters else ""
-        self.players.append({"name": f"Player {index}", "lanes": 4, "character": default_char})
-        self.selected_player_index = len(self.players) - 1
-        self._load_player_inputs()
-        self._set_status("Added a new player lane group.", self.theme.accent_green)
+        name = self.player_name_input.get_value() or f"Player {len(self.players) + 1}"
+        char_names = self._character_names()
+        assigned_char = char_names[0] if char_names else ""
+        self.players.append({"name": name, "lanes": 4, "character": assigned_char})
+        self.player_name_input.set_value("")
+        self._set_status(f"Added player: {name}", self.theme.accent_green)
 
     def _remove_player(self):
         if not self.players:
@@ -252,33 +781,119 @@ class ChartEditor:
         if self.selected_player_index >= len(self.players):
             self.selected_player_index = max(0, len(self.players) - 1)
         self._load_player_inputs()
-        self._set_status(f"Removed {removed['name']}.", self.theme.accent_yellow)
+        self._set_status(f"Removed player: {removed['name']}", self.theme.accent_red)
 
-    def _set_status(self, message, color):
+    def _set_status(self, message, color=None):
         self.status_message = message
-        self.status_color = color
+        self.status_color = color or self.theme.text_secondary
         self.status_timer = 3.0
 
     def update(self, dt):
-        self.song_input.update(dt)
-        self.bpm_input.update(dt)
-        self.character_name_input.update(dt)
-        self.player_name_input.update(dt)
-        self.player_lanes_input.update(dt)
         if self.status_timer > 0:
-            self.status_timer = max(0.0, self.status_timer - dt)
+            self.status_timer -= dt
+
+        if self.audio_playing:
+            self.audio_position += dt * self.playback_speed
+            
+            if self.audio_position >= self.audio_length:
+                self._stop_audio()
+                return
+            
+            try:
+                bpm = float(self.bpm_input.get_value())
+                beat_duration = 60.0 / bpm
+                current_beat = self.audio_position / beat_duration
+                
+                if self.metronome_enabled:
+                    beat_index = int(current_beat)
+                    if beat_index != int(self.last_beat_time / beat_duration):
+                        pass
+                
+                self.last_beat_time = self.audio_position
+                
+                target_scroll = current_beat * self.row_height - 200
+                self.grid_scroll = max(0, target_scroll)
+            except:
+                pass
 
     def draw(self, surface):
         surface.fill(self.theme.bg_dark)
-        title_surf, _ = self.title_font.render("Chart Editor", self.theme.text_primary)
-        surface.blit(title_surf, (self.rect.x + self.margin, self.rect.y + self.margin))
-        subtitle = "Psych Engine-style charting with multiple lanes and character assignments."
-        subtitle_surf, _ = self.font.render(subtitle, self.theme.text_secondary)
-        surface.blit(subtitle_surf, (self.rect.x + self.margin, self.rect.y + self.margin + 34))
-
+        self._draw_toolbar(surface)
         self._draw_left_panel(surface)
         self._draw_grid(surface)
         self._draw_status(surface)
+
+    def _draw_toolbar(self, surface):
+        left_panel = self._left_panel_rect()
+        toolbar_bg = pygame.Rect(
+            left_panel.right + self.margin,
+            self.rect.y + self.margin,
+            self.rect.width - left_panel.width - self.margin * 3,
+            self.toolbar_height - self.margin
+        )
+        pygame.draw.rect(surface, self.theme.bg_medium, toolbar_bg, border_radius=8)
+        pygame.draw.rect(surface, self.theme.border, toolbar_bg, 1, border_radius=8)
+
+        self._draw_button(surface, self._load_audio_button(), "Load Audio", self.theme.bg_light)
+        self._draw_button(surface, self._play_button(), "Play", self.theme.accent_green if not self.audio_playing else self.theme.bg_light)
+        self._draw_button(surface, self._pause_button(), "Pause", self.theme.accent_blue if self.audio_playing else self.theme.bg_light)
+        self._draw_button(surface, self._stop_button(), "Stop", self.theme.accent_red)
+
+        self._draw_button(surface, self._load_chart_button(), "Load Chart", self.theme.bg_light)
+        self._draw_button(surface, self._save_chart_button(), "Save Chart", self.theme.accent_green)
+
+        audio_info = "No audio loaded"
+        if self.audio_loaded and self.audio_file:
+            filename = Path(self.audio_file).name
+            time_str = f"{self.audio_position:.1f}s / {self.audio_length:.1f}s"
+            audio_info = f"{filename} - {time_str}"
+        
+        x_start = left_panel.right + self.margin * 2
+        info_surf, _ = self.small_font.render(audio_info, self.theme.text_secondary)
+        surface.blit(info_surf, (x_start + 320, self.rect.y + self.margin + 15))
+
+        timeline_rect = self._timeline_rect()
+        self._draw_timeline(surface, timeline_rect)
+
+        note_type_names = ["Normal", "Special 1", "Special 2", "Special 3"]
+        note_type_text = f"[1-4] Type: {note_type_names[self.current_note_type]}"
+        note_type_surf, _ = self.small_font.render(note_type_text, NOTE_TYPE_COLORS[self.current_note_type])
+        surface.blit(note_type_surf, (x_start + 320, self.rect.y + self.margin + 48))
+
+    def _draw_timeline(self, surface, rect):
+        """Draw audio timeline with waveform and playback position."""
+        pygame.draw.rect(surface, self.theme.bg_dark, rect, border_radius=4)
+        pygame.draw.rect(surface, self.theme.border, rect, 1, border_radius=4)
+
+        if not self.audio_loaded or not self.waveform_data:
+            no_audio_surf, _ = self.small_font.render("No audio loaded", self.theme.text_disabled)
+            surface.blit(no_audio_surf, (rect.x + 10, rect.y + 14))
+            return
+
+        wave_height = rect.height - 4
+        wave_y_center = rect.y + rect.height // 2
+        
+        for i, amplitude in enumerate(self.waveform_data):
+            x = rect.x + 2 + int((i / len(self.waveform_data)) * (rect.width - 4))
+            bar_height = int(amplitude * wave_height * 0.4)
+            pygame.draw.line(
+                surface,
+                self.theme.accent_blue,
+                (x, wave_y_center - bar_height),
+                (x, wave_y_center + bar_height),
+                1
+            )
+
+        if self.audio_length > 0:
+            progress = self.audio_position / self.audio_length
+            playhead_x = rect.x + int(progress * rect.width)
+            pygame.draw.line(
+                surface,
+                self.theme.accent_red,
+                (playhead_x, rect.y),
+                (playhead_x, rect.bottom),
+                2
+            )
 
     def _draw_left_panel(self, surface):
         panel = self._left_panel_rect()
@@ -286,56 +901,62 @@ class ChartEditor:
         pygame.draw.rect(surface, self.theme.border, panel, 1, border_radius=8)
 
         y = panel.y + 16
-        y = self._draw_section_header(surface, panel.x + 16, y, "Chart Settings")
 
-        self._draw_label(surface, panel.x + 16, y, "Song")
-        self.song_input.rect = pygame.Rect(panel.x + 16, y + 18, panel.width - 32, 28)
+        title_surf, _ = self.title_font.render("Chart Editor", self.theme.text_primary)
+        surface.blit(title_surf, (panel.x + 16, y))
+        y += 40
+
+        self._draw_label(surface, panel.x + 16, y, "Song Name")
+        y += 18
+        self.song_input.rect.topleft = (panel.x + 16, y)
         self.song_input.draw(surface, self.theme)
-        y += 58
+        y += 40
 
         self._draw_label(surface, panel.x + 16, y, "BPM")
-        self.bpm_input.rect = pygame.Rect(panel.x + 16, y + 18, 120, 28)
+        y += 18
+        self.bpm_input.rect.topleft = (panel.x + 16, y)
         self.bpm_input.draw(surface, self.theme)
-
-        add_rows_button = self._add_rows_button()
-        self._draw_button(surface, add_rows_button, "Add 16 rows", self.theme.accent_blue)
-        y += 70
+        y += 50
 
         y = self._draw_section_header(surface, panel.x + 16, y, "Characters")
         self._draw_label(surface, panel.x + 16, y, "Name")
-        self.character_name_input.rect = pygame.Rect(panel.x + 16, y + 18, 150, 28)
+        y += 18
+        self.character_name_input.rect.topleft = (panel.x + 16, y)
         self.character_name_input.draw(surface, self.theme)
-        self.character_color_dropdown.set_rect(pygame.Rect(panel.x + 176, y + 18, 110, 28))
+        
+        self._draw_label(surface, panel.x + 166, y - 18, "Color")
+        self.character_color_dropdown.rect.topleft = (panel.x + 166, y)
         self.character_color_dropdown.draw(surface, self.theme)
-        y += 58
+        y += 40
 
-        self._draw_button(surface, self._add_character_button(), "Add", self.theme.accent_green)
+        self._draw_button(surface, self._add_character_button(), "+Add", self.theme.accent_green)
         self._draw_button(surface, self._remove_character_button(), "Remove", self.theme.accent_red)
-        y += 44
+        y += 40
 
         y = self._draw_character_list(surface, panel.x + 16, y, panel.width - 32)
+        y += 30
 
         y = self._draw_section_header(surface, panel.x + 16, y, "Players")
         self._draw_label(surface, panel.x + 16, y, "Name")
-        self.player_name_input.rect = pygame.Rect(panel.x + 16, y + 18, 160, 28)
+        y += 18
+        self.player_name_input.rect.topleft = (panel.x + 16, y)
         self.player_name_input.draw(surface, self.theme)
-        self.player_lanes_input.rect = pygame.Rect(panel.x + 190, y + 18, 60, 28)
-        self.player_lanes_input.draw(surface, self.theme)
-        y += 58
+        y += 40
 
-        self._draw_label(surface, panel.x + 16, y, "Character")
-        self.player_character_dropdown.set_rect(pygame.Rect(panel.x + 16, y + 18, 200, 28))
+        self._draw_label(surface, panel.x + 16, y, "Lanes")
+        self.player_lanes_input.rect.topleft = (panel.x + 16, y + 18)
+        self.player_lanes_input.draw(surface, self.theme)
+
+        self._draw_label(surface, panel.x + 90, y, "Character")
+        self.player_character_dropdown.rect.topleft = (panel.x + 90, y + 18)
         self.player_character_dropdown.draw(surface, self.theme)
         y += 58
 
-        self._draw_button(surface, self._add_player_button(), "Add Player", self.theme.accent_green)
+        self._draw_button(surface, self._add_player_button(), "+Add Player", self.theme.accent_green)
         self._draw_button(surface, self._remove_player_button(), "Remove", self.theme.accent_red)
-        y += 44
+        y += 40
 
         self._draw_player_list(surface, panel.x + 16, y, panel.width - 32)
-
-        self.character_color_dropdown.draw_popup(surface, self.theme)
-        self.player_character_dropdown.draw_popup(surface, self.theme)
 
     def _draw_grid(self, surface):
         grid_rect = self._grid_rect()
@@ -385,8 +1006,68 @@ class ChartEditor:
                     lane_width,
                     self.row_height,
                 )
-                if (row, lane) in self.notes:
-                    pygame.draw.rect(surface, self.theme.accent_blue, cell_rect.inflate(-6, -6), border_radius=4)
+                note_data = self.notes.get((row, lane))
+                if note_data:
+                    note_type = note_data.get("type", 0)
+                    note_color = NOTE_TYPE_COLORS[note_type] if note_type < len(NOTE_TYPE_COLORS) else NOTE_TYPE_COLORS[0]
+                    
+                    pygame.draw.rect(surface, note_color, cell_rect.inflate(-6, -6), border_radius=4)
+                    
+                    sustain = note_data.get("sustain", 0)
+                    if sustain > 0:
+                        try:
+                            bpm = float(self.bpm_input.get_value())
+                            beat_duration_ms = (60.0 / bpm) * 1000
+                            sustain_rows = sustain / (beat_duration_ms / 4)
+                            sustain_height = int(sustain_rows * self.row_height)
+                            
+                            hold_rect = pygame.Rect(
+                                cell_rect.x + cell_rect.width // 2 - 3,
+                                cell_rect.y,
+                                6,
+                                min(sustain_height, grid_rect.bottom - cell_rect.y)
+                            )
+                            pygame.draw.rect(surface, note_color, hold_rect)
+                        except:
+                            pass
+
+        if self.placing_hold and self.hold_note_start:
+            start_row, lane = self.hold_note_start
+            pos = pygame.mouse.get_pos()
+            if grid_rect.collidepoint(pos):
+                rel_y = pos[1] - (grid_rect.y + self.header_height)
+                end_row = int((rel_y + self.grid_scroll) // self.row_height)
+                
+                start_y = grid_rect.y + self.header_height + (start_row * self.row_height - scroll_y)
+                end_y = grid_rect.y + self.header_height + (end_row * self.row_height - scroll_y)
+                
+                if end_y > start_y:
+                    preview_rect = pygame.Rect(
+                        grid_rect.x + lane * lane_width + lane_width // 2 - 3,
+                        start_y,
+                        6,
+                        end_y - start_y
+                    )
+                    note_color = NOTE_TYPE_COLORS[self.current_note_type]
+                    pygame.draw.rect(surface, note_color + (128,), preview_rect)
+
+        if self.audio_playing and self.audio_loaded:
+            try:
+                bpm = float(self.bpm_input.get_value())
+                beat_duration = 60.0 / bpm
+                current_beat = self.audio_position / beat_duration
+                playhead_y = grid_rect.y + self.header_height + (current_beat * self.row_height - scroll_y)
+                
+                if grid_rect.y + self.header_height <= playhead_y <= grid_rect.bottom:
+                    pygame.draw.line(
+                        surface,
+                        self.theme.accent_red,
+                        (grid_rect.x, playhead_y),
+                        (grid_rect.right, playhead_y),
+                        3
+                    )
+            except:
+                pass
 
         pygame.draw.line(surface, self.theme.border, (grid_rect.x, grid_rect.y + self.header_height), (grid_rect.right, grid_rect.y + self.header_height), 1)
 
@@ -525,3 +1206,49 @@ class ChartEditor:
         if lane_count <= 0:
             return self.lane_width
         return max(24, grid_rect.width // lane_count)
+
+    def get_help_entries(self):
+        """Return help information for this module."""
+        return [
+            (
+                "Audio Controls",
+                [
+                    "Ctrl+L - Load audio file",
+                    "Space - Play/Pause audio",
+                    "Click timeline - Seek to position",
+                    "Mouse wheel on timeline - Scroll through song"
+                ]
+            ),
+            (
+                "Chart Management",
+                [
+                    "Ctrl+O - Load chart JSON",
+                    "Ctrl+S - Save chart to JSON",
+                    "Charts use Psych Engine format"
+                ]
+            ),
+            (
+                "Charting",
+                [
+                    "Click grid - Toggle notes",
+                    "Shift+Click+Drag - Create hold notes",
+                    "1-4 - Select note type (normal/special)",
+                    "M - Toggle metronome",
+                    "S - Toggle beat snap",
+                    "Mouse wheel on grid - Scroll vertically"
+                ]
+            ),
+            (
+                "Note Types",
+                [
+                    "Normal notes (blue) - Standard notes",
+                    "Special notes (pink/green/yellow) - Custom mechanics",
+                    "Hold notes - Drag to set duration"
+                ]
+            )
+        ]
+
+    def cleanup(self):
+        """Cleanup resources when switching modules."""
+        if self.audio_loaded:
+            pygame.mixer.music.stop()
