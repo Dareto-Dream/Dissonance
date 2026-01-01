@@ -74,8 +74,12 @@ class VNState extends FlxState
 			trace('[VNState] Starting new scene: ${sceneToLoad}');
 		}
 		
-		// Create SceneRunner FIRST - this loads and parses scene data
-		// All narrative identifiers are now valid
+		// --------------------------------------------------
+		// CREATE SCENE RUNNER
+		// --------------------------------------------------
+		// This loads and parses scene JSON data
+		// Scene identifiers (sceneId, startNode) are now valid
+		// NOTE: SceneRunner constructor NO LONGER calls loadPlacementFile()
 		runner = new SceneRunner(sceneToLoad);
 		
 		// If resuming from rhythm, position at correct node
@@ -86,8 +90,7 @@ class VNState extends FlxState
 		}
 		
 		// --------------------------------------------------
-		// NOW SAFE: Scene data is loaded, identifiers are valid
-		// Systems can now safely reference scene-specific data
+		// INITIALIZE RENDER LAYERS
 		// --------------------------------------------------
 		
 		// Reset static systems
@@ -124,9 +127,15 @@ class VNState extends FlxState
 			charDefs.push(charDefsMap.get(key));
 		}
 
-		// Let CharacterSystem build sprites/renderers and attach to charGroup
-		// Safe now - SceneRunner exists, scene identifiers are valid
+		// Initialize CharacterSystem
+		// CharacterSystem.instance is NOW VALID
 		CharacterSystem.init(charGroup, charDefs);
+		
+		// --------------------------------------------------
+		// CRITICAL FIX: Load placement file AFTER CharacterSystem exists
+		// --------------------------------------------------
+		// Now safe to load placements - CharacterSystem.get() will return valid instance
+		runner.loadPlacementFile();
 
 		// --------------------------------------------------
 		// UI LAYER

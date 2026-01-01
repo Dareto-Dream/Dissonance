@@ -18,8 +18,9 @@ class SceneRunner {
         currentNode = parser.startNode;
         active = true;
         
-        // Auto-load placement file based on scene_id
-        loadPlacementFile();
+        // CRITICAL FIX: Do NOT load placement file here
+        // CharacterSystem is not yet initialized at this point
+        // VNState will call loadPlacementFile() after CharacterSystem.init()
     }
     
     /**
@@ -31,10 +32,12 @@ class SceneRunner {
     }
     
     /**
-     * Automatically load placement file for this scene
+     * Load placement file for this scene.
+     * MUST be called AFTER CharacterSystem.init().
+     * 
      * Looks for: assets/data/placements/{scene_id}_placement.json
      */
-    private function loadPlacementFile():Void {
+    public function loadPlacementFile():Void {
         var placementPath = 'placements/${parser.sceneId}_placement.json';
         
         try {
@@ -46,6 +49,8 @@ class SceneRunner {
                 } else {
                     trace('[SceneRunner] No placements found for scene: ${parser.sceneId} (using defaults)');
                 }
+            } else {
+                trace('[SceneRunner] WARNING: CharacterSystem not available for placement loading');
             }
         } catch (e:Dynamic) {
             trace('[SceneRunner] Could not load placements for ${parser.sceneId}: $e (using defaults)');
@@ -94,8 +99,8 @@ class SceneRunner {
         next();
     }
 
-    public function goto(id:String):Void {
-        currentNode = id;
+    public function goto(targetNode:String):Void {
+        currentNode = targetNode;
         next();
     }
 }
