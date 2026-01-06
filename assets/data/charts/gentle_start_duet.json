@@ -4,8 +4,8 @@
     "bpm": 120,
     "offset": 0.0,
     "stage": "stage1",
-    "player": "player",
-    "singers": ["hanami"],
+    "player": "mc",
+    "singers": ["mc", "hanami"],
     "notes": [
       {
         "sectionNotes": [
@@ -18,6 +18,7 @@
           [3000, 2, 0, 0],
           [3500, 3, 0, 0]
         ],
+        "singers": ["mc"],
         "mustHitSection": true,
         "playerLaneCount": 4,
         "lengthInSteps": 16,
@@ -30,6 +31,7 @@
           [6000, 2, 500, 0],
           [7000, 3, 500, 0]
         ],
+        "singers": ["mc"],
         "mustHitSection": true,
         "playerLaneCount": 4,
         "lengthInSteps": 16,
@@ -46,6 +48,7 @@
           [9500, 2, 0],
           [9750, 3, 0]
         ],
+        "singers": ["hanami"],
         "mustHitSection": false,
         "lengthInSteps": 16,
         "bpm": 120
@@ -57,6 +60,7 @@
           [10500, 2, 0],
           [10750, 3, 0]
         ],
+        "singers": ["hanami"],
         "mustHitSection": false,
         "lengthInSteps": 16,
         "bpm": 120
@@ -72,6 +76,7 @@
           [13500, 2, 0, 0],
           [13750, 3, 0, 0]
         ],
+        "singers": ["mc"],
         "mustHitSection": true,
         "playerLaneCount": 4,
         "lengthInSteps": 16,
@@ -92,6 +97,7 @@
           [15250, 2, 0],
           [15375, 3, 0]
         ],
+        "singers": ["hanami"],
         "mustHitSection": false,
         "lengthInSteps": 16,
         "bpm": 120
@@ -102,10 +108,39 @@
           [16500, 1, 0, 0],
           [17000, 2, 0, 0],
           [17500, 3, 0, 0],
-          [18000, 0, 1000, 0]
+          [18000, 0, 1000, 0],
+          [16000, -1, 0, 0],
+          [16500, -2, 0, 0],
+          [17000, -3, 0, 0],
+          [17500, -4, 0, 0]
         ],
+        "singers": ["mc", "hanami"],
         "mustHitSection": true,
         "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 120
+      },
+      {
+        "sectionNotes": [
+          [19000, 0, 0, 0],
+          [19000, 1, 0, 0],
+          [19500, 2, 0, 0],
+          [19500, 3, 0, 0],
+          [20000, 0, 0, 0],
+          [20000, 1, 0, 0],
+          [20500, 2, 0, 0],
+          [20500, 3, 0, 0],
+          [19000, -1, 0, 0],
+          [19000, -2, 0, 0],
+          [19500, -3, 0, 0],
+          [19500, -4, 0, 0],
+          [20000, -1, 0, 0],
+          [20000, -2, 0, 0],
+          [20500, -3, 0, 0],
+          [20500, -4, 0, 0]
+        ],
+        "singers": ["mc", "hanami"],
+        "mustHitSection": false,
         "lengthInSteps": 16,
         "bpm": 120
       }

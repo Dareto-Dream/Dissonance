@@ -46,7 +46,7 @@ class ChartHandler
             var stepMs = crochetMs / 4.0;
             
             // Track positive note counter per timestamp for sequential assignment
-            var positiveCounterByTimestamp:Map<Float, Int> = new Map();
+            var positiveCounterByTimestamp:Map<String, Int> = new Map();
 
             for (raw in section.sectionNotes)
             {
@@ -203,7 +203,7 @@ class ChartHandler
         lane:Int,
         mustHitSection:Bool,
         singers:Array<String>,
-        positiveCounterByTimestamp:Map<Float, Int>,
+        positiveCounterByTimestamp:Map<String, Int>,
         timeMs:Float
     ):{ isJudged:Bool, characterID:String, performerIndex:Int, animDirection:Int, inputLane:Int }
     {
@@ -224,15 +224,18 @@ class ChartHandler
         {
             // POSITIVE LANE: Animate from START of singers list, sequential per timestamp
             
+            // Convert timestamp to string key for Map lookup
+            var timeKey = Std.string(timeMs);
+            
             // Get current counter for this timestamp
-            var count = positiveCounterByTimestamp.exists(timeMs)
-                ? positiveCounterByTimestamp.get(timeMs)
+            var count = positiveCounterByTimestamp.exists(timeKey)
+                ? positiveCounterByTimestamp.get(timeKey)
                 : 0;
             
             performerIndex = count;
             
             // Increment counter for next positive note at this timestamp
-            positiveCounterByTimestamp.set(timeMs, count + 1);
+            positiveCounterByTimestamp.set(timeKey, count + 1);
             
             // Resolve character ID
             if (performerIndex < singers.length)
