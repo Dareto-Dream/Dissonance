@@ -5,6 +5,10 @@ package rhythm;
  * =========
  * Typed representation of a Psych-style chart JSON.
  *
+ * NEW DESIGN (Post-Refactor):
+ * - Sections have `singers` array instead of `playerLaneCount`
+ * - No "player vs opponent" concept
+ *
  * This file intentionally contains:
  * - NO gameplay logic
  * - NO timing logic
@@ -36,6 +40,11 @@ typedef ChartSong =
 /**
  * One chart section.
  *
+ * NEW DESIGN:
+ * - `singers` array defines who can animate in this section
+ * - `mustHitSection` determines if positive lanes are judged
+ * - `playerLaneCount` removed (no longer used)
+ *
  * Sections are ORGANIZATIONAL, not temporal authorities.
  * Timing always comes from absolute note times.
  */
@@ -45,10 +54,12 @@ typedef ChartSection =
 
     var mustHitSection:Bool;
     var lengthInSteps:Int;
+    
+    // NEW: Section-level singers array
+    var singers:Array<String>;
 
     // Optional / Psych-style extensions
     @:optional var bpm:Float;
-    @:optional var playerLaneCount:Int;
 }
 
 /**

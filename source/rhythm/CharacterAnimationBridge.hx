@@ -5,13 +5,17 @@ import rhythm.CharacterSpriteManager;
 import rhythm.Conductor;
 import rhythm.JudgementSystem.HitRating;
 import rhythm.Note.NoteKind;
-import rhythm.Note.NoteOwner;
 import rhythm.Note;
 
 /**
  * CharacterAnimationBridge
  * ========================
  * Translates gameplay events into character animation triggers.
+ *
+ * NEW DESIGN (Post-Refactor):
+ * - No role-based routing
+ * - Uses note.characterID directly
+ * - Simpler, more direct animation dispatch
  *
  * This class:
  * - Reacts to note hit / miss events
@@ -27,8 +31,8 @@ class CharacterAnimationBridge extends FlxBasic
     private var characterSprites:CharacterSpriteManager;
     private var lastBeat:Int = -1; // Track last beat to avoid spam
     
-    // Map generic role names to actual character IDs
-    private var characterMap:Map<String, String> = new Map();
+    // Track all loaded characters for idle bop
+    private var loadedCharacters:Array<String> = [];
 
     public function new(conductor:Conductor, characterSprites:CharacterSpriteManager)
     {
@@ -38,15 +42,18 @@ class CharacterAnimationBridge extends FlxBasic
     }
     
     /**
-     * Register a character ID for a role.
+     * Register a character for idle animations.
+     * Call this when loading characters in RhythmState.
      * 
-     * @param role Generic role name ("player", "opponent", "opponent1", etc.)
      * @param characterID Actual character ID from chart ("hanami", "tiffany", etc.)
      */
-    public function registerCharacter(role:String, characterID:String):Void
+    public function registerCharacter(characterID:String):Void
     {
-        characterMap.set(role, characterID);
-        trace('[CharacterAnimationBridge] Registered ${role} -> ${characterID}');
+        if (!loadedCharacters.contains(characterID))
+        {
+            loadedCharacters.push(characterID);
+            trace('[CharacterAnimationBridge] Registered ${characterID}');
+        }
     }
 
     override public function update(elapsed:Float):Void
@@ -61,20 +68,16 @@ class CharacterAnimationBridge extends FlxBasic
 
     public function onNoteHit(note:Note, rating:HitRating):Void
     {
-        switch (note.owner)
-        {
-            case PLAYER:
-                playPlayerSing(note);
-            case OPPONENT:
-                playOpponentSing(note);
-        }
+        // All notes trigger animations the same way now
+        playPerformerSing(note);
     }
 
     public function onNoteMiss(note:Note):Void
     {
-        if (note.owner == PLAYER)
+        // Only judged notes can be "missed" in the gameplay sense
+        if (note.isJudged && note.characterID != "")
         {
-            playPlayerMiss(note);
+            triggerAnimation(note.characterID, "miss");
         }
     }
 
@@ -95,48 +98,37 @@ class CharacterAnimationBridge extends FlxBasic
     }
 
     // --------------------------------------------------
-    // Animation routing
+    // Animation routing (SIMPLIFIED)
     // --------------------------------------------------
 
-    private function playPlayerSing(note:Note):Void
+    private function playPerformerSing(note:Note):Void
     {
+        // Skip if no character assigned (more notes than singers)
+        if (note.characterID == "") return;
+        
         switch (note.kind)
         {
             case TAP, HOLD_HEAD:
-                triggerAnimation("player", animIndexToName(note.animLane));
+                triggerAnimation(note.characterID, animDirectionToName(note.animDirection));
             case HOLD_TICK:
+                // HOLD_TICK doesn't trigger new animations
             case HOLD_TAIL:
-                triggerAnimation("player", "singRelease");
+                triggerAnimation(note.characterID, "singRelease");
         }
-    }
-
-    private function playOpponentSing(note:Note):Void
-    {
-        // Route to specific NPC singer for duets/trios
-        var character = note.singerIndex == 0 ? "opponent" : 'opponent${note.singerIndex}';
-
-        switch (note.kind)
-        {
-            case TAP, HOLD_HEAD:
-                triggerAnimation(character, animIndexToName(note.animLane));
-            case HOLD_TICK, HOLD_TAIL:
-        }
-    }
-
-    private function playPlayerMiss(note:Note):Void
-    {
-        triggerAnimation("player", "miss");
     }
 
     private function playIdleBop():Void
     {
-        triggerAnimation("player", "idle");
-        triggerAnimation("opponent", "idle");
+        // Trigger idle for all loaded characters
+        for (characterID in loadedCharacters)
+        {
+            triggerAnimation(characterID, "idle");
+        }
     }
 
-    private function animIndexToName(animLane:Int):String
+    private function animDirectionToName(animDirection:Int):String
     {
-        return switch (animLane)
+        return switch (animDirection)
         {
             case 0: "singLEFT";
             case 1: "singDOWN";
@@ -146,21 +138,9 @@ class CharacterAnimationBridge extends FlxBasic
         }
     }
 
-    private function triggerAnimation(character:String, anim:String):Void
+    private function triggerAnimation(characterID:String, anim:String):Void
     {
-        // Resolve generic role to actual character ID
-        var characterID = characterMap.exists(character) ? characterMap.get(character) : character;
-        
-        // DIAGNOSTIC: Log character resolution
-        if (characterMap.exists(character))
-        {
-            trace('[CharacterAnimationBridge] triggerAnimation: role="${character}" -> ID="${characterID}", anim="${anim}"');
-        }
-        else
-        {
-            trace('[CharacterAnimationBridge] WARNING: Role "${character}" not mapped, using as-is, anim="${anim}"');
-        }
-        
+        // Direct dispatch to character sprite manager
         characterSprites.play(characterID, anim);
     }
 }

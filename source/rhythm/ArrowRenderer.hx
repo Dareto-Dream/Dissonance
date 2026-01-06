@@ -286,8 +286,8 @@ class ArrowRenderer extends FlxGroup
      */
     public function onNoteHit(note:Note, rating:HitRating):Void
     {
-        // Only render player notes
-        if (!note.isPlayerNote()) return;
+        // Only render judged notes (positive lanes that require input)
+        if (!note.isJudged) return;  // ✅ FIXED: was note.isPlayerNote()
 
         var arrow = arrows[note.inputLane];
 
@@ -317,8 +317,8 @@ class ArrowRenderer extends FlxGroup
      */
     public function onNoteMiss(note:Note):Void
     {
-        // Only render player notes
-        if (!note.isPlayerNote()) return;
+        // Only render judged notes
+        if (!note.isJudged) return;  // ✅ FIXED: was note.isPlayerNote()
 
         var arrow = arrows[note.inputLane];
 
@@ -327,6 +327,7 @@ class ArrowRenderer extends FlxGroup
         {
             arrow.animation.play("miss", true);
 
+            // Return to idle after feedback
             new FlxTimer().start(0.1, function(t:FlxTimer) {
                 if (arrow.animation.exists("idle"))
                     arrow.animation.play("idle");
@@ -334,8 +335,8 @@ class ArrowRenderer extends FlxGroup
         }
         else
         {
-            // Debug fallback: flash dark
-            arrow.color = 0xFF444444;
+            // Debug fallback: flash red
+            arrow.color = 0xFFFF0000;
             new FlxTimer().start(0.1, function(t:FlxTimer) {
                 arrow.color = getDebugColor(note.inputLane);
             });
@@ -343,17 +344,18 @@ class ArrowRenderer extends FlxGroup
     }
 
     /**
-     * Called when player presses a lane with no valid note.
+     * Called on ghost tap (input with no note in window).
      */
-    public function onGhostTap(lane:Int):Void
+    public function onGhostTap(inputLane:Int):Void
     {
-        var arrow = arrows[lane];
+        var arrow = arrows[inputLane];
 
         // Try animation if available
-        if (arrow.animation != null && arrow.animation.exists("press"))
+        if (arrow.animation != null && arrow.animation.exists("miss"))
         {
-            arrow.animation.play("press", true);
+            arrow.animation.play("miss", true);
 
+            // Quick return to idle
             new FlxTimer().start(0.05, function(t:FlxTimer) {
                 if (arrow.animation.exists("idle"))
                     arrow.animation.play("idle");
@@ -361,10 +363,10 @@ class ArrowRenderer extends FlxGroup
         }
         else
         {
-            // Debug fallback: brief darken
-            arrow.color = 0xFFAAAAAA;
+            // Debug fallback: flash dark red
+            arrow.color = 0xFF880000;
             new FlxTimer().start(0.05, function(t:FlxTimer) {
-                arrow.color = getDebugColor(lane);
+                arrow.color = getDebugColor(inputLane);
             });
         }
     }

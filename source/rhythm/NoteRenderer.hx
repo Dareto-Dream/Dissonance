@@ -94,8 +94,9 @@ class NoteRenderer extends FlxGroup
      */
     public function spawnNote(note:Note):Void
     {
-        // Only render player notes (NPC notes handled by character renderer)
-        if (!note.isPlayerNote()) return;
+        // Only render judged notes (notes that require player input)
+        // Animation-only notes (negative lanes) have no visual representation
+        if (!note.isJudged) return;  // ✅ FIXED: was note.isPlayerNote()
 
         var sprite = new FlxSprite();
 

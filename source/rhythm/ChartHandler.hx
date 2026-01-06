@@ -2,7 +2,6 @@ package rhythm;
 
 import rhythm.ChartData;
 import rhythm.Note.NoteKind;
-import rhythm.Note.NoteOwner;
 import rhythm.Note;
 
 /**
@@ -10,6 +9,12 @@ import rhythm.Note;
  * ============
  * Expands Psych-style chart data into a flat, deterministic list of
  * runtime Notes.
+ *
+ * NEW DESIGN (Post-Refactor):
+ * - No "player vs opponent" lanes
+ * - Positive lanes (≥0) drive judgement + animation
+ * - Negative lanes (<0) drive animation only
+ * - Performers assigned from singers array
  *
  * After construction:
  * - Notes are absolute-time (ms)
@@ -39,6 +44,9 @@ class ChartHandler
             // Pre-calc step length for this section
             var crochetMs = 60000.0 / sectionBpm;
             var stepMs = crochetMs / 4.0;
+            
+            // Track positive note counter per timestamp for sequential assignment
+            var positiveCounterByTimestamp:Map<Float, Int> = new Map();
 
             for (raw in section.sectionNotes)
             {
@@ -58,9 +66,15 @@ class ChartHandler
                 var isSwing = (noteType == ChartConstants.NOTE_SWING);
 
                 // ------------------------------------------------------------------
-                // DECODE LANE (canonical interpretation)
+                // DECODE LANE (NEW SEMANTICS)
                 // ------------------------------------------------------------------
-                var decoded = decodeLane(lane, section.mustHitSection, section.playerLaneCount);
+                var decoded = decodeLane(
+                    lane,
+                    section.mustHitSection,
+                    section.singers,
+                    positiveCounterByTimestamp,
+                    timeMs
+                );
 
                 if (holdMs <= 0)
                 {
@@ -71,7 +85,6 @@ class ChartHandler
                         timeMs,
                         lane,
                         NoteKind.TAP,
-                        decoded.owner,
                         isSwing
                     );
 
@@ -79,9 +92,11 @@ class ChartHandler
                     tap.chartIndex = chartIndex++;
 
                     // Set decoded fields
+                    tap.isJudged = decoded.isJudged;
+                    tap.characterID = decoded.characterID;
+                    tap.performerIndex = decoded.performerIndex;
+                    tap.animDirection = decoded.animDirection;
                     tap.inputLane = decoded.inputLane;
-                    tap.animLane = decoded.animLane;
-                    tap.singerIndex = decoded.singerIndex;
 
                     notes.push(tap);
                 }
@@ -94,7 +109,6 @@ class ChartHandler
                         timeMs,
                         lane,
                         NoteKind.HOLD_HEAD,
-                        decoded.owner,
                         isSwing
                     );
 
@@ -102,9 +116,11 @@ class ChartHandler
                     head.chartIndex = chartIndex++;
 
                     // Set decoded fields
+                    head.isJudged = decoded.isJudged;
+                    head.characterID = decoded.characterID;
+                    head.performerIndex = decoded.performerIndex;
+                    head.animDirection = decoded.animDirection;
                     head.inputLane = decoded.inputLane;
-                    head.animLane = decoded.animLane;
-                    head.singerIndex = decoded.singerIndex;
 
                     notes.push(head);
 
@@ -120,17 +136,18 @@ class ChartHandler
                             t,
                             lane,
                             NoteKind.HOLD_TICK,
-                            decoded.owner,
                             isSwing
                         );
 
                         tick.sectionIndex = sectionIndex;
                         tick.chartIndex = chartIndex++;
 
-                        // Set decoded fields
+                        // Set decoded fields (same as head)
+                        tick.isJudged = decoded.isJudged;
+                        tick.characterID = decoded.characterID;
+                        tick.performerIndex = decoded.performerIndex;
+                        tick.animDirection = decoded.animDirection;
                         tick.inputLane = decoded.inputLane;
-                        tick.animLane = decoded.animLane;
-                        tick.singerIndex = decoded.singerIndex;
 
                         notes.push(tick);
                         t += stepMs;
@@ -143,17 +160,18 @@ class ChartHandler
                         endTime,
                         lane,
                         NoteKind.HOLD_TAIL,
-                        decoded.owner,
                         isSwing
                     );
 
                     tail.sectionIndex = sectionIndex;
                     tail.chartIndex = chartIndex++;
 
-                    // Set decoded fields
+                    // Set decoded fields (same as head)
+                    tail.isJudged = decoded.isJudged;
+                    tail.characterID = decoded.characterID;
+                    tail.performerIndex = decoded.performerIndex;
+                    tail.animDirection = decoded.animDirection;
                     tail.inputLane = decoded.inputLane;
-                    tail.animLane = decoded.animLane;
-                    tail.singerIndex = decoded.singerIndex;
 
                     notes.push(tail);
                 }
@@ -167,11 +185,16 @@ class ChartHandler
     }
 
     // ------------------------------------------------------------------
-    // Canonical lane decoder
+    // Canonical lane decoder (NEW SEMANTICS)
     // ------------------------------------------------------------------
 
     /**
      * Decode raw lane index into semantic gameplay fields.
+     * 
+     * NEW DESIGN:
+     * - mustHitSection determines if POSITIVE lanes are judged
+     * - Positive lanes (≥0) animate from START of singers list (sequential per timestamp)
+     * - Negative lanes (<0) animate from END of singers list (grouped by 4)
      * 
      * This is the SINGLE SOURCE OF TRUTH for lane interpretation.
      * All gameplay logic MUST use decoded fields, never raw lane.
@@ -179,57 +202,90 @@ class ChartHandler
     private static function decodeLane(
         lane:Int,
         mustHitSection:Bool,
-        playerLaneCount:Null<Int>
-    ):{ owner:NoteOwner, inputLane:Int, animLane:Int, singerIndex:Int }
+        singers:Array<String>,
+        positiveCounterByTimestamp:Map<Float, Int>,
+        timeMs:Float
+    ):{ isJudged:Bool, characterID:String, performerIndex:Int, animDirection:Int, inputLane:Int }
     {
-        var result:{ owner:NoteOwner, inputLane:Int, animLane:Int, singerIndex:Int };
+        var isJudged:Bool;
+        var performerIndex:Int;
+        var characterID:String = "";
+        var animDirection:Int;
+        var inputLane:Int;
         
-        if (mustHitSection)
+        // Determine if note is judged
+        isJudged = mustHitSection && (lane >= 0);
+        
+        // Determine animation direction
+        animDirection = Std.int(Math.abs(lane)) % 4;
+        
+        // Determine performer
+        if (lane >= 0)
         {
-            // Player section - playerLaneCount MUST be present
-            if (playerLaneCount == null)
+            // POSITIVE LANE: Animate from START of singers list, sequential per timestamp
+            
+            // Get current counter for this timestamp
+            var count = positiveCounterByTimestamp.exists(timeMs)
+                ? positiveCounterByTimestamp.get(timeMs)
+                : 0;
+            
+            performerIndex = count;
+            
+            // Increment counter for next positive note at this timestamp
+            positiveCounterByTimestamp.set(timeMs, count + 1);
+            
+            // Resolve character ID
+            if (performerIndex < singers.length)
             {
-                throw 'Chart error: playerLaneCount missing in mustHitSection (lane ${lane})';
-            }
-
-            if (lane < playerLaneCount)
-            {
-                // Player note
-                result = {
-                    owner: PLAYER,
-                    inputLane: lane,
-                    animLane: lane % 4,
-                    singerIndex: -1
-                };
+                characterID = singers[performerIndex];
             }
             else
             {
-                // NPC note in player section
-                var npcLane = lane - playerLaneCount;
-                result = {
-                    owner: OPPONENT,
-                    inputLane: -1,
-                    animLane: npcLane % 4,
-                    singerIndex: Std.int(Math.floor(npcLane / 4))
-                };
+                // More notes than singers - wrap or ignore (design choice: ignore animation)
+                characterID = "";  // No character (will be skipped by animation bridge)
+                trace('[ChartHandler] WARNING: More positive notes than singers at time ${timeMs}');
             }
+            
+            // Input lane (for judged notes, same as raw lane)
+            inputLane = isJudged ? lane : -1;
         }
         else
         {
-            // NPC section - playerLaneCount NOT consulted
-            result = {
-                owner: OPPONENT,
-                inputLane: -1,
-                animLane: lane % 4,
-                singerIndex: Std.int(Math.floor(lane / 4))
-            };
+            // NEGATIVE LANE: Animate from END of singers list, grouped by 4
+            
+            var absLane = Std.int(Math.abs(lane));
+            var groupIndex = Std.int(Math.floor(absLane / 4));
+            
+            performerIndex = (singers.length - 1) - groupIndex;
+            
+            // Resolve character ID
+            if (performerIndex >= 0 && performerIndex < singers.length)
+            {
+                characterID = singers[performerIndex];
+            }
+            else
+            {
+                // Group index out of range
+                characterID = "";  // No character
+                trace('[ChartHandler] WARNING: Negative lane group ${groupIndex} out of range for singers at time ${timeMs}');
+            }
+            
+            // Negative lanes are never judged
+            inputLane = -1;
         }
         
         // DIAGNOSTIC: Log decode results
-        var ownerStr = result.owner == PLAYER ? "PLAYER" : "OPPONENT";
-        trace('[ChartHandler.decodeLane] lane=${lane}, mustHit=${mustHitSection}, playerLanes=${playerLaneCount} => owner=${ownerStr}, inputLane=${result.inputLane}, animLane=${result.animLane}, singerIndex=${result.singerIndex}');
+        trace('[ChartHandler.decodeLane] lane=${lane}, mustHit=${mustHitSection}, timeMs=${timeMs} => ' +
+              'isJudged=${isJudged}, performerIdx=${performerIndex}, charID="${characterID}", ' +
+              'animDir=${animDirection}, inputLane=${inputLane}');
         
-        return result;
+        return {
+            isJudged: isJudged,
+            characterID: characterID,
+            performerIndex: performerIndex,
+            animDirection: animDirection,
+            inputLane: inputLane
+        };
     }
 
     // ------------------------------------------------------------------

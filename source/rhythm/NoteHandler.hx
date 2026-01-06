@@ -6,13 +6,17 @@ import rhythm.Conductor;
 import rhythm.JudgementSystem.HitRating;
 import rhythm.JudgementSystem;
 import rhythm.Note.NoteKind;
-import rhythm.Note.NoteOwner;
 import rhythm.Note;
 
 /**
  * NoteHandler
  * ===========
  * Core gameplay logic.
+ *
+ * NEW DESIGN (Post-Refactor):
+ * - No "player vs opponent" concept
+ * - Notes are either judged or animation-only
+ * - Judgement based on note.isJudged field
  *
  * Notes flow:
  *   ChartHandler -> ACTIVE -> JUDGED -> REMOVED
@@ -69,7 +73,7 @@ class NoteHandler
         var nowMs = conductor.songPositionMs;
 
         spawnNotes(nowMs);
-        handleOpponentAutoplay(nowMs);
+        handleAnimationOnlyNotes(nowMs);
         handleMisses(nowMs);
     }
 
@@ -137,23 +141,25 @@ class NoteHandler
     }
 
     // ------------------------------------------------------------------
-    // Opponent autoplay
+    // Animation-only note handling
     // ------------------------------------------------------------------
 
     /**
-     * Handle opponent notes automatically on timing.
-     * Opponents "auto-hit" notes when their scheduled time arrives.
+     * Handle animation-only notes automatically on timing.
+     * Animation-only notes "auto-hit" when their scheduled time arrives.
      * This is separate from player hit/miss logic.
+     * 
+     * RENAMED from handleOpponentAutoplay (semantic clarity).
      */
-    private function handleOpponentAutoplay(nowMs:Float):Void
+    private function handleAnimationOnlyNotes(nowMs:Float):Void
     {
         var autoplayWindow = 50.0; // Small window around note time for autoplay
         var toAutoplay:Array<Note> = [];
 
         for (note in activeNotes)
         {
-            // Only process opponent notes
-            if (note.isPlayerNote()) continue;
+            // Only process animation-only notes
+            if (note.isJudged) continue;  // ✅ NEW: Skip judged notes
             if (note.judged) continue;
 
             // Check if note time has been reached (within small window)
@@ -191,7 +197,7 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isPlayerNote()) continue;
+            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
             if (note.judged) continue;
 
             if (nowMs > note.timeMs + missWindow)
@@ -219,7 +225,7 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isPlayerNote()) continue;
+            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
             if (note.judged) continue;
             if (note.inputLane != inputLane) continue;
 
@@ -243,7 +249,7 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isPlayerNote()) continue;
+            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
             if (note.judged) continue;
             if (note.inputLane != inputLane) continue;
             if (note.kind != NoteKind.HOLD_TAIL) continue;
