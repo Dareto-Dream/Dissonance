@@ -1,12 +1,16 @@
 package core.dialogue;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import util.MobileSupport;
 
 // Optional helper typedef for clarity
 typedef ChoiceEntry =
 {
+	var background:FlxSprite;
 	var textObj:FlxText;
 	var target:String;
 };
@@ -15,7 +19,7 @@ class ChoiceSystem
 {
 	static var uiGroup:FlxGroup;
 
-	// Stored clickable choices for manual mouse detection
+	// Stored clickable choices for manual pointer detection
 	static var choiceTexts:Array<ChoiceEntry> = [];
 
 	// Callback to run when a choice is selected
@@ -107,19 +111,31 @@ class ChoiceSystem
 		// Store callback for when player actually clicks something
 		choiceCallback = callback;
 
-		var yStart = FlxG.height - 220;
-		var spacing = 40;
+		var sideMargin = MobileSupport.choiceSideMargin();
+		var spacing = MobileSupport.choiceSpacing();
+		var buttonHeight = MobileSupport.choiceButtonHeight();
+		var totalHeight = (choices.length * buttonHeight) + ((choices.length - 1) * (spacing - buttonHeight));
+		var yStart = FlxG.height - MobileSupport.choiceBottomMargin() - totalHeight;
+		var buttonWidth = FlxG.width - (sideMargin * 2);
 
 		for (i in 0...choices.length)
 		{
 			var c = choices[i];
+			var y = yStart + i * spacing;
 
-			var txt = new FlxText(60, yStart + i * spacing, FlxG.width - 120, "> " + c.text);
-			txt.setFormat(null, 24, 0xffffff, "left");
+			var background = new FlxSprite(sideMargin, y);
+			background.makeGraphic(Std.int(buttonWidth), Std.int(buttonHeight), FlxColor.fromRGB(16, 12, 28));
+			background.scrollFactor.set(0, 0);
+			background.alpha = MobileSupport.isMobile() ? 0.88 : 0.72;
+			uiGroup.add(background);
+
+			var txt = new FlxText(sideMargin + 18, y + (MobileSupport.isMobile() ? 12 : 8), buttonWidth - 36, "> " + c.text);
+			txt.setFormat(null, MobileSupport.choiceFontSize(), 0xffffff, "left");
 			txt.scrollFactor.set(0, 0);
 			uiGroup.add(txt);
 
 			choiceTexts.push({
+				background: background,
 				textObj: txt,
 				target: c.target
 			});
@@ -133,10 +149,18 @@ class ChoiceSystem
 			// Remove only our choice texts
 			for (entry in choiceTexts)
 			{
+				if (entry != null && entry.background != null)
+				{
+					entry.background.kill();
+					uiGroup.remove(entry.background);
+					entry.background.destroy();
+				}
+
 				if (entry != null && entry.textObj != null)
 				{
 					entry.textObj.kill();
 					uiGroup.remove(entry.textObj);
+					entry.textObj.destroy();
 				}
 			}
 		}
@@ -151,27 +175,37 @@ class ChoiceSystem
 		if (choiceCallback == null || choiceTexts == null || choiceTexts.length == 0)
 			return;
 
-		if (FlxG.mouse.justPressed)
+		for (entry in choiceTexts)
 		{
-			for (entry in choiceTexts)
+			if (entry == null || entry.background == null || entry.textObj == null)
 			{
-				if (entry != null && entry.textObj != null && FlxG.mouse.overlaps(entry.textObj))
+				continue;
+			}
+
+			var highlighted = MobileSupport.pointerOverlaps(entry.background) || MobileSupport.pointerOverlaps(entry.textObj);
+			entry.background.alpha = highlighted ? 0.96 : (MobileSupport.isMobile() ? 0.88 : 0.72);
+			entry.textObj.color = highlighted ? FlxColor.WHITE : FlxColor.fromRGB(232, 232, 255);
+		}
+
+		for (entry in choiceTexts)
+		{
+			if (entry == null || entry.background == null || entry.textObj == null)
+			{
+				continue;
+			}
+
+			if (MobileSupport.pointerJustPressedOver(entry.background) || MobileSupport.pointerJustPressedOver(entry.textObj))
+			{
+				trace("CHOICE SELECTED: " + entry.textObj.text);
+
+				var target = entry.target;
+				var cb = choiceCallback;
+				clearChoices();
+				if (cb != null)
 				{
-					trace("CHOICE SELECTED: " + entry.textObj.text);
-
-					var target = entry.target;
-					// Store callback before we clear
-					var cb = choiceCallback;
-
-					// Clear UI (this will null choiceCallback)
-					clearChoices();
-
-					// Now call the stored callback
-					if (cb != null)
-						cb(target);
-
-					break;
+					cb(target);
 				}
+				break;
 			}
 		}
 	}

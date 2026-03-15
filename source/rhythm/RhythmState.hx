@@ -19,6 +19,7 @@ import rhythm.JudgementSystem;
 import rhythm.Note;
 import rhythm.NoteHandler;
 import rhythm.NoteRenderer;
+import util.MobileSupport;
 
 class RhythmState extends FlxState
 {
@@ -37,6 +38,9 @@ class RhythmState extends FlxState
 	private var characterSprites:CharacterSpriteManager;
 	private var characterBridge:CharacterAnimationBridge;
 	private var isFinishingSong:Bool = false;
+	private var touchPads:Array<FlxSprite> = [];
+	private var touchPadLabels:Array<FlxText> = [];
+	private var touchLaneHeld:Array<Bool> = [false, false, false, false];
 
 	private var devOverlayBg:FlxSprite;
 	private var devOverlayText:FlxText;
@@ -51,6 +55,7 @@ class RhythmState extends FlxState
 			throw 'RhythmState could not find chart at ${chartPath}';
 
 		var chart:ChartData = cast haxe.Json.parse(Assets.getText(chartPath));
+		configureMobileLayout();
 
 		var stageSprite = createStageSprite(chart.song.stage);
 		if (stageSprite != null)
@@ -126,6 +131,11 @@ class RhythmState extends FlxState
 		if (DevTools.ENABLED)
 		{
 			createDevOverlay();
+		}
+
+		if (MobileSupport.isMobile())
+		{
+			createTouchControls();
 		}
 
 		conductor.start();
@@ -252,6 +262,9 @@ class RhythmState extends FlxState
 
 	private function handleInput():Void
 	{
+		updateTouchInput();
+
+		#if FLX_KEYBOARD
 		if (FlxG.keys.justPressed.A) noteHandler.onKeyPress(0);
 		if (FlxG.keys.justPressed.S) noteHandler.onKeyPress(1);
 		if (FlxG.keys.justPressed.D) noteHandler.onKeyPress(2);
@@ -261,6 +274,92 @@ class RhythmState extends FlxState
 		if (FlxG.keys.justReleased.S) noteHandler.onKeyRelease(1);
 		if (FlxG.keys.justReleased.D) noteHandler.onKeyRelease(2);
 		if (FlxG.keys.justReleased.F) noteHandler.onKeyRelease(3);
+		#end
+	}
+
+	private function configureMobileLayout():Void
+	{
+		if (MobileSupport.isMobile())
+		{
+			ArrowRenderer.VISUAL_SCALE = 1.3;
+			ArrowRenderer.LAYOUT_RADIUS = 130;
+			ArrowRenderer.LAYOUT_CENTER_Y_OFFSET = -18;
+			NoteRenderer.VISUAL_SCALE = 1.35;
+			NoteRenderer.SPAWN_RADIUS = 330;
+			return;
+		}
+
+		ArrowRenderer.VISUAL_SCALE = 1.0;
+		ArrowRenderer.LAYOUT_RADIUS = 150;
+		ArrowRenderer.LAYOUT_CENTER_Y_OFFSET = 50;
+		NoteRenderer.VISUAL_SCALE = 1.0;
+		NoteRenderer.SPAWN_RADIUS = 400;
+	}
+
+	private function createTouchControls():Void
+	{
+		var gap = MobileSupport.rhythmPadGap();
+		var bottomMargin = MobileSupport.rhythmPadBottomMargin();
+		var padHeight = MobileSupport.rhythmPadHeight();
+		var sideMargin = 18.0;
+		var padWidth = (FlxG.width - (sideMargin * 2) - (gap * 3)) / 4;
+		var y = FlxG.height - padHeight - bottomMargin;
+		var labels = ["LEFT", "DOWN", "UP", "RIGHT"];
+		var colors = [
+			FlxColor.fromRGB(200, 70, 70),
+			FlxColor.fromRGB(80, 180, 90),
+			FlxColor.fromRGB(80, 120, 220),
+			FlxColor.fromRGB(220, 190, 70)
+		];
+
+		touchPads = [];
+		touchPadLabels = [];
+		touchLaneHeld = [false, false, false, false];
+
+		for (lane in 0...4)
+		{
+			var x = sideMargin + lane * (padWidth + gap);
+			var pad = new FlxSprite(x, y);
+			pad.makeGraphic(Std.int(padWidth), Std.int(padHeight), colors[lane]);
+			pad.scrollFactor.set(0, 0);
+			pad.alpha = MobileSupport.rhythmPadIdleAlpha();
+			add(pad);
+			touchPads.push(pad);
+
+			var label = new FlxText(x, y + (padHeight / 2) - 20, padWidth, labels[lane]);
+			label.setFormat(null, 22, FlxColor.WHITE, "center");
+			label.scrollFactor.set(0, 0);
+			add(label);
+			touchPadLabels.push(label);
+		}
+	}
+
+	private function updateTouchInput():Void
+	{
+		if (!MobileSupport.isMobile() || touchPads == null || touchPads.length == 0)
+		{
+			return;
+		}
+
+		for (lane in 0...touchPads.length)
+		{
+			var isPressed = MobileSupport.pointerPressedOver(touchPads[lane]);
+			if (isPressed != touchLaneHeld[lane])
+			{
+				if (isPressed)
+				{
+					noteHandler.onKeyPress(lane);
+				}
+				else
+				{
+					noteHandler.onKeyRelease(lane);
+				}
+			}
+
+			touchLaneHeld[lane] = isPressed;
+			touchPads[lane].alpha = isPressed ? MobileSupport.rhythmPadPressedAlpha() : MobileSupport.rhythmPadIdleAlpha();
+			touchPadLabels[lane].alpha = isPressed ? 1.0 : 0.88;
+		}
 	}
 
 	private function onNoteSpawn(note:Note):Void

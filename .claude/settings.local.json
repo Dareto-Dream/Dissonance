@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT\")",
+      "Bash(\"C:/Users/steak/AppData/Local/Android/Sdk/cmdline-tools/latest/bin/sdkmanager.bat\" \"ndk;21.4.7075529\")"
+    ]
+  }
+}

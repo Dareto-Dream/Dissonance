@@ -16,6 +16,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import rhythm.RhythmCompletionBridge;
+import util.MobileSupport;
 import vn.RhythmBridge;
 import vn.VNCommands;
 import vn.VNConfig;
@@ -49,7 +50,9 @@ class VNState extends FlxState
 	{
 		super.create();
 
-		FlxG.mouse.visible = true;
+		#if FLX_MOUSE
+		FlxG.mouse.visible = !MobileSupport.isMobile();
+		#end
 
 		var returnContext:VNReturnContext = null;
 		if (VNReturnContext.hasPending())
@@ -263,6 +266,7 @@ class VNState extends FlxState
 
 	private function handleChoiceHotkeys():Void
 	{
+		#if FLX_KEYBOARD
 		if (!FlxG.keys.pressed.CONTROL || !ChoiceSystem.hasActiveChoices())
 		{
 			return;
@@ -283,6 +287,7 @@ class VNState extends FlxState
 		{
 			DevTools.notify('Picked choice ${selectedIndex + 1}');
 		}
+		#end
 	}
 
 	private function updateFastForward(elapsed:Float):Void

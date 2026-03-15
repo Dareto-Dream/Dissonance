@@ -41,6 +41,7 @@ class ArrowRenderer extends FlxGroup
      */
     public static var ARROW_FRAME_WIDTH:Int = 64;
     public static var ARROW_FRAME_HEIGHT:Int = 64;
+    public static var VISUAL_SCALE:Float = 1.0;
 
     /**
      * Enable debug rendering (colored boxes) if assets fail to load.
@@ -141,6 +142,8 @@ class ArrowRenderer extends FlxGroup
                 }
             }
 
+            applyVisualScale(arrow);
+
             arrows.push(arrow);
             add(arrow);
         }
@@ -160,6 +163,8 @@ class ArrowRenderer extends FlxGroup
             // Determine center point
             var centerX = LAYOUT_CENTER_X >= 0 ? LAYOUT_CENTER_X : FlxG.width / 2;
             var centerY = LAYOUT_CENTER_Y >= 0 ? LAYOUT_CENTER_Y : (FlxG.height / 2) + LAYOUT_CENTER_Y_OFFSET;
+            var renderWidth = ARROW_FRAME_WIDTH * VISUAL_SCALE;
+            var renderHeight = ARROW_FRAME_HEIGHT * VISUAL_SCALE;
 
             trace('[ArrowRenderer] Radial layout: center=(${centerX}, ${centerY}), radius=${LAYOUT_RADIUS}');
 
@@ -174,8 +179,8 @@ class ArrowRenderer extends FlxGroup
                 var y = centerY + Math.sin(angle) * LAYOUT_RADIUS;
 
                 // Center the sprite on the calculated point
-                x -= ARROW_FRAME_WIDTH / 2;
-                y -= ARROW_FRAME_HEIGHT / 2;
+                x -= renderWidth / 2;
+                y -= renderHeight / 2;
 
                 positions.push({x: x, y: y});
             }
@@ -262,9 +267,24 @@ class ArrowRenderer extends FlxGroup
 
         var arrow = arrows[inputLane];
         return {
-            x: arrow.x + (ARROW_FRAME_WIDTH / 2),
-            y: arrow.y + (ARROW_FRAME_HEIGHT / 2)
+            x: arrow.x + (arrow.width / 2),
+            y: arrow.y + (arrow.height / 2)
         };
+    }
+
+    private function applyVisualScale(sprite:FlxSprite):Void
+    {
+        if (sprite == null || VISUAL_SCALE == 1.0)
+        {
+            return;
+        }
+
+        var centerX = sprite.x + (ARROW_FRAME_WIDTH / 2);
+        var centerY = sprite.y + (ARROW_FRAME_HEIGHT / 2);
+        sprite.setGraphicSize(Std.int(ARROW_FRAME_WIDTH * VISUAL_SCALE), Std.int(ARROW_FRAME_HEIGHT * VISUAL_SCALE));
+        sprite.updateHitbox();
+        sprite.x = centerX - (sprite.width / 2);
+        sprite.y = centerY - (sprite.height / 2);
     }
 
     // ------------------------------------------------------------------

@@ -23,7 +23,7 @@ enum abstract RhythmDevMode(Int) from Int to Int
 
 class DevTools
 {
-	public static var ENABLED:Bool = true;
+	public static var ENABLED:Bool = false;
 	public static var SHOW_OVERLAY:Bool = true;
 	public static var LOG_LEVEL:DevLogLevel = INFO;
 
@@ -145,12 +145,20 @@ class DevTools
 
 	public static function devChordPressed(digit:Int):Bool
 	{
+		#if FLX_KEYBOARD
 		return chordPressed(digit, false, false);
+		#else
+		return false;
+		#end
 	}
 
 	public static function shiftDevChordPressed(digit:Int):Bool
 	{
+		#if FLX_KEYBOARD
 		return chordPressed(digit, true, false);
+		#else
+		return false;
+		#end
 	}
 
 	public static function sceneCount():Int
@@ -359,6 +367,7 @@ class DevTools
 
 	private static function chordPressed(digit:Int, shift:Bool, control:Bool):Bool
 	{
+		#if FLX_KEYBOARD
 		if (!FlxG.keys.pressed.M && !FlxG.keys.justPressed.M)
 		{
 			return false;
@@ -385,10 +394,14 @@ class DevTools
 			|| digitJustPressed(digit)
 			|| (shift && FlxG.keys.justPressed.SHIFT)
 			|| (control && FlxG.keys.justPressed.CONTROL);
+		#else
+		return false;
+		#end
 	}
 
 	private static function digitPressed(digit:Int):Bool
 	{
+		#if FLX_KEYBOARD
 		return switch (digit)
 		{
 			case 0: FlxG.keys.pressed.ZERO || FlxG.keys.pressed.NUMPADZERO;
@@ -403,10 +416,14 @@ class DevTools
 			case 9: FlxG.keys.pressed.NINE || FlxG.keys.pressed.NUMPADNINE;
 			default: false;
 		};
+		#else
+		return false;
+		#end
 	}
 
 	private static function digitJustPressed(digit:Int):Bool
 	{
+		#if FLX_KEYBOARD
 		return switch (digit)
 		{
 			case 0: FlxG.keys.justPressed.ZERO || FlxG.keys.justPressed.NUMPADZERO;
@@ -421,5 +438,8 @@ class DevTools
 			case 9: FlxG.keys.justPressed.NINE || FlxG.keys.justPressed.NUMPADNINE;
 			default: false;
 		};
+		#else
+		return false;
+		#end
 	}
 }

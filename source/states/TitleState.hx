@@ -12,6 +12,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import openfl.Assets;
 import rhythm.RhythmState;
+import util.MobileSupport;
 
 class TitleState extends FlxState
 {
@@ -32,7 +33,9 @@ class TitleState extends FlxState
 	{
 		super.create();
 
-		FlxG.mouse.visible = true;
+		#if FLX_MOUSE
+		FlxG.mouse.visible = !MobileSupport.isMobile();
+		#end
 
 		// Background
 		createBackground();
@@ -54,8 +57,8 @@ class TitleState extends FlxState
         logo.origin.set(0, 0);
         logo.offset.set(0, 0);
 
-        var startScale:Float = 0.6;
-        var endScale:Float = 0.2;
+        var startScale:Float = MobileSupport.isMobile() ? 0.7 : 0.6;
+        var endScale:Float = MobileSupport.isMobile() ? 0.24 : 0.2;
 
         logo.setGraphicSize(Std.int(logo.frameWidth * startScale));
         logo.updateHitbox();
@@ -86,8 +89,8 @@ class TitleState extends FlxState
         });
 
 		// Subtitle (positioned below the logo after it scales to ~181 pixels)
-		subtitle = new FlxText(40, 240, 0, "A VISUAL NOVEL");
-		subtitle.setFormat(null, 16, FlxColor.fromRGB(138, 43, 226), LEFT); // Purple
+		subtitle = new FlxText(MobileSupport.titleMenuX(), MobileSupport.isMobile() ? 278 : 240, 0, "A VISUAL NOVEL");
+		subtitle.setFormat(null, MobileSupport.titleSubtitleFontSize(), FlxColor.fromRGB(138, 43, 226), LEFT); // Purple
 		subtitle.alpha = 0;
 		add(subtitle);
 
@@ -100,31 +103,33 @@ class TitleState extends FlxState
 		menuButtons = new FlxTypedGroup<MenuButton>();
 		add(menuButtons);
 
-		var buttonY = FlxG.height - 280;
-		var buttonSpacing = 70;
+		var buttonY = FlxG.height - (MobileSupport.isMobile() ? 420 : 280);
+		var buttonSpacing = MobileSupport.titleButtonSpacing();
 
-		var playBtn = new MenuButton(40, buttonY, "PLAY", function() {
+		var menuX = MobileSupport.titleMenuX();
+
+		var playBtn = new MenuButton(menuX, buttonY, "PLAY", function() {
 			startGame();
 		});
 		menuButtons.add(playBtn);
 
-		var loadBtn = new MenuButton(40, buttonY + buttonSpacing, "LOAD GAME", function() {
+		var loadBtn = new MenuButton(menuX, buttonY + buttonSpacing, "LOAD GAME", function() {
 			showStatus("Load game is not available yet.");
 		});
 		menuButtons.add(loadBtn);
 
-		var saveBtn = new MenuButton(40, buttonY + buttonSpacing * 2, "SAVE GAME", function() {
+		var saveBtn = new MenuButton(menuX, buttonY + buttonSpacing * 2, "SAVE GAME", function() {
 			showStatus("Save game is only available in-story.");
 		});
 		menuButtons.add(saveBtn);
 
-		var optionsBtn = new MenuButton(40, buttonY + buttonSpacing * 3, "OPTIONS", function() {
+		var optionsBtn = new MenuButton(menuX, buttonY + buttonSpacing * 3, "OPTIONS", function() {
 			showStatus("Options are not available yet.");
 		});
 		menuButtons.add(optionsBtn);
 
-		statusText = new FlxText(40, buttonY + buttonSpacing * 4 + 12, 420, "");
-		statusText.setFormat(null, 14, FlxColor.fromRGB(220, 210, 255), LEFT);
+		statusText = new FlxText(menuX, buttonY + buttonSpacing * 4 + 12, FlxG.width - Std.int(menuX * 2), "");
+		statusText.setFormat(null, MobileSupport.titleStatusFontSize(), FlxColor.fromRGB(220, 210, 255), LEFT);
 		statusText.alpha = 0;
 		add(statusText);
 
@@ -236,6 +241,7 @@ class TitleState extends FlxState
 		}
 
 		// Keyboard navigation
+		#if FLX_KEYBOARD
 		if (FlxG.keys.justPressed.UP)
 		{
 			selectedIndex--;
@@ -254,6 +260,7 @@ class TitleState extends FlxState
 		{
 			menuButtons.members[selectedIndex].onClick();
 		}
+		#end
 	}
 
 	private function updateSelection():Void
@@ -424,17 +431,22 @@ class MenuButton extends FlxSprite
 
 		this.callback = callback;
 
+		var buttonWidth = MobileSupport.titleButtonWidth();
+		var buttonHeight = MobileSupport.titleButtonHeight();
+		var fontSize = MobileSupport.isMobile() ? 28 : 20;
+
 		// Button background
-		makeGraphic(320, 50, FlxColor.TRANSPARENT);
+		makeGraphic(buttonWidth, buttonHeight, FlxColor.fromRGB(18, 12, 32));
+		alpha = 0.82;
 
 		// Selection indicator
 		indicator = new FlxSprite(x - 15, y + 10);
-		indicator.makeGraphic(6, 30, baseColor);
+		indicator.makeGraphic(6, Std.int(buttonHeight - 20), baseColor);
 		indicator.visible = false;
 
 		// Text
-		text = new FlxText(x + 20, y, 320, label);
-		text.setFormat(null, 20, baseColor, LEFT);
+		text = new FlxText(x + 20, y, buttonWidth - 28, label);
+		text.setFormat(null, fontSize, baseColor, LEFT);
 		text.setBorderStyle(OUTLINE, FlxColor.BLACK, 1);
 	}
 
@@ -450,12 +462,12 @@ class MenuButton extends FlxSprite
 		indicator.y = y + 10;
 
 		// Mouse hover
-		if (FlxG.mouse.overlaps(this))
+		if (MobileSupport.pointerOverlaps(this))
 		{
 			text.color = hoverColor;
 			text.scale.set(1.05, 1.05);
 
-			if (FlxG.mouse.justPressed)
+			if (MobileSupport.pointerJustPressedOver(this))
 			{
 				onClick();
 			}

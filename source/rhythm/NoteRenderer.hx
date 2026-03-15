@@ -17,6 +17,7 @@ class NoteRenderer extends FlxGroup
     public static var NOTE_ASSET_PATH:String = "assets/images/ui/arrows/note.png";
     public static var NOTE_WIDTH:Int = 32;
     public static var NOTE_HEIGHT:Int = 32;
+    public static var VISUAL_SCALE:Float = 1.0;
     public static var DEBUG_FALLBACK:Bool = true;
 
     public static var SPAWN_AHEAD_MS:Float = 2000;
@@ -51,6 +52,8 @@ class NoteRenderer extends FlxGroup
         {
             createDebugNote(sprite, note);
         }
+
+        applyVisualScale(sprite);
 
         activeNotes.set(note, sprite);
         add(sprite);
@@ -103,8 +106,8 @@ class NoteRenderer extends FlxGroup
         var currentX = spawnX + (receptorPos.x - spawnX) * (1 - progress);
         var currentY = spawnY + (receptorPos.y - spawnY) * (1 - progress);
 
-        sprite.x = currentX - (NOTE_WIDTH / 2);
-        sprite.y = currentY - (NOTE_HEIGHT / 2);
+        sprite.x = currentX - (sprite.width / 2);
+        sprite.y = currentY - (sprite.height / 2);
     }
 
     private function tryLoadNoteAsset(sprite:FlxSprite):Bool
@@ -133,5 +136,16 @@ class NoteRenderer extends FlxGroup
         };
 
         sprite.makeGraphic(NOTE_WIDTH, NOTE_HEIGHT, color);
+    }
+
+    private function applyVisualScale(sprite:FlxSprite):Void
+    {
+        if (sprite == null || VISUAL_SCALE == 1.0)
+        {
+            return;
+        }
+
+        sprite.setGraphicSize(Std.int(NOTE_WIDTH * VISUAL_SCALE), Std.int(NOTE_HEIGHT * VISUAL_SCALE));
+        sprite.updateHitbox();
     }
 }

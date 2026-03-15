@@ -7,6 +7,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxTimer;
 import core.rendering.TextEffectSystem;
 import core.rendering.TextEffectSystem.TextEffect;
+import util.MobileSupport;
 
 class DialogueSystem
 {
@@ -36,13 +37,12 @@ class DialogueSystem
 		uiGroup = group;
 
 		// Create base box and label once
-		box = new FlxSprite(40, FlxG.height - 160);
-		box.makeGraphic(FlxG.width - 80, 120, 0xaa000000);
+		box = new FlxSprite();
 		box.scrollFactor.set(0, 0);
 
-		label = new FlxText(60, FlxG.height - 150, FlxG.width - 120, "");
-		label.setFormat(null, 20, 0xFFFFFFFF, "left");
+		label = new FlxText();
 		label.scrollFactor.set(0, 0);
+		applyLayout();
 
 		uiGroup.add(box);
 		uiGroup.add(label);
@@ -52,8 +52,6 @@ class DialogueSystem
 
 		timer = new FlxTimer();
 
-		originalX = label.x;
-		originalY = label.y;
 	}
 
 	// -------------------------------------------------
@@ -112,7 +110,18 @@ class DialogueSystem
 			return;
 		}
 
-		if (FlxG.keys.justPressed.SPACE || FlxG.keys.justPressed.ENTER)
+		var confirmPressed = false;
+
+		#if FLX_KEYBOARD
+		confirmPressed = FlxG.keys.justPressed.SPACE || FlxG.keys.justPressed.ENTER;
+		#end
+
+		if (!confirmPressed)
+		{
+			confirmPressed = MobileSupport.anyPointerJustPressed();
+		}
+
+		if (confirmPressed)
 		{
 			if (isTypewriterEffect(currentEffect) && !TextEffectSystem.isTypewriterComplete())
 			{
@@ -151,6 +160,7 @@ class DialogueSystem
         }
 
 		// Reset position and effect
+		applyLayout();
 		resetTextPosition();
 
 		// If there's a persistent effect and no node-specific effect, use persistent
@@ -207,6 +217,7 @@ class DialogueSystem
         }
 
 		// Reset position and effect
+		applyLayout();
 		resetTextPosition();
 
 		// If there's a persistent effect and no node-specific effect, use persistent
@@ -322,6 +333,34 @@ class DialogueSystem
 			label.x = originalX;
 			label.y = originalY;
 		}
+	}
+
+	private static function applyLayout():Void
+	{
+		if (box == null || label == null)
+		{
+			return;
+		}
+
+		var margin = MobileSupport.dialogueMargin();
+		var bottomMargin = MobileSupport.dialogueBottomMargin();
+		var boxHeight = MobileSupport.dialogueHeight();
+		var padding = MobileSupport.isMobile() ? 24 : 20;
+		var boxWidth = FlxG.width - (margin * 2);
+
+		box.x = margin;
+		box.y = FlxG.height - boxHeight - bottomMargin;
+		box.makeGraphic(Std.int(boxWidth), boxHeight, 0xaa000000);
+		box.scrollFactor.set(0, 0);
+
+		label.x = box.x + padding;
+		label.y = box.y + (MobileSupport.isMobile() ? 18 : 10);
+		label.fieldWidth = boxWidth - (padding * 2);
+		label.setFormat(null, MobileSupport.dialogueFontSize(), 0xFFFFFFFF, "left");
+		label.scrollFactor.set(0, 0);
+
+		originalX = label.x;
+		originalY = label.y;
 	}
 
 	public static function setEffect(effectData:Dynamic):Void
