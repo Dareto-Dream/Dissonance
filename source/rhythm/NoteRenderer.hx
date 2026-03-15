@@ -42,7 +42,7 @@ class NoteRenderer extends FlxGroup
 
     public function spawnNote(note:Note):Void
     {
-        if (!note.isJudged) return;
+        // Skip hold ticks — too many, handled implicitly via hold body rendering
         if (note.kind == NoteKind.HOLD_TICK) return;
 
         var sprite = new FlxSprite();
@@ -53,12 +53,20 @@ class NoteRenderer extends FlxGroup
             createDebugNote(sprite, note);
         }
 
+        // Animation-only notes render as translucent "ghost" notes so the
+        // charter and developer can see which characters are animating without
+        // cluttering the judged note lane.
+        if (!note.isJudged)
+        {
+            sprite.alpha = 0.38;
+        }
+
         applyVisualScale(sprite);
 
         activeNotes.set(note, sprite);
         add(sprite);
 
-        trace('[NoteRenderer] Spawned note: lane=${note.inputLane}, time=${note.timeMs}');
+        trace('[NoteRenderer] Spawned note: lane=${note.inputLane}, judged=${note.isJudged}, time=${note.timeMs}');
     }
 
     public function removeNote(note:Note):Void
@@ -88,8 +96,6 @@ class NoteRenderer extends FlxGroup
         var progress = timeUntilHit / SPAWN_AHEAD_MS;
         progress = Math.max(0, Math.min(1, progress));
 
-        var receptorPos = arrowRenderer.getReceptorPosition(note.inputLane);
-
         var centerX = ArrowRenderer.LAYOUT_CENTER_X >= 0
             ? ArrowRenderer.LAYOUT_CENTER_X
             : flixel.FlxG.width / 2;
@@ -98,7 +104,14 @@ class NoteRenderer extends FlxGroup
             : (flixel.FlxG.height / 2) + ArrowRenderer.LAYOUT_CENTER_Y_OFFSET;
 
         var anglePerLane = (Math.PI * 2) / 4;
-        var angle = ArrowRenderer.LAYOUT_START_ANGLE + (note.inputLane * anglePerLane);
+
+        // For judged notes use inputLane (0-3) to align with the actual receptor.
+        // For animation-only notes (inputLane == -1) use animDirection so they still
+        // travel along the correct radial track, just rendered at reduced alpha.
+        var visualLane = note.isJudged ? note.inputLane : note.animDirection;
+
+        var receptorPos = arrowRenderer.getReceptorPosition(visualLane);
+        var angle = ArrowRenderer.LAYOUT_START_ANGLE + (visualLane * anglePerLane);
 
         var spawnX = centerX + Math.cos(angle) * SPAWN_RADIUS;
         var spawnY = centerY + Math.sin(angle) * SPAWN_RADIUS;

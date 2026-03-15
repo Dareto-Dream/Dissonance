@@ -3,6 +3,8 @@ package core.rendering;
 import core.scene.PlacementManager.PlacementData;
 import core.scene.PlacementManager;
 import flixel.group.FlxGroup;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxColor;
 
 class CharacterSystem
 {
@@ -13,7 +15,7 @@ class CharacterSystem
 
 	public var characters:Map<String, CharacterRenderer> = new Map();
 	public var group:FlxGroup;
-	
+
 	public var placementManager:PlacementManager;
 
 	public static function init(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
@@ -24,150 +26,208 @@ class CharacterSystem
 	public function new(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
 	{
 		this.group = group;
-		
-		// Initialize placement manager
+
 		placementManager = new PlacementManager();
 		if (placementPath != null && placementPath != "")
-		{
 			placementManager.loadPlacements(placementPath);
-		}
 
 		var index = 0;
 		for (c in charDefs)
 		{
 			index++;
-
-			if (c == null)
-			{
-				trace("[CharacterSystem] ERROR: charDefs[" + index + "] is NULL.");
-				continue;
-			}
-
-			if (!Reflect.hasField(c, "id") || c.id == null)
+			if (c == null || !Reflect.hasField(c, "id") || c.id == null)
 			{
 				trace("[CharacterSystem] ERROR: charDefs[" + index + "] missing 'id' field.");
 				continue;
 			}
 
-			var name:String = c.id;
-
-			var renderer = new CharacterRenderer(name);
-			characters.set(name, renderer);
+			var renderer = new CharacterRenderer(c.id);
+			characters.set(c.id, renderer);
 			group.add(renderer);
 		}
 
-		var count = 0;
-		for (_ in characters.keys())
-			count++;
-
-		trace("[CharacterSystem] Loaded " + count + " character definitions.");
+		trace("[CharacterSystem] Loaded " + Lambda.count(characters) + " character definitions.");
 	}
 
+	// =========================================================================
+	// Show / hide
+	// =========================================================================
+
 	/**
-	 * Show a character with hybrid placement support
-	 * Supports both slot-based and custom coordinate positioning
+	 * Show a character with placement + transition support.
+	 * Reads flip, z_order, and entry transition from placement data when present.
 	 */
 	public function show(name:String, pose:String, transition:String, duration:Float, ?nodeId:String)
 	{
 		var r = characters.get(name);
 		if (r == null)
 		{
-			trace("[CharacterSystem] ERROR: Attempted to SHOW unknown character '" + name + "'");
+			trace("[CharacterSystem] ERROR: Unknown character '" + name + "'");
 			return;
 		}
 
-		// Try to get position from placement file
-		var placementData:Null<PlacementData> = null;
+		// Apply placement for this node
+		var placement:Null<PlacementData> = null;
 		if (nodeId != null)
 		{
 			placementManager.applyNode(nodeId);
-			placementData = placementManager.getPosition(name);
+			placement = placementManager.getPosition(name);
 		}
 
-		if (placementData != null)
+		if (placement != null)
 		{
-			// Check if custom coordinates provided
-			if (placementData.x != null && placementData.y != null)
-			{
-				// Use custom coordinates
-				trace('[CharacterSystem] Using CUSTOM placement for $name: (${placementData.x}, ${placementData.y})');
-				r.setAbsolutePosition(placementData.x, placementData.y);
-				
-				// Store slot for reference if provided
-				if (placementData.slot != null)
-				{
-					r.currentPosition = placementData.slot;
-				}
-			}
-			else if (placementData.slot != null)
-			{
-				// Use slot-based positioning
-				trace('[CharacterSystem] Using SLOT placement for $name: ${placementData.slot}');
-				r.setPositionKeyword(placementData.slot);
-			}
+			// --- Position ---
+			if (placement.x != null && placement.y != null)
+				r.setAbsolutePosition(placement.x, placement.y);
+			else if (placement.slot != null)
+				r.setPositionKeyword(placement.slot);
+			else if (r.currentPosition != null && r.currentPosition != "")
+				{ /* keep current */ }
 			else
+				r.setPositionKeyword("center");
+
+			if (placement.slot != null) r.currentPosition = placement.slot;
+
+			// --- Flip ---
+			if (placement.flip != null)
+				r.flip(placement.flip);
+
+			// --- Entry transition override from placement ---
+			if (placement.transition != null && placement.transition != "")
 			{
-				// Placement data exists but is invalid
-				trace('[CharacterSystem] WARNING: Invalid placement data for $name (no x/y or slot)');
-				
-				// Fall through to state persistence check below
-				if (r.currentPosition != null && r.currentPosition != "")
-				{
-					trace('[CharacterSystem] $name keeping current position: ${r.currentPosition}');
-				}
-				else
-				{
-					trace('[CharacterSystem] $name defaulting to center');
-					r.setPositionKeyword("center");
-				}
+				var dur = placement.transition_duration != null ? placement.transition_duration : duration;
+				r.setPose(pose);
+				r.playTransition(placement.transition, dur);
+				return;
 			}
 		}
 		else
 		{
-			// No placement data for this node - use state persistence
-			if (r.currentPosition != null && r.currentPosition != "")
-			{
-				// Character already has a position, keep it
-				trace('[CharacterSystem] $name keeping current position: ${r.currentPosition}');
-			}
-			else
-			{
-				// First appearance, use default
-				trace('[CharacterSystem] $name first appearance, using default center');
+			// State persistence: keep position if character already placed
+			if (r.currentPosition == null || r.currentPosition == "")
 				r.setPositionKeyword("center");
-			}
 		}
-		
-		// Set pose AFTER positioning
+
+		// Set pose then play transition
 		r.setPose(pose);
-		trace('[CharacterSystem] Set pose "$pose" for $name');
-		
-		// Apply transition
 		if (transition != null && transition != "")
-		{
-			trace('[CharacterSystem] Applying transition: $transition (duration: $duration)');
 			r.playTransition(transition, duration);
-		}
 	}
 
 	public function hide(name:String, transition:String, duration:Float)
 	{
 		var r = characters.get(name);
-		if (r == null)
-		{
-			trace("[CharacterSystem] ERROR: Attempted to HIDE unknown character '" + name + "'");
-			return;
-		}
+		if (r == null) return;
 
-		r.hide();
-		
-		// Remove from placement tracking
+		if (transition == "fade_out")
+			r.fadeOut(duration > 0 ? duration : 0.4);
+		else
+			r.hide();
+
 		placementManager.removeCharacter(name);
 	}
 
+	// =========================================================================
+	// Movement (animated)
+	// =========================================================================
+
+	/** Smoothly slide a character to a new named slot. */
+	public function moveCharacter(name:String, slot:String, duration:Float = 0.45, ?ease:Float->Float):Void
+	{
+		var r = characters.get(name);
+		if (r == null)
+		{
+			trace("[CharacterSystem] ERROR: Unknown character '" + name + "'");
+			return;
+		}
+		r.moveTo(slot, duration, ease);
+	}
+
+	/** Smoothly slide a character to absolute screen coordinates. */
+	public function moveCharacterAbsolute(name:String, x:Float, y:Float, duration:Float = 0.45, ?ease:Float->Float):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.moveToAbsolute(x, y, duration, ease);
+	}
+
+	// =========================================================================
+	// Flip
+	// =========================================================================
+
+	/** Mirror a character horizontally. */
+	public function flipCharacter(name:String, flipped:Bool):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.flip(flipped);
+	}
+
+	// =========================================================================
+	// Tint / color
+	// =========================================================================
+
+	/** Apply a color tint to a specific character. */
+	public function setCharacterTint(name:String, color:Int):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.setTint(color);
+	}
+
+	/** Remove color tint from a specific character. */
+	public function clearCharacterTint(name:String):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.clearTint();
+	}
+
+	/** Apply tint to ALL visible characters (e.g. grayscale flashback mode). */
+	public function setAllTint(color:Int):Void
+	{
+		for (r in characters) r.setTint(color);
+	}
+
+	public function clearAllTints():Void
+	{
+		for (r in characters) r.clearTint();
+	}
+
+	// =========================================================================
+	// Per-character effects
+	// =========================================================================
+
+	/** Make a character bounce (good for reaction moments). */
+	public function bounceCharacter(name:String, height:Float = 30, duration:Float = 0.5):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.bounce(height, duration);
+	}
+
+	/** Shake a character in place (good for fear / anger). */
+	public function shakeCharacter(name:String, intensity:Float = 15, duration:Float = 0.5):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.shakeCharacter(intensity, duration);
+	}
+
+	/** Pop a character in (scale from 0 → normal). */
+	public function popInCharacter(name:String, duration:Float = 0.3):Void
+	{
+		var r = characters.get(name);
+		if (r == null) return;
+		r.popIn(duration);
+	}
+
+	// =========================================================================
+	// Emphasis (DDLC-style speaking highlights)
+	// =========================================================================
+
 	public function emphasizeCharacter(name:String):Void
 	{
-		// Deemphasize all characters first
 		for (charName in characters.keys())
 		{
 			var r = characters.get(charName);
@@ -175,135 +235,64 @@ class CharacterSystem
 				r.deemphasize();
 		}
 
-		// Emphasize the active speaker
 		var r = characters.get(name);
-		if (r != null)
-			r.emphasize();
-		else
-			trace("[CharacterSystem] Cannot emphasize unknown character '" + name + "'");
+		if (r != null) r.emphasize();
+		else trace("[CharacterSystem] Cannot emphasize unknown character '" + name + "'");
 	}
 
 	public function deemphasizeAll():Void
 	{
-		// Reset all characters to normal state
-		for (charName in characters.keys())
+		for (r in characters)
 		{
-			var r = characters.get(charName);
-			if (r != null)
-			{
-				// Reset VN layers
-				for (spr in r.vnLayers)
-				{
-					if (spr.visible)
-					{
-						spr.scale.set(r.config.scale, r.config.scale);
-						spr.alpha = 1.0;
-					}
-				}
-				
-				// Reset rhythm layers
-				for (spr in r.rhythmLayers)
-				{
-					if (spr.visible)
-					{
-						spr.scale.set(r.config.scale, r.config.scale);
-						spr.alpha = 1.0;
-					}
-				}
-			}
+			for (spr in r.vnLayers)
+				if (spr.visible) { spr.scale.set(r.config.scale, r.config.scale); spr.alpha = 1.0; }
+
+			for (spr in r.rhythmLayers)
+				if (spr.visible) { spr.scale.set(r.config.scale, r.config.scale); spr.alpha = 1.0; }
 		}
 	}
-	
+
+	// =========================================================================
+	// Placement helpers
+	// =========================================================================
+
 	public function resetPlacements():Void
 	{
 		placementManager.reset();
 	}
-	
-	// ========================================================================
-	// RHYTHM GAME INTEGRATION
-	// ========================================================================
-	
-	/**
-	 * Play an animation (rhythm game wrapper for setPose)
-	 * This allows the rhythm system to trigger character animations
-	 * 
-	 * @param name Character ID
-	 * @param animName Animation/pose name (e.g., "singLEFT", "singDOWN", "idle", "miss")
-	 */
+
+	// =========================================================================
+	// Rhythm game integration
+	// =========================================================================
+
 	public function playAnimation(name:String, animName:String):Void
 	{
 		var r = characters.get(name);
-		if (r == null)
-		{
-			trace("[CharacterSystem] ERROR: Cannot play animation for unknown character '" + name + "'");
-			return;
-		}
-		
+		if (r == null) return;
 		r.setPose(animName);
 	}
-	
-	/**
-	 * Enable/disable animation looping for hold notes
-	 * In rhythm gameplay, hold notes should keep the sing animation playing
-	 * 
-	 * @param name Character ID
-	 * @param looping Whether to loop the current animation
-	 */
+
 	public function setLooping(name:String, looping:Bool):Void
 	{
 		var r = characters.get(name);
-		if (r == null)
-		{
-			trace("[CharacterSystem] ERROR: Cannot set looping for unknown character '" + name + "'");
-			return;
-		}
-		
+		if (r == null) return;
 		r.isLooping = looping;
-		trace('[CharacterSystem] Set looping=${looping} for $name');
 	}
-	
-	/**
-	 * Check if a character has a specific pose
-	 * Useful for fallback behavior (e.g., if "miss" doesn't exist, use "idle")
-	 * 
-	 * @param name Character ID
-	 * @param pose Pose name
-	 * @return True if pose exists
-	 */
+
 	public function hasPose(name:String, pose:String):Bool
 	{
 		var r = characters.get(name);
 		if (r == null) return false;
-		
 		return r.poses.exists(pose);
 	}
-	// ========================================================================
-	// RHYTHM MODE MANAGEMENT
-	// ========================================================================
-	
-	/**
-	 * Enable rhythm mode for all characters
-	 * Switches character rendering to use rhythm atlases with animations
-	 */
+
 	public function enableRhythmMode():Void
 	{
-		for (r in characters)
-		{
-			r.setRhythmMode(true);
-		}
-		trace("[CharacterSystem] Enabled rhythm mode for all characters");
+		for (r in characters) r.setRhythmMode(true);
 	}
-	
-	/**
-	 * Disable rhythm mode for all characters
-	 * Returns character rendering to VN mode (static poses)
-	 */
+
 	public function disableRhythmMode():Void
 	{
-		for (r in characters)
-		{
-			r.setRhythmMode(false);
-		}
-		trace("[CharacterSystem] Disabled rhythm mode for all characters");
+		for (r in characters) r.setRhythmMode(false);
 	}
 }

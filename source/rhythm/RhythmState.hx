@@ -102,10 +102,11 @@ class RhythmState extends FlxState
 			var sprite = characterSprites.loadCharacter(characterID);
 			if (sprite != null)
 			{
+				// Use the base position from the character JSON directly.
+				// The xOffset override was wrong: it ignored per-character positioning data.
 				var basePos = characterSprites.getBasePosition(characterID);
-				var xOffset = (i - ((allCharacterIDs.length - 1) / 2)) * 140;
-				characterSprites.setCharacterPosition(characterID, basePos.x + xOffset, basePos.y);
-				trace('[RhythmState]   Positioned at: [${basePos.x + xOffset}, ${basePos.y}]');
+				characterSprites.setCharacterPosition(characterID, basePos.x, basePos.y);
+				trace('[RhythmState]   Positioned at: [${basePos.x}, ${basePos.y}]');
 
 				add(sprite);
 				loadedCharacterIDs.push(characterID);

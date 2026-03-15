@@ -164,26 +164,32 @@ class PlacementManager
 }
 
 /**
- * Position data for a character
- * Supports both slot-based and custom coordinate positioning
+ * Position data for a character.
+ * Supports slot-based, absolute coordinate, and animated placement.
  */
 typedef PlacementData =
 {
-    /**
-     * Custom X coordinate (optional)
-     * If present, takes precedence over slot
-     */
+    /** Custom X coordinate. Takes precedence over slot when set. */
     var ?x:Float;
-    
-    /**
-     * Custom Y coordinate (optional)
-     * If present, takes precedence over slot
-     */
+
+    /** Custom Y coordinate. Takes precedence over slot when set. */
     var ?y:Float;
-    
-    /**
-     * Slot name (optional)
-     * Used if x/y not present, or as documentation
-     */
+
+    /** Named slot (far_left / left / center_left / center / center_right / right / far_right). */
     var ?slot:String;
+
+    /** Mirror the character horizontally when true. */
+    var ?flip:Bool;
+
+    /** Draw order within the character group — higher = in front. */
+    var ?z_order:Int;
+
+    /**
+     * Named entrance transition to play when this placement is applied.
+     * Values: "fade" | "slide_left" | "slide_right" | "slide_up" | "pop" | "bounce"
+     */
+    var ?transition:String;
+
+    /** Duration for the per-placement transition (seconds). Defaults to show node duration. */
+    var ?transition_duration:Float;
 }

@@ -33,6 +33,7 @@ from modules.effects.text_effects import TextEffectPreview
 from modules.placement.scene_placement import ScenePlacement
 from modules.conditions.condition_editor import ConditionEditor
 from modules.rhythm.chart_editor import ChartEditor
+from modules.preview.scene_preview import ScenePreview
 
 
 class DissonanceEditor:
@@ -71,14 +72,15 @@ class DissonanceEditor:
         
         # Available modules
         self.modules = {
+            "Scene Preview": None,
             "Story Editor": None,
+            "Scene Placement": None,
             "Pose Editor": None,
             "XML Viewer": None,
             "XML Creator": None,
             "Text Effects": None,
-            "Scene Placement": None,
             "Condition Editor": None,
-            "Chart Editor": None
+            "Chart Editor": None,
         }
         
         self.current_module = None
@@ -117,7 +119,13 @@ class DissonanceEditor:
         )
         
         # Initialize new module
-        if module_name == "Story Editor":
+        if module_name == "Scene Preview":
+            self.current_module = ScenePreview(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+        elif module_name == "Story Editor":
             self.current_module = StoryEditor(
                 workspace_rect,
                 self.theme,
@@ -329,7 +337,8 @@ class DissonanceEditor:
             "- XML Viewer - Browse atlas textures",
             "- XML Creator - Generate texture atlases",
             "- Text Effects - Preview text animations",
-            "- Scene Placement - Position characters and backgrounds",
+            "- Scene Preview - Play through scenes with real assets",
+            "- Scene Placement - Position characters with live sprite preview",
             "- Condition Editor - Build conditional logic"
         ]
         

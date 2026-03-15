@@ -3,69 +3,101 @@ package core.rendering;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup;
+import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import haxe.Json;
 import openfl.utils.Assets;
 
+/**
+ * CharacterRenderer - Renders a single VN character with full positioning control.
+ *
+ * Positioning model (layered offsets):
+ *   finalX = screenX + characterOffsetX + layerOffsetX
+ *   finalY = screenY + characterOffsetY + layerOffsetY
+ *
+ * screenX/Y   → where the character stands on screen (set by slot keyword or absolute coords)
+ * characterOffsetX/Y → per-character centering loaded from poses.json config.base_offset
+ * layerOffsetX/Y     → per-layer fine-tuning from the pose definition
+ */
 class CharacterRenderer extends FlxGroup
 {
-	// Dual atlas support
+	// =========================================================================
+	// Atlas data
+	// =========================================================================
 	private var vnFrames:FlxAtlasFrames;
 	private var rhythmFrames:FlxAtlasFrames;
-	
-	public var vnLayers:Map<String, FlxSprite> = new Map();
+
+	public var vnLayers:Map<String, FlxSprite>     = new Map();
 	public var rhythmLayers:Map<String, FlxSprite> = new Map();
-	
+
 	public var poseData:Dynamic;
 	public var config:Dynamic;
 	public var poses:Map<String, Dynamic>;
 
 	public var name:String;
-	
-	// CRITICAL FIX: Separate screen position from character offset
-	private var screenX:Float = 0;      // Where character is on screen
-	private var screenY:Float = 0;
-	private var characterOffsetX:Float = 0;  // Character-specific centering
+
+	// =========================================================================
+	// Position state
+	// =========================================================================
+	/** World-space X of the character anchor. Tweened by moveTo / slideIn. */
+	public var screenX:Float = 0;
+	/** World-space Y of the character anchor. */
+	public var screenY:Float = 0;
+
+	/** Per-character centering offset from poses.json → config.base_offset */
+	private var characterOffsetX:Float = 0;
 	private var characterOffsetY:Float = 0;
-	
+
+	/** Current named slot (e.g. "center", "left"). Updated by setPositionKeyword / moveTo. */
 	public var currentPosition:String = "center";
+
+	// =========================================================================
+	// Visual state
+	// =========================================================================
 	public var currentPose:String;
-	
-	// Mode switching
+	public var isFlipped:Bool = false;
+
+	/** Whether rhythm-mode atlases are active. */
 	public var isRhythmMode:Bool = false;
-	
-	// Animation state
+
+	/** Sprites currently playing frame-based animations (rhythm mode). */
 	public var isLooping:Bool = false;
 	private var currentAnimatingSprites:Array<FlxSprite> = [];
-	
-	// Store current pose's layer data
 	private var currentPoseLayers:Array<Dynamic>;
 
-	private var hasPoseData:Bool = false;
-	private var hasVNAtlas:Bool = false;
+	// =========================================================================
+	// Load flags
+	// =========================================================================
+	private var hasPoseData:Bool   = false;
+	private var hasVNAtlas:Bool    = false;
 	private var hasRhythmAtlas:Bool = false;
+
+	// Active tweens – cancelled before starting new movement/entrance tweens
+	private var moveTween:FlxTween   = null;
+	private var effectTween:FlxTween = null;
+
+	// =========================================================================
+	// Construction
+	// =========================================================================
 
 	public function new(characterName:String)
 	{
 		super();
 		this.name = characterName;
 
-		// Load pose data first
 		loadPoseData(characterName);
-		
-		// Load VN atlas (required)
 		loadVNAtlas(characterName);
-		
-		// Load rhythm atlas (optional)
 		loadRhythmAtlas(characterName);
-		
-		// Create layer sprites for both atlases
 		createLayerSprites();
-		
-		// Initialize to center position
+
 		setPositionKeyword("center");
 	}
-	
+
+	// =========================================================================
+	// Asset loading
+	// =========================================================================
+
 	private function loadPoseData(characterName:String):Void
 	{
 		var jsonPath = 'assets/data/characters/$characterName/poses.json';
@@ -74,22 +106,14 @@ class CharacterRenderer extends FlxGroup
 			var jsonText = Assets.getText(jsonPath);
 			poseData = Json.parse(jsonText);
 
-			if (poseData == null)
-			{
-				throw "Parsed JSON is null";
-			}
+			if (poseData == null) throw "Parsed JSON is null";
 
 			config = poseData.config;
 			if (config == null)
 			{
-				trace("[CharacterRenderer] WARNING: No config found in poses.json for " + characterName);
-				config = {
-					scale: 1.0,
-					base_offset: {x: 0, y: 0}
-				};
+				config = { scale: 1.0, base_offset: { x: 0, y: 0 } };
 			}
 
-			// CRITICAL FIX: Store character offset separately
 			if (config.base_offset != null)
 			{
 				characterOffsetX = config.base_offset.x;
@@ -98,90 +122,77 @@ class CharacterRenderer extends FlxGroup
 
 			if (poseData.poses == null)
 			{
-				trace("[CharacterRenderer] WARNING: No poses found in poses.json for " + characterName);
 				hasPoseData = false;
 				return;
 			}
 
 			poses = new Map<String, Dynamic>();
-			var poseObj:Dynamic = poseData.poses;
-			for (field in Reflect.fields(poseObj))
-			{
-				poses.set(field, Reflect.field(poseObj, field));
-			}
+			for (field in Reflect.fields(poseData.poses))
+				poses.set(field, Reflect.field(poseData.poses, field));
 
-			trace("[CharacterRenderer] Loaded " + Lambda.count(poses) + " poses for " + characterName);
 			hasPoseData = true;
 		}
 		catch (e:Dynamic)
 		{
-			trace("[CharacterRenderer] ERROR: Could not load poses.json for " + characterName + ": " + e);
+			trace("[CharacterRenderer] ERROR loading poses.json for " + characterName + ": " + e);
 			hasPoseData = false;
 		}
 	}
-	
+
 	private function loadVNAtlas(characterName:String):Void
 	{
 		try
 		{
-			var png = 'assets/images/characters/$characterName/$characterName.png';
-			var xml = 'assets/images/characters/$characterName/$characterName.xml';
-			vnFrames = FlxAtlasFrames.fromSparrow(png, xml);
+			vnFrames  = FlxAtlasFrames.fromSparrow(
+				'assets/images/characters/$characterName/$characterName.png',
+				'assets/images/characters/$characterName/$characterName.xml'
+			);
 			hasVNAtlas = true;
-			trace("[CharacterRenderer] Loaded VN atlas for " + characterName);
 		}
 		catch (e:Dynamic)
 		{
-			trace("[CharacterRenderer] ERROR: Could not load VN atlas for " + characterName + ": " + e);
+			trace("[CharacterRenderer] ERROR loading VN atlas for " + characterName + ": " + e);
 			hasVNAtlas = false;
 		}
 	}
-	
+
 	private function loadRhythmAtlas(characterName:String):Void
 	{
 		try
 		{
 			var png = 'assets/images/characters/$characterName/${characterName}_rhythm.png';
 			var xml = 'assets/images/characters/$characterName/${characterName}_rhythm.xml';
-			
+
 			if (!Assets.exists(png) || !Assets.exists(xml))
 			{
-				trace("[CharacterRenderer] No rhythm atlas found for " + characterName + " (this is optional)");
 				hasRhythmAtlas = false;
 				return;
 			}
-			
-			rhythmFrames = FlxAtlasFrames.fromSparrow(png, xml);
+
+			rhythmFrames   = FlxAtlasFrames.fromSparrow(png, xml);
 			hasRhythmAtlas = true;
-			trace("[CharacterRenderer] Loaded rhythm atlas for " + characterName);
 		}
 		catch (e:Dynamic)
 		{
-			trace("[CharacterRenderer] Could not load rhythm atlas for " + characterName + ": " + e);
 			hasRhythmAtlas = false;
 		}
 	}
-	
+
 	private function createLayerSprites():Void
 	{
 		if (!hasPoseData) return;
-		
-		// Create VN layer sprites
+
 		if (hasVNAtlas)
 		{
 			for (poseName in poses.keys())
 			{
 				var pose:Dynamic = poses.get(poseName);
 				if (pose.layers == null) continue;
-				
 				var layerArr:Array<Dynamic> = cast pose.layers;
-
 				for (entry in layerArr)
 				{
 					if (entry == null || entry.frame == null) continue;
-					
 					var frame:String = entry.frame;
-
 					if (!vnLayers.exists(frame))
 					{
 						var spr = new FlxSprite();
@@ -189,33 +200,26 @@ class CharacterRenderer extends FlxGroup
 						spr.visible = false;
 						spr.antialiasing = true;
 						spr.scrollFactor.set(0, 0);
-
 						vnLayers.set(frame, spr);
 						add(spr);
 					}
 				}
 			}
-			trace("[CharacterRenderer] Created " + Lambda.count(vnLayers) + " VN layer sprites for " + name);
 		}
-		
-		// Create rhythm layer sprites with animations
+
 		if (hasRhythmAtlas)
 		{
 			var rhythmPoses = ["singLEFT", "singDOWN", "singUP", "singRIGHT", "idle", "miss"];
-			
 			for (poseName in rhythmPoses)
 			{
 				if (!poses.exists(poseName)) continue;
-				
 				var pose:Dynamic = poses.get(poseName);
 				if (pose.layers == null) continue;
-				
 				var layerArr:Array<Dynamic> = cast pose.layers;
 				for (entry in layerArr)
 				{
 					if (entry == null || entry.frame == null) continue;
 					var baseFrame:String = entry.frame;
-					
 					if (!rhythmLayers.exists(baseFrame))
 					{
 						var spr = new FlxSprite();
@@ -223,338 +227,512 @@ class CharacterRenderer extends FlxGroup
 						spr.visible = false;
 						spr.antialiasing = true;
 						spr.scrollFactor.set(0, 0);
-						
 						setupRhythmAnimation(spr, baseFrame);
-						
 						rhythmLayers.set(baseFrame, spr);
 						add(spr);
 					}
 				}
 			}
-			trace("[CharacterRenderer] Created " + Lambda.count(rhythmLayers) + " rhythm layer sprites for " + name);
 		}
 	}
-	
+
 	private function setupRhythmAnimation(sprite:FlxSprite, baseName:String):Void
 	{
 		var frameNames:Array<String> = [];
 		var frameIndex = 0;
-		var maxFrames = 100;
-		
-		while (frameIndex < maxFrames)
+		while (frameIndex < 100)
 		{
 			var frameName = baseName + StringTools.lpad(Std.string(frameIndex), "0", 4);
-			
 			if (rhythmFrames.getByName(frameName) != null)
 			{
 				frameNames.push(frameName);
 				frameIndex++;
 			}
-			else
-			{
-				break;
-			}
+			else break;
 		}
-		
 		if (frameNames.length > 0)
-		{
 			sprite.animation.addByNames(baseName, frameNames, 24, false);
-			trace('[CharacterRenderer] Created ${frameNames.length}-frame animation for $baseName');
-		}
-		else
-		{
-			trace('[CharacterRenderer] WARNING: No frames found for $baseName');
-		}
 	}
 
 	// =========================================================================
-	// CRITICAL FIX: Completely rewritten positioning system
+	// Slot helpers
 	// =========================================================================
 
 	/**
-	 * Set character position using keyword (e.g., "center", "left", "right")
-	 * This is the PRIMARY way to position characters
+	 * Converts a named slot to a screen X coordinate.
+	 * Extracted so both setPositionKeyword and moveTo can use it.
 	 */
-	public function setPositionKeyword(pos:String):Void
+	public function slotToScreenX(slot:String):Float
 	{
-		currentPosition = pos;
 		var screenW = flixel.FlxG.width;
 		var centerX = (screenW / 2) - 250;
 
-		// Convert slot keyword to screen coordinates
-		switch (pos)
+		return switch (slot)
 		{
-			case "far_left":
-				screenX = -200;
-			case "left":
-				screenX = 100;
-			case "center_left":
-				screenX = centerX - 400;
-			case "center":
-				screenX = centerX;
-			case "center_right":
-				screenX = centerX + 400;
-			case "right":
-				screenX = screenW - 500;
-			case "far_right":
-				screenX = screenW + 200;
-			default:
-				screenX = centerX;
-		}
-		
-		screenY = 0;  // Base vertical position
-		
-		trace('[CharacterRenderer] Set position keyword "$pos" → screen position ($screenX, $screenY)');
-		
-		// CRITICAL: Reposition all layers if we have a pose active
-		if (currentPose != null && currentPoseLayers != null)
-		{
-			updateLayerPositions();
-		}
+			case "far_left":    -200;
+			case "left":         100;
+			case "center_left":  centerX - 400;
+			case "center":       centerX;
+			case "center_right": centerX + 400;
+			case "right":        screenW - 500;
+			case "far_right":    screenW + 200;
+			default:             centerX;
+		};
 	}
 
-	/**
-	 * Set character to absolute screen coordinates
-	 * Used by PlacementManager for custom positioning
-	 */
+	// =========================================================================
+	// Positioning — instant
+	// =========================================================================
+
+	/** Instantly place character at a named slot. */
+	public function setPositionKeyword(pos:String):Void
+	{
+		cancelMoveTween();
+		currentPosition = pos;
+		screenX = slotToScreenX(pos);
+		screenY = 0;
+		if (currentPose != null && currentPoseLayers != null)
+			updateLayerPositions();
+	}
+
+	/** Instantly place character at absolute screen coordinates. */
 	public function setAbsolutePosition(x:Float, y:Float):Void
 	{
-		trace('[CharacterRenderer] Set absolute position for $name: ($x, $y)');
-		
+		cancelMoveTween();
 		screenX = x;
 		screenY = y;
-		
-		// CRITICAL: Reposition all layers
 		if (currentPose != null && currentPoseLayers != null)
-		{
 			updateLayerPositions();
+	}
+
+	// =========================================================================
+	// Positioning — animated
+	// =========================================================================
+
+	/**
+	 * Smoothly move character to a named slot over `duration` seconds.
+	 * Uses quartOut easing by default for a snappy feel.
+	 */
+	public function moveTo(slot:String, duration:Float = 0.45, ?ease:Float->Float):Void
+	{
+		var targetX = slotToScreenX(slot);
+		currentPosition = slot;
+
+		if (duration <= 0)
+		{
+			screenX = targetX;
+			screenY = 0;
+			updateLayerPositions();
+			return;
 		}
+
+		cancelMoveTween();
+		var easeFn = ease != null ? ease : FlxEase.quartOut;
+		moveTween = FlxTween.tween(this, { screenX: targetX, screenY: 0.0 }, duration, {
+			ease: easeFn,
+			onUpdate: _ -> updateLayerPositions(),
+			onComplete: _ -> { moveTween = null; }
+		});
 	}
 
 	/**
-	 * Update all visible layer positions based on current screen position
-	 * This is called whenever screenX/screenY changes OR when pose changes
+	 * Smoothly move character to absolute coordinates.
 	 */
+	public function moveToAbsolute(x:Float, y:Float, duration:Float = 0.45, ?ease:Float->Float):Void
+	{
+		if (duration <= 0)
+		{
+			screenX = x;
+			screenY = y;
+			updateLayerPositions();
+			return;
+		}
+
+		cancelMoveTween();
+		var easeFn = ease != null ? ease : FlxEase.quartOut;
+		moveTween = FlxTween.tween(this, { screenX: x, screenY: y }, duration, {
+			ease: easeFn,
+			onUpdate: _ -> updateLayerPositions(),
+			onComplete: _ -> { moveTween = null; }
+		});
+	}
+
+	private function cancelMoveTween():Void
+	{
+		if (moveTween != null)
+		{
+			moveTween.cancel();
+			moveTween = null;
+		}
+	}
+
+	// =========================================================================
+	// Layer position update — called whenever screenX/Y changes
+	// =========================================================================
+
 	private function updateLayerPositions():Void
 	{
 		if (currentPoseLayers == null) return;
-		
+
 		for (entry in currentPoseLayers)
 		{
 			if (entry == null || entry.frame == null) continue;
-			
+
 			var frame:String = entry.frame;
-			var layerOffsetX:Float = entry.x;
-			var layerOffsetY:Float = entry.y;
-			
-			// Calculate final position:
-			// screen position + character offset + layer offset
-			var finalX = screenX + characterOffsetX + layerOffsetX;
-			var finalY = screenY + characterOffsetY + layerOffsetY;
-			
-			// Apply to appropriate layer collection
+			var lox:Float = entry.x;
+			var loy:Float = entry.y;
+
+			// Mirror layer X offset when flipped
+			var fx = isFlipped ? -lox : lox;
+
+			var finalX = screenX + characterOffsetX + fx;
+			var finalY = screenY + characterOffsetY + loy;
+
 			var spr = vnLayers.get(frame);
 			if (spr != null && spr.visible)
 			{
 				spr.x = finalX;
 				spr.y = finalY;
 			}
-			
-			var rhythmSpr = rhythmLayers.get(frame);
-			if (rhythmSpr != null && rhythmSpr.visible)
+
+			var rspr = rhythmLayers.get(frame);
+			if (rspr != null && rspr.visible)
 			{
-				rhythmSpr.x = finalX;
-				rhythmSpr.y = finalY;
+				rspr.x = finalX;
+				rspr.y = finalY;
 			}
 		}
 	}
 
 	// =========================================================================
-	// Pose System - Now properly separated from positioning
+	// Flip
+	// =========================================================================
+
+	/** Mirror the character horizontally. */
+	public function flip(flipped:Bool):Void
+	{
+		isFlipped = flipped;
+		for (spr in vnLayers)     spr.flipX = flipped;
+		for (spr in rhythmLayers) spr.flipX = flipped;
+		updateLayerPositions();
+	}
+
+	// =========================================================================
+	// Tint / color filter
+	// =========================================================================
+
+	/** Apply a color tint to all layers. Pass FlxColor.WHITE to clear. */
+	public function setTint(color:Int):Void
+	{
+		for (spr in vnLayers)     spr.color = color;
+		for (spr in rhythmLayers) spr.color = color;
+	}
+
+	public function clearTint():Void
+	{
+		setTint(FlxColor.WHITE);
+	}
+
+	// =========================================================================
+	// Pose system
 	// =========================================================================
 
 	public function setPose(poseName:String):Void
 	{
-		if (!hasPoseData || poses == null)
-		{
-			trace("[CharacterRenderer] Cannot set pose '" + poseName + "' for " + name + " - no pose data loaded");
-			return;
-		}
-		
+		if (!hasPoseData || poses == null) return;
+
 		var isRhythmPose = (poseName.indexOf("sing") == 0 || poseName == "idle" || poseName == "miss");
-		var useRhythm = isRhythmMode && isRhythmPose;
-		
-		if (useRhythm && !hasRhythmAtlas)
-		{
-			trace('[CharacterRenderer] WARNING: Rhythm mode requested but no rhythm atlas for $name, using VN atlas');
-			useRhythm = false;
-		}
-		
-		if (useRhythm)
-		{
-			setPoseRhythm(poseName);
-		}
-		else
-		{
-			if (!hasVNAtlas)
-			{
-				trace("[CharacterRenderer] Cannot set VN pose '" + poseName + "' for " + name + " - no VN atlas loaded");
-				return;
-			}
-			setPoseVN(poseName);
-		}
+		var useRhythm    = isRhythmMode && isRhythmPose && hasRhythmAtlas;
+
+		if (useRhythm) setPoseRhythm(poseName);
+		else           setPoseVN(poseName);
 	}
-	
+
 	private function setPoseVN(poseName:String):Void
 	{
-		// Hide all layers first
-		for (spr in vnLayers) spr.visible = false;
+		for (spr in vnLayers)     spr.visible = false;
 		for (spr in rhythmLayers) spr.visible = false;
-		
-		if (!poses.exists(poseName))
-		{
-			trace("[CharacterRenderer] Unknown VN pose: " + poseName + " for character " + name);
-			var available = [for (k in poses.keys()) k];
-			trace("[CharacterRenderer] Available poses: " + available.join(", "));
-			return;
-		}
+
+		if (!hasVNAtlas || !poses.exists(poseName)) return;
 
 		var pose = poses.get(poseName);
-		if (pose == null || pose.layers == null)
-		{
-			trace("[CharacterRenderer] Pose '" + poseName + "' has no valid layers");
-			return;
-		}
-		
-		currentPose = poseName;
+		if (pose == null || pose.layers == null) return;
+
+		currentPose      = poseName;
 		currentPoseLayers = cast pose.layers;
 
-		trace('[CharacterRenderer] Setting VN pose "$poseName" for $name (${currentPoseLayers.length} layers)');
-
-		// Make layers visible and set their frames
 		for (entry in currentPoseLayers)
 		{
 			if (entry == null || entry.frame == null) continue;
-			
-			var frame:String = entry.frame;
-			var spr = vnLayers.get(frame);
-			if (spr == null)
-			{
-				trace("[CharacterRenderer] WARNING: VN frame '" + frame + "' not found in layers");
-				continue;
-			}
-
+			var spr = vnLayers.get(entry.frame);
+			if (spr == null) continue;
 			spr.visible = true;
-			spr.animation.frameName = frame;
+			spr.animation.frameName = entry.frame;
 			spr.scale.set(config.scale, config.scale);
+			spr.flipX = isFlipped;
 		}
-		
-		// CRITICAL: Position all layers based on current screen position
+
 		updateLayerPositions();
 	}
-	
+
 	private function setPoseRhythm(poseName:String):Void
 	{
-		// Stop any currently playing animations
 		for (spr in currentAnimatingSprites)
-		{
 			if (spr != null && spr.animation != null && spr.animation.curAnim != null)
-			{
 				spr.animation.stop();
-			}
-		}
 		currentAnimatingSprites = [];
-		
-		// Hide all layers
-		for (spr in vnLayers) spr.visible = false;
+
+		for (spr in vnLayers)     spr.visible = false;
 		for (spr in rhythmLayers) spr.visible = false;
-		
-		if (!poses.exists(poseName))
-		{
-			trace("[CharacterRenderer] Unknown rhythm pose: " + poseName + " for character " + name);
-			return;
-		}
-		
+
+		if (!poses.exists(poseName)) return;
+
 		var pose = poses.get(poseName);
-		if (pose == null || pose.layers == null)
-		{
-			trace("[CharacterRenderer] Pose has no layers");
-			return;
-		}
-		
-		currentPose = poseName;
+		if (pose == null || pose.layers == null) return;
+
+		currentPose       = poseName;
 		currentPoseLayers = cast pose.layers;
-		
-		trace('[CharacterRenderer] Setting rhythm pose "$poseName" for $name');
-		
-		// Check if we have any rhythm layers at all
-		var hasAnyRhythmLayers = false;
-		for (_ in rhythmLayers.keys())
+
+		var hasAny = false;
+		for (_ in rhythmLayers.keys()) { hasAny = true; break; }
+
+		if (!hasRhythmAtlas || !hasAny)
 		{
-			hasAnyRhythmLayers = true;
-			break;
-		}
-		
-		// FALLBACK: If no rhythm layers at all, use VN layers
-		if (!hasRhythmAtlas || !hasAnyRhythmLayers)
-		{
-			trace('[CharacterRenderer] No rhythm layers for $name, using VN layers as fallback');
 			setPoseVN(poseName);
 			return;
 		}
-		
-		// Process each layer
+
 		for (entry in currentPoseLayers)
 		{
 			if (entry == null || entry.frame == null) continue;
-			
 			var baseFrame:String = entry.frame;
 			var spr = rhythmLayers.get(baseFrame);
-			
+
 			if (spr == null)
 			{
-				trace("[CharacterRenderer] WARNING: Rhythm sprite for '" + baseFrame + "' is null, trying VN fallback");
-				
 				var vnSpr = vnLayers.get(baseFrame);
-				if (vnSpr != null)
-				{
-					vnSpr.visible = true;
-					if (vnSpr.animation != null)
-					{
-						vnSpr.animation.frameName = baseFrame;
-					}
-					vnSpr.scale.set(config.scale, config.scale);
-				}
+				if (vnSpr != null) { vnSpr.visible = true; vnSpr.animation.frameName = baseFrame; vnSpr.scale.set(config.scale, config.scale); }
 				continue;
 			}
-			
+
 			spr.visible = true;
-			
 			if (spr.animation != null && spr.animation.exists(baseFrame))
 			{
 				spr.animation.play(baseFrame, true);
 				currentAnimatingSprites.push(spr);
-				trace('[CharacterRenderer] Playing animation "$baseFrame"');
 			}
 			else
 			{
-				var staticFrame = baseFrame + "0000";
-				if (spr.animation != null && rhythmFrames != null && rhythmFrames.getByName(staticFrame) != null)
-				{
-					spr.animation.frameName = staticFrame;
-					trace('[CharacterRenderer] Using static frame "$staticFrame"');
-				}
+				var sf = baseFrame + "0000";
+				if (spr.animation != null && rhythmFrames != null && rhythmFrames.getByName(sf) != null)
+					spr.animation.frameName = sf;
 			}
-			
 			spr.scale.set(config.scale, config.scale);
+			spr.flipX = isFlipped;
 		}
-		
-		// CRITICAL: Position all layers
+
 		updateLayerPositions();
 	}
 
 	// =========================================================================
-	// Transitions and Effects
+	// Entrance & exit transitions
+	// =========================================================================
+
+	/** Fade all visible layers from 0 to 1. */
+	public function fadeIn(d:Float = 0.4):Void
+	{
+		_forVisibleLayers(function(spr:FlxSprite) {
+			spr.alpha = 0;
+			FlxTween.tween(spr, { alpha: 1 }, d);
+		});
+	}
+
+	/** Fade all visible layers from current to 0. */
+	public function fadeOut(d:Float = 0.4):Void
+	{
+		_forVisibleLayers(function(spr:FlxSprite) {
+			FlxTween.tween(spr, { alpha: 0 }, d, {
+				onComplete: _ -> spr.visible = false
+			});
+		});
+	}
+
+	/** Slide in from the left or right. */
+	public function slideIn(dir:String, d:Float = 0.45):Void
+	{
+		var off = (dir == "left") ? -400.0 : 400.0;
+		var targetX = screenX;
+
+		screenX += off;
+		updateLayerPositions();
+
+		cancelMoveTween();
+		moveTween = FlxTween.tween(this, { screenX: targetX }, d, {
+			ease: FlxEase.quartOut,
+			onUpdate: _ -> updateLayerPositions(),
+			onComplete: _ -> { moveTween = null; }
+		});
+	}
+
+	/** Slide in from below the screen. */
+	public function slideUp(d:Float = 0.5):Void
+	{
+		var targetY = screenY;
+		screenY += 400;
+		updateLayerPositions();
+
+		cancelMoveTween();
+		moveTween = FlxTween.tween(this, { screenY: targetY }, d, {
+			ease: FlxEase.quartOut,
+			onUpdate: _ -> updateLayerPositions(),
+			onComplete: _ -> { moveTween = null; }
+		});
+	}
+
+	/** Quick scale pop-in (starts tiny, snaps to normal). */
+	public function popIn(d:Float = 0.3):Void
+	{
+		var targetScale = config.scale;
+		_forVisibleLayers(function(spr:FlxSprite) {
+			spr.scale.set(targetScale * 0.1, targetScale * 0.1);
+			FlxTween.tween(spr.scale, { x: targetScale, y: targetScale }, d, {
+				ease: FlxEase.backOut
+			});
+		});
+	}
+
+	/**
+	 * Bounce up and back down — good for "enter stage left" emphasis moments.
+	 * Uses a brief up-tween then bounceOut back to resting Y.
+	 */
+	public function bounce(height:Float = 30, d:Float = 0.5):Void
+	{
+		cancelEffectTween();
+		var baseY = screenY;
+		effectTween = FlxTween.tween(this, { screenY: baseY - height }, d * 0.4, {
+			ease: FlxEase.quadOut,
+			onUpdate: _ -> updateLayerPositions(),
+			onComplete: _ -> {
+				effectTween = FlxTween.tween(this, { screenY: baseY }, d * 0.6, {
+					ease: FlxEase.bounceOut,
+					onUpdate: _ -> updateLayerPositions(),
+					onComplete: _ -> { effectTween = null; }
+				});
+			}
+		});
+	}
+
+	/**
+	 * Quick horizontal shake in place — good for emotional reactions.
+	 */
+	public function shakeCharacter(intensity:Float = 15, duration:Float = 0.5):Void
+	{
+		cancelEffectTween();
+		var baseX  = screenX;
+		var steps  = Std.int(duration / 0.05);
+		var stepDur = duration / steps;
+		var dir    = 1.0;
+		var step   = 0;
+
+		function doStep():Void
+		{
+			if (step >= steps)
+			{
+				screenX = baseX;
+				updateLayerPositions();
+				effectTween = null;
+				return;
+			}
+			var targetX = baseX + dir * intensity * (1.0 - step / steps);
+			dir = -dir;
+			step++;
+			effectTween = FlxTween.tween(this, { screenX: targetX }, stepDur, {
+				ease: FlxEase.quadInOut,
+				onUpdate: _ -> updateLayerPositions(),
+				onComplete: _ -> doStep()
+			});
+		}
+		doStep();
+	}
+
+	private function cancelEffectTween():Void
+	{
+		if (effectTween != null)
+		{
+			effectTween.cancel();
+			effectTween = null;
+		}
+	}
+
+	/** Route named transition to the right method. */
+	public function playTransition(t:String, d:Float):Void
+	{
+		switch (t)
+		{
+			case "fade":           fadeIn(d);
+			case "fade_out":       fadeOut(d);
+			case "slide_left":     slideIn("left", d);
+			case "slide_right":    slideIn("right", d);
+			case "slide_up":       slideUp(d);
+			case "pop":            popIn(d);
+			case "bounce":         bounce(30, d);
+			default:               /* no transition */
+		}
+	}
+
+	// =========================================================================
+	// Emphasis (DDLC-style speaking highlights)
+	// =========================================================================
+
+	public function emphasize():Void
+	{
+		_forVisibleLayers(function(spr:FlxSprite) {
+			spr.scale.set(config.scale * 1.1, config.scale * 1.1);
+			spr.alpha = 1.0;
+		});
+	}
+
+	public function deemphasize():Void
+	{
+		_forVisibleLayers(function(spr:FlxSprite) {
+			spr.scale.set(config.scale * 0.9, config.scale * 0.9);
+			spr.alpha = 0.6;
+		});
+	}
+
+	// =========================================================================
+	// Visibility
+	// =========================================================================
+
+	public function hide():Void
+	{
+		for (spr in vnLayers)     spr.visible = false;
+		for (spr in rhythmLayers) spr.visible = false;
+	}
+
+	// =========================================================================
+	// Rhythm mode
+	// =========================================================================
+
+	public function setRhythmMode(enabled:Bool):Void
+	{
+		isRhythmMode = enabled;
+		if (!enabled)
+		{
+			for (spr in currentAnimatingSprites)
+				if (spr != null && spr.animation != null && spr.animation.curAnim != null)
+					spr.animation.stop();
+			currentAnimatingSprites = [];
+		}
+	}
+
+	public function shouldLoop():Bool
+	{
+		return isLooping;
+	}
+
+	// =========================================================================
+	// Offset helper (additive nudge)
 	// =========================================================================
 
 	public function setOffset(x:Float, y:Float):Void
@@ -563,121 +741,14 @@ class CharacterRenderer extends FlxGroup
 		screenY += y;
 		updateLayerPositions();
 	}
-	
-	public function fadeIn(d:Float = 0.4):Void
-	{
-		for (spr in vnLayers)
-		{
-			spr.alpha = 0;
-			if (spr.visible)
-				FlxTween.tween(spr, {alpha: 1}, d);
-		}
-		
-		for (spr in rhythmLayers)
-		{
-			spr.alpha = 0;
-			if (spr.visible)
-				FlxTween.tween(spr, {alpha: 1}, d);
-		}
-	}
 
-	public function slideIn(dir:String, d:Float = 0.45):Void
-	{
-		var off = (dir == "left") ? -400 : 400;
-		var originalX = screenX;
-		
-		screenX += off;
-		updateLayerPositions();
-		
-		FlxTween.tween(this, {screenX: originalX}, d, {
-			onUpdate: function(_) {
-				updateLayerPositions();
-			}
-		});
-	}
+	// =========================================================================
+	// Internal utility
+	// =========================================================================
 
-	public function playTransition(t:String, d:Float):Void
+	private function _forVisibleLayers(fn:FlxSprite->Void):Void
 	{
-		switch (t)
-		{
-			case "fade":
-				fadeIn(d);
-			case "slide_left":
-				slideIn("left", d);
-			case "slide_right":
-				slideIn("right", d);
-			default:
-		}
-	}
-
-	public function hide():Void
-	{
-		for (spr in vnLayers) spr.visible = false;
-		for (spr in rhythmLayers) spr.visible = false;
-	}
-
-	public function emphasize():Void
-	{
-		for (spr in vnLayers)
-		{
-			if (spr.visible)
-			{
-				spr.scale.set(config.scale * 1.1, config.scale * 1.1);
-				spr.alpha = 1.0;
-			}
-		}
-		
-		for (spr in rhythmLayers)
-		{
-			if (spr.visible)
-			{
-				spr.scale.set(config.scale * 1.1, config.scale * 1.1);
-				spr.alpha = 1.0;
-			}
-		}
-	}
-
-	public function deemphasize():Void
-	{
-		for (spr in vnLayers)
-		{
-			if (spr.visible)
-			{
-				spr.scale.set(config.scale * 0.9, config.scale * 0.9);
-				spr.alpha = 0.6;
-			}
-		}
-		
-		for (spr in rhythmLayers)
-		{
-			if (spr.visible)
-			{
-				spr.scale.set(config.scale * 0.9, config.scale * 0.9);
-				spr.alpha = 0.6;
-			}
-		}
-	}
-	
-	public function setRhythmMode(enabled:Bool):Void
-	{
-		isRhythmMode = enabled;
-		trace('[CharacterRenderer] Rhythm mode ${enabled ? "ENABLED" : "DISABLED"} for $name');
-		
-		if (!enabled)
-		{
-			for (spr in currentAnimatingSprites)
-			{
-				if (spr != null && spr.animation != null && spr.animation.curAnim != null)
-				{
-					spr.animation.stop();
-				}
-			}
-			currentAnimatingSprites = [];
-		}
-	}
-	
-	public function shouldLoop():Bool
-	{
-		return isLooping;
+		for (spr in vnLayers)     if (spr.visible) fn(spr);
+		for (spr in rhythmLayers) if (spr.visible) fn(spr);
 	}
 }

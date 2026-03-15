@@ -223,20 +223,20 @@ class ChartHandler
         if (lane >= 0)
         {
             // POSITIVE LANE: Animate from START of singers list, sequential per timestamp
-            
+
             // Convert timestamp to string key for Map lookup
             var timeKey = Std.string(timeMs);
-            
+
             // Get current counter for this timestamp
             var count = positiveCounterByTimestamp.exists(timeKey)
                 ? positiveCounterByTimestamp.get(timeKey)
                 : 0;
-            
+
             performerIndex = count;
-            
+
             // Increment counter for next positive note at this timestamp
             positiveCounterByTimestamp.set(timeKey, count + 1);
-            
+
             // Resolve character ID
             if (performerIndex < singers.length)
             {
@@ -248,17 +248,21 @@ class ChartHandler
                 characterID = "";  // No character (will be skipped by animation bridge)
                 trace('[ChartHandler] WARNING: More positive notes than singers at time ${timeMs}');
             }
-            
-            // Input lane (for judged notes, same as raw lane)
-            inputLane = isJudged ? lane : -1;
+
+            // Input lane: map to 0-3 range so keyboard bindings always work.
+            // Multiple singers share the same 4 input slots (their notes don't overlap).
+            inputLane = isJudged ? (lane % 4) : -1;
         }
         else
         {
             // NEGATIVE LANE: Animate from END of singers list, grouped by 4
-            
+            // Lanes -1..-4  → last singer  (all 4 directions)
+            // Lanes -5..-8  → second-to-last singer
+            // Formula: groupIndex = floor((absLane - 1) / 4)
+
             var absLane = Std.int(Math.abs(lane));
-            var groupIndex = Std.int(Math.floor(absLane / 4));
-            
+            var groupIndex = Std.int(Math.floor((absLane - 1) / 4));
+
             performerIndex = (singers.length - 1) - groupIndex;
             
             // Resolve character ID
