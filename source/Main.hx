@@ -1,5 +1,6 @@
 package;
 
+import dev.DevTools;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.system.scaleModes.RatioScaleMode;
@@ -11,6 +12,7 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+		DevTools.install();
 
 		var w = 1280;
 		var h = 720;

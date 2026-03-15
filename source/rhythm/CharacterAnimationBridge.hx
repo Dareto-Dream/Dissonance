@@ -33,6 +33,7 @@ class CharacterAnimationBridge extends FlxBasic
     
     // Track all loaded characters for idle bop
     private var loadedCharacters:Array<String> = [];
+    private var sustainingCharacters:Map<String, Int> = [];
 
     public function new(conductor:Conductor, characterSprites:CharacterSpriteManager)
     {
@@ -77,6 +78,7 @@ class CharacterAnimationBridge extends FlxBasic
         // Only judged notes can be "missed" in the gameplay sense
         if (note.isJudged && note.characterID != "")
         {
+            clearSustain(note.characterID);
             triggerAnimation(note.characterID, "miss");
         }
     }
@@ -109,10 +111,15 @@ class CharacterAnimationBridge extends FlxBasic
         switch (note.kind)
         {
             case TAP, HOLD_HEAD:
+                if (note.kind == HOLD_HEAD)
+                {
+                    beginSustain(note.characterID);
+                }
                 triggerAnimation(note.characterID, animDirectionToName(note.animDirection));
             case HOLD_TICK:
                 // HOLD_TICK doesn't trigger new animations
             case HOLD_TAIL:
+                endSustain(note.characterID);
                 triggerAnimation(note.characterID, "singRelease");
         }
     }
@@ -122,6 +129,11 @@ class CharacterAnimationBridge extends FlxBasic
         // Trigger idle for all loaded characters
         for (characterID in loadedCharacters)
         {
+            if (isSustaining(characterID))
+            {
+                continue;
+            }
+
             triggerAnimation(characterID, "idle");
         }
     }
@@ -142,5 +154,39 @@ class CharacterAnimationBridge extends FlxBasic
     {
         // Direct dispatch to character sprite manager
         characterSprites.play(characterID, anim);
+    }
+
+    private function beginSustain(characterID:String):Void
+    {
+        var count = sustainingCharacters.exists(characterID) ? sustainingCharacters.get(characterID) : 0;
+        sustainingCharacters.set(characterID, count + 1);
+    }
+
+    private function endSustain(characterID:String):Void
+    {
+        if (!sustainingCharacters.exists(characterID))
+        {
+            return;
+        }
+
+        var nextCount = sustainingCharacters.get(characterID) - 1;
+        if (nextCount <= 0)
+        {
+            sustainingCharacters.remove(characterID);
+        }
+        else
+        {
+            sustainingCharacters.set(characterID, nextCount);
+        }
+    }
+
+    private function clearSustain(characterID:String):Void
+    {
+        sustainingCharacters.remove(characterID);
+    }
+
+    private function isSustaining(characterID:String):Bool
+    {
+        return sustainingCharacters.exists(characterID) && sustainingCharacters.get(characterID) > 0;
     }
 }

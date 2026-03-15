@@ -1,4 +1,4 @@
--- Minimal build file to help the Haxe language server and builds
+# Minimal build file to help the Haxe language server and builds
 -lib flixel
 -cp source
 -main Main

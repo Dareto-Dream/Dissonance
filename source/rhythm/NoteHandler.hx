@@ -13,11 +13,6 @@ import rhythm.Note;
  * ===========
  * Core gameplay logic.
  *
- * NEW DESIGN (Post-Refactor):
- * - No "player vs opponent" concept
- * - Notes are either judged or animation-only
- * - Judgement based on note.isJudged field
- *
  * Notes flow:
  *   ChartHandler -> ACTIVE -> JUDGED -> REMOVED
  *
@@ -25,23 +20,16 @@ import rhythm.Note;
  */
 class NoteHandler
 {
-    // Active (spawned) notes
     private var activeNotes:Array<Note> = [];
 
-    // External systems
     private var chart:ChartHandler;
     private var conductor:Conductor;
     private var judgement:JudgementSystem;
 
-    // Spawn configuration
     public var spawnAheadMs:Float = 2000;
 
-    // Input state
     private var heldLanes:Map<Int, Bool> = [];
-
-    // ------------------------------------------------------------------
-    // Events (consumed by renderer / animation / scoring)
-    // ------------------------------------------------------------------
+    private var sustainingLanes:Map<Int, Bool> = [];
 
     public var onNoteSpawn:FlxTypedSignal<Note->Void>;
     public var onNoteHit:FlxTypedSignal<Note->HitRating->Void>;
@@ -59,14 +47,10 @@ class NoteHandler
         this.judgement = judgement;
 
         onNoteSpawn = new FlxTypedSignal();
-        onNoteHit   = new FlxTypedSignal();
-        onNoteMiss  = new FlxTypedSignal();
-        onGhostTap  = new FlxTypedSignal();
+        onNoteHit = new FlxTypedSignal();
+        onNoteMiss = new FlxTypedSignal();
+        onGhostTap = new FlxTypedSignal();
     }
-
-    // ------------------------------------------------------------------
-    // Update loop
-    // ------------------------------------------------------------------
 
     public function update():Void
     {
@@ -74,12 +58,9 @@ class NoteHandler
 
         spawnNotes(nowMs);
         handleAnimationOnlyNotes(nowMs);
+        handleSustainTicks(nowMs);
         handleMisses(nowMs);
     }
-
-    // ------------------------------------------------------------------
-    // Spawning
-    // ------------------------------------------------------------------
 
     private function spawnNotes(nowMs:Float):Void
     {
@@ -92,10 +73,6 @@ class NoteHandler
             onNoteSpawn.dispatch(note);
         }
     }
-
-    // ------------------------------------------------------------------
-    // Input handling
-    // ------------------------------------------------------------------
 
     public function onKeyPress(inputLane:Int):Void
     {
@@ -120,51 +97,49 @@ class NoteHandler
         }
 
         consumeNote(target);
+        if (target.kind == NoteKind.HOLD_HEAD)
+        {
+            sustainingLanes.set(inputLane, true);
+        }
+
         onNoteHit.dispatch(target, rating);
     }
 
     public function onKeyRelease(inputLane:Int):Void
     {
+        var wasSustaining = sustainingLanes.exists(inputLane) && sustainingLanes.get(inputLane);
         heldLanes.set(inputLane, false);
 
+        if (!wasSustaining)
+        {
+            return;
+        }
+
         var nowMs = conductor.songPositionMs;
-
-        // Handle HOLD_TAIL release judgement
         var tail = findTailForLane(inputLane, nowMs);
-        if (tail == null) return;
 
-        var delta = nowMs - tail.timeMs;
-        var rating = judgement.judgeRelease(delta);
+        if (tail == null)
+        {
+            sustainingLanes.remove(inputLane);
+            return;
+        }
 
         consumeNote(tail);
-        onNoteHit.dispatch(tail, rating);
+        sustainingLanes.remove(inputLane);
+        onNoteHit.dispatch(tail, judgement.judgeRelease(nowMs - tail.timeMs));
     }
 
-    // ------------------------------------------------------------------
-    // Animation-only note handling
-    // ------------------------------------------------------------------
-
-    /**
-     * Handle animation-only notes automatically on timing.
-     * Animation-only notes "auto-hit" when their scheduled time arrives.
-     * This is separate from player hit/miss logic.
-     * 
-     * RENAMED from handleOpponentAutoplay (semantic clarity).
-     */
     private function handleAnimationOnlyNotes(nowMs:Float):Void
     {
-        var autoplayWindow = 50.0; // Small window around note time for autoplay
+        var autoplayWindow = 50.0;
         var toAutoplay:Array<Note> = [];
 
         for (note in activeNotes)
         {
-            // Only process animation-only notes
-            if (note.isJudged) continue;  // ✅ NEW: Skip judged notes
+            if (note.isJudged) continue;
             if (note.judged) continue;
 
-            // Check if note time has been reached (within small window)
             var timeDiff = Math.abs(nowMs - note.timeMs);
-            
             if (timeDiff <= autoplayWindow && nowMs >= note.timeMs)
             {
                 toAutoplay.push(note);
@@ -173,22 +148,47 @@ class NoteHandler
 
         for (note in toAutoplay)
         {
-            // Only trigger animations for TAP and HOLD_HEAD
-            // HOLD_TICK and HOLD_TAIL don't trigger sing animations
             if (note.kind == NoteKind.TAP || note.kind == NoteKind.HOLD_HEAD)
             {
-                // Trigger animation event with perfect rating (autoplay)
                 onNoteHit.dispatch(note, HitRating.SICK);
             }
 
-            // Consume the note
             consumeNote(note);
         }
     }
 
-    // ------------------------------------------------------------------
-    // Miss handling
-    // ------------------------------------------------------------------
+    private function handleSustainTicks(nowMs:Float):Void
+    {
+        var missWindow = judgement.maxHitWindowMs();
+        var toMiss:Array<Note> = [];
+
+        for (note in activeNotes)
+        {
+            if (!note.isJudged) continue;
+            if (note.judged) continue;
+            if (note.kind != NoteKind.HOLD_TICK) continue;
+            if (nowMs < note.timeMs) continue;
+
+            var isSustaining = sustainingLanes.exists(note.inputLane) && sustainingLanes.get(note.inputLane);
+            var keyHeld = heldLanes.exists(note.inputLane) && heldLanes.get(note.inputLane);
+
+            if (isSustaining && keyHeld)
+            {
+                consumeNote(note);
+            }
+            else if (nowMs > note.timeMs + missWindow)
+            {
+                toMiss.push(note);
+            }
+        }
+
+        for (note in toMiss)
+        {
+            sustainingLanes.remove(note.inputLane);
+            consumeNote(note);
+            onNoteMiss.dispatch(note);
+        }
+    }
 
     private function handleMisses(nowMs:Float):Void
     {
@@ -197,8 +197,9 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
+            if (!note.isJudged) continue;
             if (note.judged) continue;
+            if (note.kind == NoteKind.HOLD_TICK) continue;
 
             if (nowMs > note.timeMs + missWindow)
             {
@@ -208,14 +209,15 @@ class NoteHandler
 
         for (note in toRemove)
         {
+            if (note.kind == NoteKind.HOLD_HEAD || note.kind == NoteKind.HOLD_TAIL)
+            {
+                sustainingLanes.remove(note.inputLane);
+            }
+
             consumeNote(note);
             onNoteMiss.dispatch(note);
         }
     }
-
-    // ------------------------------------------------------------------
-    // Note lookup helpers
-    // ------------------------------------------------------------------
 
     private function findHittableNote(inputLane:Int, nowMs:Float):Note
     {
@@ -225,12 +227,10 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
+            if (!note.isJudged) continue;
             if (note.judged) continue;
             if (note.inputLane != inputLane) continue;
-
-            // HOLD_TAILs are judged on release, not press
-            if (note.kind == NoteKind.HOLD_TAIL) continue;
+            if (note.kind == NoteKind.HOLD_TICK || note.kind == NoteKind.HOLD_TAIL) continue;
 
             var diff = Math.abs(note.timeMs - nowMs);
             if (diff <= window && diff < bestDiff)
@@ -249,21 +249,19 @@ class NoteHandler
 
         for (note in activeNotes)
         {
-            if (!note.isJudged) continue;  // ✅ NEW: Only check judged notes
+            if (!note.isJudged) continue;
             if (note.judged) continue;
             if (note.inputLane != inputLane) continue;
             if (note.kind != NoteKind.HOLD_TAIL) continue;
 
             if (Math.abs(note.timeMs - nowMs) <= window)
+            {
                 return note;
+            }
         }
 
         return null;
     }
-
-    // ------------------------------------------------------------------
-    // Consumption
-    // ------------------------------------------------------------------
 
     private function consumeNote(note:Note):Void
     {
@@ -271,12 +269,28 @@ class NoteHandler
         activeNotes.remove(note);
     }
 
-    // ------------------------------------------------------------------
-    // Debug / inspection
-    // ------------------------------------------------------------------
-
     public inline function getActiveCount():Int
     {
         return activeNotes.length;
+    }
+
+    public function getHittableNoteForLane(inputLane:Int):Note
+    {
+        return findHittableNote(inputLane, conductor.songPositionMs);
+    }
+
+    public function getTailInWindow(inputLane:Int):Note
+    {
+        return findTailForLane(inputLane, conductor.songPositionMs);
+    }
+
+    public function isLaneSustaining(inputLane:Int):Bool
+    {
+        return sustainingLanes.exists(inputLane) && sustainingLanes.get(inputLane);
+    }
+
+    public function isLaneHeld(inputLane:Int):Bool
+    {
+        return heldLanes.exists(inputLane) && heldLanes.get(inputLane);
     }
 }

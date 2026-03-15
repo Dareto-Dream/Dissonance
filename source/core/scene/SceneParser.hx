@@ -7,6 +7,7 @@ class SceneParser {
     public var sceneId:String;
     public var startNode:String;
     public var nodes:Map<String, Dynamic>;
+    public var nodeOrder:Array<String>;
 
     public function new(path:String) {
         // path example: "scenes/act1/act1_scene1.json"
@@ -17,6 +18,7 @@ class SceneParser {
         sceneId = data.scene_id;
         startNode = data.start != null ? data.start : "n1";
         nodes = new Map<String, Dynamic>();
+        nodeOrder = [];
 
         
         var arr:Array<Dynamic> = cast data.nodes;
@@ -26,6 +28,7 @@ class SceneParser {
             }
 
             nodes.set(node.id, node);
+            nodeOrder.push(node.id);
         }
     }
 
@@ -34,5 +37,9 @@ class SceneParser {
             throw "SceneParser Error: Node '" + id + "' not found in " + sceneId;
         }
         return nodes.get(id);
+    }
+
+    public function hasNode(id:String):Bool {
+        return nodes.exists(id);
     }
 }

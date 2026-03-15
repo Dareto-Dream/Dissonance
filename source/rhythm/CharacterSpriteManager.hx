@@ -11,7 +11,7 @@ import rhythm.RhythmCharacterData;
  * CharacterSpriteManager
  * ======================
  * Data-driven character sprite loading and animation management.
- * 
+ *
  * CRITICAL RULES:
  * - All config from assets/data/characters/<id>/<id>.json
  * - anim (engine key) ≠ name (XML prefix)
@@ -36,15 +36,18 @@ class CharacterSpriteManager
 
     // Character data cache (loaded JSONs)
     private var characterData:Map<String, RhythmCharacterData> = new Map();
-    
+
     // Character sprites (loaded FlxSprites)
     private var sprites:Map<String, FlxSprite> = new Map();
-    
+
     // Current animation offsets per character
     private var currentOffsets:Map<String, {x:Float, y:Float}> = new Map();
-    
+
     // Base positions per character (from JSON)
     private var basePositions:Map<String, {x:Float, y:Float}> = new Map();
+
+    // Runtime anchor positions after layout is applied
+    private var anchorPositions:Map<String, {x:Float, y:Float}> = new Map();
 
     public function new()
     {
@@ -57,7 +60,7 @@ class CharacterSpriteManager
 
     /**
      * Load a character's rhythm sprite and configuration.
-     * 
+     *
      * @param characterID Character to load
      * @return FlxSprite instance (or null if failed)
      */
@@ -105,6 +108,7 @@ class CharacterSpriteManager
         // Cache
         sprites.set(characterID, sprite);
         characterData.set(characterID, data);
+        applyResolvedPosition(characterID);
 
         trace('[CharacterSpriteManager] Character loaded successfully: ${characterID}');
         return sprite;
@@ -196,7 +200,7 @@ class CharacterSpriteManager
 
     /**
      * Register animations from character data.
-     * 
+     *
      * CRITICAL: Uses anim (engine key) + name (XML prefix) split.
      */
     private function registerAnimations(sprite:FlxSprite, data:RhythmCharacterData, characterID:String):Void
@@ -258,17 +262,19 @@ class CharacterSpriteManager
         sprite.flipX = data.flip_x;
 
         // Store base position for later use
-        basePositions.set(characterID, {
-            x: data.position[0],
-            y: data.position[1]
-        });
+        var basePosition = {
+            x: data.position != null && data.position.length > 0 ? data.position[0] : 0,
+            y: data.position != null && data.position.length > 1 ? data.position[1] : 0
+        };
+        basePositions.set(characterID, basePosition);
+        anchorPositions.set(characterID, basePosition);
 
         // Initialize offset tracking
         currentOffsets.set(characterID, {x: 0, y: 0});
 
         trace('[CharacterSpriteManager]   Scale: ${data.scale}');
         trace('[CharacterSpriteManager]   Flip X: ${data.flip_x}');
-        trace('[CharacterSpriteManager]   Base position: [${data.position[0]}, ${data.position[1]}]');
+        trace('[CharacterSpriteManager]   Base position: [${basePosition.x}, ${basePosition.y}]');
     }
 
     // ------------------------------------------------------------------
@@ -278,7 +284,7 @@ class CharacterSpriteManager
     /**
      * Play an animation on a character.
      * Automatically applies animation-specific offsets.
-     * 
+     *
      * @param characterID Character to animate
      * @param animKey Engine animation key (anim, not name)
      */
@@ -297,19 +303,27 @@ class CharacterSpriteManager
         }
 
         var sprite = sprites.get(characterID);
+        var resolvedAnim = animKey;
 
         // Animation exists?
-        if (!sprite.animation.exists(animKey))
+        if (!sprite.animation.exists(resolvedAnim))
         {
-            trace('[CharacterSpriteManager] WARNING: Animation "${animKey}" not found for character "${characterID}"');
-            return;
+            if (sprite.animation.exists("idle"))
+            {
+                resolvedAnim = "idle";
+            }
+            else
+            {
+                trace('[CharacterSpriteManager] WARNING: Animation "${animKey}" not found for character "${characterID}"');
+                return;
+            }
         }
 
         // Play animation
-        sprite.animation.play(animKey, true);
+        sprite.animation.play(resolvedAnim, true);
 
         // Apply animation-specific offset
-        applyAnimationOffset(characterID, animKey);
+        applyAnimationOffset(characterID, resolvedAnim);
     }
 
     /**
@@ -320,26 +334,22 @@ class CharacterSpriteManager
         if (!characterData.exists(characterID)) return;
 
         var data = characterData.get(characterID);
-        var sprite = sprites.get(characterID);
+        var offsetX = 0.0;
+        var offsetY = 0.0;
 
         // Find animation definition
         for (animDef in data.animations)
         {
             if (animDef.anim == animKey)
             {
-                var offsetX = animDef.offsets[0];
-                var offsetY = animDef.offsets[1];
-
-                // Store current offset
-                currentOffsets.set(characterID, {x: offsetX, y: offsetY});
-
-                // Apply offset (added to base position)
-                // Note: Actual positioning handled by caller (RhythmState)
-                // This just tracks the offset for retrieval
-
-                return;
+                offsetX = animDef.offsets != null && animDef.offsets.length > 0 ? animDef.offsets[0] : 0;
+                offsetY = animDef.offsets != null && animDef.offsets.length > 1 ? animDef.offsets[1] : 0;
+                break;
             }
         }
+
+        currentOffsets.set(characterID, {x: offsetX, y: offsetY});
+        applyResolvedPosition(characterID);
     }
 
     // ------------------------------------------------------------------
@@ -370,6 +380,16 @@ class CharacterSpriteManager
         }
 
         return {x: 0, y: 0};
+    }
+
+    /**
+     * Set the runtime anchor position for a character.
+     * Animation offsets are applied relative to this position.
+     */
+    public function setCharacterPosition(characterID:String, x:Float, y:Float):Void
+    {
+        anchorPositions.set(characterID, {x: x, y: y});
+        applyResolvedPosition(characterID);
     }
 
     /**
@@ -404,5 +424,23 @@ class CharacterSpriteManager
     public function isLoaded(characterID:String):Bool
     {
         return sprites.exists(characterID) && characterData.exists(characterID);
+    }
+
+    private function applyResolvedPosition(characterID:String):Void
+    {
+        if (!sprites.exists(characterID))
+        {
+            return;
+        }
+
+        var sprite = sprites.get(characterID);
+        var anchor = anchorPositions.exists(characterID)
+            ? anchorPositions.get(characterID)
+            : (basePositions.exists(characterID) ? basePositions.get(characterID) : {x: 0.0, y: 0.0});
+        var offset = currentOffsets.exists(characterID)
+            ? currentOffsets.get(characterID)
+            : {x: 0.0, y: 0.0};
+
+        sprite.setPosition(anchor.x + offset.x, anchor.y + offset.y);
     }
 }

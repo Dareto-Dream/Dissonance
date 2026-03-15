@@ -1,8 +1,12 @@
 package rhythm;
 
+import dev.DevTools;
+import dev.DevTools.RhythmDevMode;
 import flixel.FlxG;
-import flixel.FlxState;
 import flixel.FlxSprite;
+import flixel.FlxState;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
 import openfl.Assets;
 import rhythm.ArrowRenderer;
 import rhythm.CharacterAnimationBridge;
@@ -16,334 +20,419 @@ import rhythm.Note;
 import rhythm.NoteHandler;
 import rhythm.NoteRenderer;
 
-/**
- * RhythmState
- * ===========
- * Main gameplay state for the rhythm engine.
- *
- * Data is injected BEFORE create() by RhythmBridge.
- * This keeps the state reusable and decoupled.
- */
 class RhythmState extends FlxState
 {
-    // --------------------------------------------------
-    // Injected by RhythmBridge
-    // --------------------------------------------------
+	public var song:String;
+	public var chartPath:String;
+	public var returnStateFactory:Void->flixel.FlxState;
+	public var onComplete:Dynamic;
 
-    public var song:String;
-    public var chartPath:String;
-    public var returnStateFactory:Void->flixel.FlxState; // Factory to rebuild VN state after completion
-    public var onComplete:Dynamic; // RhythmResult -> Void (kept loose for now)
+	private var conductor:Conductor;
+	private var chartHandler:ChartHandler;
+	private var judgement:JudgementSystem;
+	private var noteHandler:NoteHandler;
 
-    // --------------------------------------------------
-    // Core systems
-    // --------------------------------------------------
+	private var arrowRenderer:ArrowRenderer;
+	private var noteRenderer:NoteRenderer;
+	private var characterSprites:CharacterSpriteManager;
+	private var characterBridge:CharacterAnimationBridge;
+	private var isFinishingSong:Bool = false;
 
-    private var conductor:Conductor;
-    private var chartHandler:ChartHandler;
-    private var judgement:JudgementSystem;
-    private var noteHandler:NoteHandler;
+	private var devOverlayBg:FlxSprite;
+	private var devOverlayText:FlxText;
 
-    // --------------------------------------------------
-    // Presentation systems
-    // --------------------------------------------------
+	override public function create():Void
+	{
+		super.create();
 
-    private var arrowRenderer:ArrowRenderer;
-    private var noteRenderer:NoteRenderer;
-    private var characterSprites:CharacterSpriteManager;
-    private var characterBridge:CharacterAnimationBridge;
+		if (chartPath == null)
+			throw "RhythmState started without chartPath";
+		if (!Assets.exists(chartPath))
+			throw 'RhythmState could not find chart at ${chartPath}';
 
-    // --------------------------------------------------
-    // Lifecycle
-    // --------------------------------------------------
+		var chart:ChartData = cast haxe.Json.parse(Assets.getText(chartPath));
 
-    override public function create():Void
-    {
-        super.create();
+		var stageSprite = createStageSprite(chart.song.stage);
+		if (stageSprite != null)
+		{
+			add(stageSprite);
+		}
 
-        // --------------------------------------------------
-        // Validation
-        // --------------------------------------------------
+		FlxG.sound.playMusic('assets/music/${chart.song.song}.ogg', 1.0, false);
 
-        if (chartPath == null)
-            throw "RhythmState started without chartPath";
+		conductor = new Conductor(chart.song.bpm, chart.song.offset);
+		judgement = new JudgementSystem();
+		chartHandler = new ChartHandler(chart, conductor);
+		noteHandler = new NoteHandler(chartHandler, conductor, judgement);
+		noteHandler.spawnAheadMs = NoteRenderer.SPAWN_AHEAD_MS;
 
-        // --------------------------------------------------
-        // Load chart
-        // --------------------------------------------------
+		arrowRenderer = new ArrowRenderer();
+		noteRenderer = new NoteRenderer(conductor, arrowRenderer);
+		characterSprites = new CharacterSpriteManager();
 
-        var chart:ChartData = cast haxe.Json.parse(
-            Assets.getText(chartPath)
-        );
+		var allCharacterIDs:Array<String> = [];
+		var loadedCharacterIDs:Array<String> = [];
 
-        // --------------------------------------------------
-        // Load background stage (if provided)
-        // --------------------------------------------------
+		for (section in chart.song.notes)
+		{
+			if (section.singers != null)
+			{
+				for (singerID in section.singers)
+				{
+					if (!allCharacterIDs.contains(singerID))
+					{
+						allCharacterIDs.push(singerID);
+					}
+				}
+			}
+		}
 
-        var stageSprite = createStageSprite(chart.song.stage);
-        if (stageSprite != null)
-        {
-            add(stageSprite);
-        }
+		trace('[RhythmState] Loading ${allCharacterIDs.length} unique characters');
 
-        // --------------------------------------------------
-        // Load music
-        // --------------------------------------------------
+		for (i in 0...allCharacterIDs.length)
+		{
+			var characterID = allCharacterIDs[i];
+			trace('[RhythmState] Loading character: ${characterID}');
 
-        FlxG.sound.playMusic(
-            'assets/music/${chart.song.song}.ogg',
-            1.0,
-            false
-        );
+			var sprite = characterSprites.loadCharacter(characterID);
+			if (sprite != null)
+			{
+				var basePos = characterSprites.getBasePosition(characterID);
+				var xOffset = (i - ((allCharacterIDs.length - 1) / 2)) * 140;
+				characterSprites.setCharacterPosition(characterID, basePos.x + xOffset, basePos.y);
+				trace('[RhythmState]   Positioned at: [${basePos.x + xOffset}, ${basePos.y}]');
 
-        // --------------------------------------------------
-        // Initialize core systems
-        // --------------------------------------------------
+				add(sprite);
+				loadedCharacterIDs.push(characterID);
+			}
+		}
 
-        conductor = new Conductor(chart.song.bpm, chart.song.offset);
-        judgement = new JudgementSystem();
-        chartHandler = new ChartHandler(chart, conductor);
-        noteHandler = new NoteHandler(chartHandler, conductor, judgement);
+		characterBridge = new CharacterAnimationBridge(conductor, characterSprites);
+		for (characterID in loadedCharacterIDs)
+		{
+			characterBridge.registerCharacter(characterID);
+			trace('[RhythmState] Registered character for animations: ${characterID}');
+		}
 
-        // --------------------------------------------------
-        // Initialize presentation systems
-        // --------------------------------------------------
+		add(arrowRenderer);
+		add(noteRenderer);
+		add(characterBridge);
 
-        arrowRenderer = new ArrowRenderer();
-        noteRenderer = new NoteRenderer(conductor, arrowRenderer);
-        
-        // --------------------------------------------------
-        // Initialize character sprites
-        // --------------------------------------------------
-        
-        characterSprites = new CharacterSpriteManager();
-        
-        // NEW DESIGN: Load all unique characters from ALL sections
-        // Collect unique character IDs from all section singers arrays
-        var allCharacterIDs:Array<String> = [];
-        
-        for (section in chart.song.notes)
-        {
-            if (section.singers != null)
-            {
-                for (singerID in section.singers)
-                {
-                    if (!allCharacterIDs.contains(singerID))
-                    {
-                        allCharacterIDs.push(singerID);
-                    }
-                }
-            }
-        }
-        
-        trace('[RhythmState] Loading ${allCharacterIDs.length} unique characters');
-        
-        // Load and position each character
-        for (i in 0...allCharacterIDs.length)
-        {
-            var characterID = allCharacterIDs[i];
-            trace('[RhythmState] Loading character: ${characterID}');
-            
-            var sprite = characterSprites.loadCharacter(characterID);
-            if (sprite != null)
-            {
-                // Apply position from character data
-                var basePos = characterSprites.getBasePosition(characterID);
-                
-                // Offset positions for multiple characters (simple horizontal spacing)
-                var xOffset = i * 100;
-                sprite.setPosition(basePos.x + xOffset, basePos.y);
-                trace('[RhythmState]   Positioned at: [${basePos.x + xOffset}, ${basePos.y}]');
-                
-                add(sprite);
-            }
-        }
-        
-        // Initialize animation bridge (with character sprite manager)
-        characterBridge = new CharacterAnimationBridge(conductor, characterSprites);
-        
-        // Register all loaded characters with animation bridge
-        for (characterID in allCharacterIDs)
-        {
-            characterBridge.registerCharacter(characterID);
-            trace('[RhythmState] Registered character for animations: ${characterID}');
-        }
-        
-        add(arrowRenderer);
-        add(noteRenderer);
-        add(characterBridge);
+		noteHandler.onNoteSpawn.add(onNoteSpawn);
+		noteHandler.onNoteHit.add(onNoteHit);
+		noteHandler.onNoteMiss.add(onNoteMiss);
+		noteHandler.onGhostTap.add(onGhostTap);
 
-        // --------------------------------------------------
-        // Event wiring
-        // --------------------------------------------------
+		if (DevTools.ENABLED)
+		{
+			createDevOverlay();
+		}
 
-        noteHandler.onNoteSpawn.add(onNoteSpawn);
-        noteHandler.onNoteHit.add(onNoteHit);
-        noteHandler.onNoteMiss.add(onNoteMiss);
-        noteHandler.onGhostTap.add(onGhostTap);
+		conductor.start();
+	}
 
-        // --------------------------------------------------
-        // Start timing AFTER music begins
-        // --------------------------------------------------
+	override public function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
 
-        conductor.start();
-    }
+		conductor.update();
+		noteHandler.update();
 
-    override public function update(elapsed:Float):Void
-    {
-        super.update(elapsed);
+		if (DevTools.ENABLED)
+		{
+			handleDevTools(elapsed);
+			updateDevOverlay();
+		}
 
-        // --------------------------------------------------
-        // Authoritative update order
-        // --------------------------------------------------
+		if (!DevTools.ENABLED || DevTools.RHYTHM_MODE == RhythmDevMode.OFF)
+		{
+			handleInput();
+		}
+		else if (DevTools.RHYTHM_MODE == RhythmDevMode.BOTPLAY)
+		{
+			updateBotplay();
+		}
 
-        conductor.update();
-        noteHandler.update();
+		if (FlxG.sound.music != null && !FlxG.sound.music.playing)
+		{
+			finishSong();
+		}
+	}
 
-        // --------------------------------------------------
-        // Input forwarding (event-based)
-        // --------------------------------------------------
+	private function handleDevTools(elapsed:Float):Void
+	{
+		if (DevTools.shiftDevChordPressed(1))
+		{
+			DevTools.cycleLogLevel();
+		}
+		else if (DevTools.devChordPressed(1))
+		{
+			DevTools.toggleOverlay();
+		}
 
-        handleInput();
+		if (DevTools.devChordPressed(2))
+		{
+			DevTools.cycleRhythmMode();
+		}
 
-        // --------------------------------------------------
-        // Song completion check (simple for now)
-        // --------------------------------------------------
+		if (DevTools.devChordPressed(3))
+		{
+			restartChart(song);
+			return;
+		}
 
-        if (FlxG.sound.music != null && !FlxG.sound.music.playing)
-        {
-            finishSong();
-        }
-    }
+		if (DevTools.shiftDevChordPressed(4))
+		{
+			forceFail();
+			return;
+		}
+		else if (DevTools.devChordPressed(4))
+		{
+			forceSuccess();
+			return;
+		}
 
-    // --------------------------------------------------
-    // Input handling
-    // --------------------------------------------------
+		if (DevTools.devChordPressed(5))
+		{
+			DevTools.cycleChart(-1);
+		}
 
-    private function handleInput():Void
-    {
-        // Input lane mapping (0..playerLaneCount-1)
-        // These values are passed as inputLane indices, NOT global lane indices
-        // TODO: Make this data-driven to support variable playerLaneCount
-        if (FlxG.keys.justPressed.A) noteHandler.onKeyPress(0);
-        if (FlxG.keys.justPressed.S) noteHandler.onKeyPress(1);
-        if (FlxG.keys.justPressed.D) noteHandler.onKeyPress(2);
-        if (FlxG.keys.justPressed.F) noteHandler.onKeyPress(3);
+		if (DevTools.devChordPressed(6))
+		{
+			DevTools.cycleChart(1);
+		}
 
-        if (FlxG.keys.justReleased.A) noteHandler.onKeyRelease(0);
-        if (FlxG.keys.justReleased.S) noteHandler.onKeyRelease(1);
-        if (FlxG.keys.justReleased.D) noteHandler.onKeyRelease(2);
-        if (FlxG.keys.justReleased.F) noteHandler.onKeyRelease(3);
-    }
+		if (DevTools.devChordPressed(7))
+		{
+			restartChart(DevTools.getSelectedChart());
+			return;
+		}
 
-    // --------------------------------------------------
-    // Gameplay → Presentation bridge
-    // --------------------------------------------------
+		if (DevTools.devChordPressed(8))
+		{
+			DevTools.adjustAutoFinishDelay(-0.25);
+		}
 
-    private function onNoteSpawn(note:Note):Void
-    {
-        noteRenderer.spawnNote(note);
-    }
+		if (DevTools.devChordPressed(9))
+		{
+			DevTools.adjustAutoFinishDelay(0.25);
+		}
 
-    private function onNoteHit(note:Note, rating:HitRating):Void
-    {
-        noteRenderer.removeNote(note);
-        arrowRenderer.onNoteHit(note, rating);
-        characterBridge.onNoteHit(note, rating);
-    }
+		switch (DevTools.RHYTHM_MODE)
+		{
+			case AUTO_FINISH_SUCCESS:
+				if (conductor.songPositionMs >= DevTools.RHYTHM_AUTO_FINISH_DELAY * 1000)
+				{
+					forceSuccess();
+				}
+			case AUTO_FINISH_FAIL:
+				if (conductor.songPositionMs >= DevTools.RHYTHM_AUTO_FINISH_DELAY * 1000)
+				{
+					forceFail();
+				}
+			default:
+		}
+	}
 
-    private function onNoteMiss(note:Note):Void
-    {
-        noteRenderer.removeNote(note);
-        arrowRenderer.onNoteMiss(note);
-        characterBridge.onNoteMiss(note);
-    }
+	private function updateBotplay():Void
+	{
+		for (lane in 0...4)
+		{
+			if (noteHandler.isLaneSustaining(lane) && noteHandler.getTailInWindow(lane) != null)
+			{
+				noteHandler.onKeyRelease(lane);
+			}
 
-    private function onGhostTap(lane:Int):Void
-    {
-        arrowRenderer.onGhostTap(lane);
-    }
+			if (noteHandler.getHittableNoteForLane(lane) != null)
+			{
+				noteHandler.onKeyPress(lane);
+			}
+		}
+	}
 
-    // --------------------------------------------------
-    // Stage background loading
-    // --------------------------------------------------
+	private function handleInput():Void
+	{
+		if (FlxG.keys.justPressed.A) noteHandler.onKeyPress(0);
+		if (FlxG.keys.justPressed.S) noteHandler.onKeyPress(1);
+		if (FlxG.keys.justPressed.D) noteHandler.onKeyPress(2);
+		if (FlxG.keys.justPressed.F) noteHandler.onKeyPress(3);
 
-    private function createStageSprite(stageId:String):FlxSprite
-    {
-        if (stageId == null || stageId == "")
-        {
-            trace("[RhythmState] No stage specified in chart; skipping stage background");
-            return null;
-        }
+		if (FlxG.keys.justReleased.A) noteHandler.onKeyRelease(0);
+		if (FlxG.keys.justReleased.S) noteHandler.onKeyRelease(1);
+		if (FlxG.keys.justReleased.D) noteHandler.onKeyRelease(2);
+		if (FlxG.keys.justReleased.F) noteHandler.onKeyRelease(3);
+	}
 
-        var stagePath = 'assets/images/stages/${stageId}.png';
-        var sprite = new FlxSprite(0, 0);
+	private function onNoteSpawn(note:Note):Void
+	{
+		noteRenderer.spawnNote(note);
+	}
 
-        if (Assets.exists(stagePath))
-        {
-            trace('[RhythmState] Loading stage background: ${stagePath}');
-            sprite.loadGraphic(stagePath);
-        }
-        else
-        {
-            trace('[RhythmState] Stage image not found at ${stagePath}, using placeholder');
-            sprite.makeGraphic(FlxG.width, FlxG.height, 0xff101018);
-        }
+	private function onNoteHit(note:Note, rating:HitRating):Void
+	{
+		noteRenderer.removeNote(note);
+		arrowRenderer.onNoteHit(note, rating);
+		characterBridge.onNoteHit(note, rating);
+	}
 
-        // Fit to screen and keep static
-        sprite.setGraphicSize(FlxG.width, FlxG.height);
-        sprite.updateHitbox();
-        sprite.scrollFactor.set(0, 0);
-        sprite.antialiasing = true;
+	private function onNoteMiss(note:Note):Void
+	{
+		noteRenderer.removeNote(note);
+		arrowRenderer.onNoteMiss(note);
+		characterBridge.onNoteMiss(note);
+	}
 
-        return sprite;
-    }
+	private function onGhostTap(lane:Int):Void
+	{
+		arrowRenderer.onGhostTap(lane);
+	}
 
-    // --------------------------------------------------
-    // Completion
-    // --------------------------------------------------
+	private function createStageSprite(stageId:String):FlxSprite
+	{
+		if (stageId == null || stageId == "")
+		{
+			trace("[RhythmState] No stage specified in chart; skipping stage background");
+			return null;
+		}
 
-    private function finishSong():Void
-    {
-        trace("[RhythmState] Song complete");
+		var stagePath = 'assets/images/stages/${stageId}.png';
+		var sprite = new FlxSprite(0, 0);
 
-        // Build result
-        var result = {
-            score: 0,
-            combo: 0,
-            accuracy: 0.0,
-            health: 1.0,
-            completed: true
-        };
+		if (Assets.exists(stagePath))
+		{
+			trace('[RhythmState] Loading stage background: ${stagePath}');
+			sprite.loadGraphic(stagePath);
+		}
+		else
+		{
+			trace('[RhythmState] Stage image not found at ${stagePath}, using placeholder');
+			sprite.makeGraphic(FlxG.width, FlxG.height, 0xff101018);
+		}
 
-        if (onComplete != null)
-        {
-            // CRITICAL FIX: Store callback for deferred execution
-            // Do NOT call onComplete here - VN renderers don't exist yet
-            rhythm.RhythmCompletionBridge.storeResult(result, onComplete);
-            
-            trace("[RhythmState] Stored completion callback for deferred execution");
-        }
+		sprite.setGraphicSize(FlxG.width, FlxG.height);
+		sprite.updateHitbox();
+		sprite.scrollFactor.set(0, 0);
+		sprite.antialiasing = true;
 
-        // Switch back to VN state
-        // VN state's create/resume will:
-        // 1. Initialize VN renderers
-        // 2. Call RhythmCompletionBridge.executePendingCallback()
-        // 3. Execute callback safely with valid renderers
-        
-        if (returnStateFactory != null)
-        {
-            trace("[RhythmState] Returning to VN state (rebuilding new instance)");
-            FlxG.switchState(() -> returnStateFactory());
-        }
-        else
-        {
-            trace("[RhythmState] WARNING: No returnStateFactory provided, cannot transition back to VN");
-            // Fallback: Call immediately (will likely crash)
-            if (onComplete != null)
-            {
-                onComplete(result);
-            }
-        }
-    }
+		return sprite;
+	}
+
+	private function restartChart(nextSong:String):Void
+	{
+		DevTools.notify('Restarting rhythm chart ${nextSong}');
+		var nextState = new RhythmState();
+		nextState.song = nextSong;
+		nextState.chartPath = 'assets/data/charts/${nextSong}.json';
+		nextState.returnStateFactory = returnStateFactory;
+		nextState.onComplete = onComplete;
+		FlxG.switchState(() -> nextState);
+	}
+
+	private function forceSuccess():Void
+	{
+		DevTools.notify('Forced success for ${song}');
+		finishSong({
+			score: 123456,
+			combo: 999,
+			accuracy: 1.0,
+			health: 1.0,
+			completed: true
+		});
+	}
+
+	private function forceFail():Void
+	{
+		DevTools.notify('Forced fail for ${song}');
+		finishSong({
+			score: 0,
+			combo: 0,
+			accuracy: 0.0,
+			health: 0.0,
+			completed: false
+		});
+	}
+
+	private function finishSong(?resultOverride:Dynamic):Void
+	{
+		if (isFinishingSong)
+		{
+			return;
+		}
+
+		isFinishingSong = true;
+		trace("[RhythmState] Song complete");
+
+		var result = {
+			score: 0,
+			combo: 0,
+			accuracy: 0.0,
+			health: 1.0,
+			completed: true
+		};
+
+		if (resultOverride != null)
+		{
+			for (field in Reflect.fields(resultOverride))
+			{
+				Reflect.setField(result, field, Reflect.field(resultOverride, field));
+			}
+		}
+
+		if (onComplete != null)
+		{
+			rhythm.RhythmCompletionBridge.storeResult(result, onComplete);
+			trace("[RhythmState] Stored completion callback for deferred execution");
+		}
+
+		if (returnStateFactory != null)
+		{
+			trace("[RhythmState] Returning to VN state (rebuilding new instance)");
+			FlxG.switchState(() -> returnStateFactory());
+		}
+		else
+		{
+			trace("[RhythmState] WARNING: No returnStateFactory provided, cannot transition back to VN");
+			if (onComplete != null)
+			{
+				onComplete(result);
+			}
+		}
+	}
+
+	private function createDevOverlay():Void
+	{
+		devOverlayBg = new FlxSprite(8, 8);
+		devOverlayBg.makeGraphic(560, 166, FlxColor.fromRGB(10, 10, 10, 180));
+		devOverlayBg.scrollFactor.set(0, 0);
+		devOverlayBg.alpha = 0.8;
+		add(devOverlayBg);
+
+		devOverlayText = new FlxText(18, 16, 540, "");
+		devOverlayText.setFormat(null, 12, FlxColor.WHITE, LEFT);
+		devOverlayText.scrollFactor.set(0, 0);
+		add(devOverlayText);
+	}
+
+	private function updateDevOverlay():Void
+	{
+		if (devOverlayText == null || devOverlayBg == null)
+		{
+			return;
+		}
+
+		devOverlayBg.visible = DevTools.SHOW_OVERLAY;
+		devOverlayText.visible = DevTools.SHOW_OVERLAY;
+		if (!DevTools.SHOW_OVERLAY)
+		{
+			return;
+		}
+
+		devOverlayText.text =
+			'DEV RHYTHM | Song=${song} | Log=${DevTools.logLevelName(DevTools.LOG_LEVEL)} | Last=${DevTools.lastAction}\n'
+			+ 'Mode=${DevTools.rhythmModeName(DevTools.RHYTHM_MODE)} | AutoFinishDelay=${DevTools.formatFloat(DevTools.RHYTHM_AUTO_FINISH_DELAY)}s | Time=${DevTools.formatFloat(conductor.songPositionMs)}ms\n'
+			+ 'Selected Chart=${DevTools.getSelectedChart()} | Active Notes=${noteHandler.getActiveCount()} | Finishing=${isFinishingSong}\n'
+			+ 'M+1 overlay | Shift+M+1 log | M+2 rhythm mode | M+3 restart current | M+4 success | Shift+M+4 fail\n'
+			+ 'M+5/M+6 chart | M+7 load selected chart | M+8/M+9 auto-finish delay\n'
+			+ 'Manual input remains active when mode=OFF. BOTPLAY auto-hits notes. AUTO_* ends the song with a forced result.';
+	}
 }

@@ -29,6 +29,58 @@ class ChoiceSystem
 		uiGroup = group;
 	}
 
+	public static function hasActiveChoices():Bool
+	{
+		return choiceCallback != null && choiceTexts != null && choiceTexts.length > 0;
+	}
+
+	public static function getChoiceLabels():Array<String>
+	{
+		var labels:Array<String> = [];
+		for (entry in choiceTexts)
+		{
+			if (entry != null && entry.textObj != null)
+			{
+				labels.push(entry.textObj.text);
+			}
+		}
+		return labels;
+	}
+
+	public static function selectChoice(index:Int):Bool
+	{
+		if (!hasActiveChoices())
+		{
+			return false;
+		}
+
+		if (index < 0 || index >= choiceTexts.length)
+		{
+			return false;
+		}
+
+		var entry = choiceTexts[index];
+		if (entry == null)
+		{
+			return false;
+		}
+
+		var target = entry.target;
+		var cb = choiceCallback;
+		clearChoices();
+		if (cb != null)
+		{
+			cb(target);
+		}
+
+		return true;
+	}
+
+	public static function clear():Void
+	{
+		clearChoices();
+	}
+
 	/**
 	 * choices: [{ text: "...", target: "..." }, ...]
 	 */
