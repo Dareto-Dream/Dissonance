@@ -281,11 +281,6 @@ class ChartHandler
             inputLane = -1;
         }
         
-        // DIAGNOSTIC: Log decode results
-        trace('[ChartHandler.decodeLane] lane=${lane}, mustHit=${mustHitSection}, timeMs=${timeMs} => ' +
-              'isJudged=${isJudged}, performerIdx=${performerIndex}, charID="${characterID}", ' +
-              'animDir=${animDirection}, inputLane=${inputLane}');
-        
         return {
             isJudged: isJudged,
             characterID: characterID,

@@ -23,13 +23,11 @@ Scenes are stored in `assets/data/scenes/{act}/scene{N}.json`.
 | `start` | string | Yes | ID of the first node to execute |
 | `nodes` | array | Yes | Array of node objects |
 
----
-
-## 2. Node Types
+### Node Types
 
 Every node has an `id` (string, unique within scene) and a `type` field.
 
-### 2.1 dialogue
+#### 1.1 dialogue
 
 Character speech with optional pose change and text effect.
 
@@ -51,19 +49,21 @@ Character speech with optional pose change and text effect.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"dialogue"` |
 | `speaker` | string | Yes | Display name in dialogue box |
+| `text` | string | Yes | Dialogue text |
+| `next` | string | Yes | Next node ID |
 | `character` | string | No | Character ID for pose/emphasis |
 | `pose` | string | No | Pose name to set before showing text |
-| `text` | string | Yes | Dialogue text |
-| `text_effect` | string | No | One of: shake, glitch, wave, rainbow, fade, typewriter |
-| `effect_speed` | float | No | Speed parameter for effect |
-| `effect_intensity` | float | No | Intensity parameter for effect |
+| `text_effect` | string | No | One of: `shake`, `glitch`, `wave`, `rainbow`, `fade`, `typewriter` |
+| `effect_speed` | float | No | Speed parameter for text effect |
+| `effect_intensity` | float | No | Intensity parameter for text effect |
 | `effect_amplitude` | float | No | Amplitude parameter for wave effect |
-| `next` | string | Yes | Next node ID |
 
-### 2.2 narration
+#### 1.2 narration
 
-Narrator text (no character displayed as speaker).
+Narrator text with no character speaker.
 
 ```json
 {
@@ -76,13 +76,16 @@ Narrator text (no character displayed as speaker).
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"narration"` |
 | `text` | string | Yes | Narration text |
-| `text_effect` | string | No | Same options as dialogue |
 | `next` | string | Yes | Next node ID |
+| `text_effect` | string | No | Same options as dialogue |
+| `effect_speed` | float | No | Speed parameter for text effect |
 
-### 2.3 action
+#### 1.3 action
 
-System operations. The `action` field determines which operation and what parameters are expected.
+System operation. The `action` field selects which operation runs and what extra fields are expected.
 
 ```json
 {
@@ -96,67 +99,42 @@ System operations. The `action` field determines which operation and what parame
 }
 ```
 
-#### Action Types Reference
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"action"` |
+| `action` | string | Yes | Action name (see Action Types Reference below) |
+| `next` | string | Yes | Next node ID (for most actions) |
+| *(action-specific)* | varies | Varies | See Action Types Reference |
 
-| Action | Parameters | Description |
-|--------|-----------|-------------|
-| `set_bg` | `background`, `transition`, `duration` | Change background image |
-| `show_character` | `character`, `pose`, `transition`, `duration` | Show a character |
-| `hide_character` | `character`, `transition`, `duration` | Hide a character |
-| `move_character` | `character`, `slot` or `x`+`y`, `duration` | Move character to slot or coordinates |
-| `flip_character` | `character`, `flipped` (bool) | Mirror character horizontally |
-| `bounce_character` | `character`, `height`, `duration` | Bounce animation |
-| `shake_character` | `character`, `intensity`, `duration` | Shake animation |
-| `set_tint` | `character` (optional), `color` | Apply color tint (#RRGGBB) |
-| `clear_tint` | `character` (optional) | Remove color tint |
-| `shake_screen` | `intensity`, `duration` | Screen shake effect |
-| `flash` | `color`, `duration` | Screen flash |
-| `glitch` | `intensity`, `duration` | Glitch screen effect |
-| `play_sound` | `sound`, `volume` | Play sound effect |
-| `play_music` | `track`, `volume`, `transition`, `duration` | Play music track |
-| `stop_music` | — | Stop music immediately |
-| `fade_out_music` | `duration` | Fade out current music |
-| `set_default_bgm` | `track`, `volume` | Set default background music |
-| `play_default_bgm` | `volume` | Play the default BGM |
-| `set_text_effect` | `text_effect`, `effect_speed`, etc. | Set persistent text effect |
-| `clear_text_effect` | — | Clear persistent text effect |
-| `set_variable` | `variable`, `value`, `op` (optional) | Set/modify a game variable |
-| `set_flag` | `flag`, `value` | Set a boolean flag |
+#### 1.4 choice
 
-#### set_variable
-
-```json
-{"action": "set_variable", "variable": "tiffany_rot", "value": 3}
-{"action": "set_variable", "variable": "tiffany_rot", "op": "add", "value": 1}
-{"action": "set_variable", "variable": "cassian_rot", "op": "subtract", "value": 2}
-```
-
-Operations: `set` (default), `add`, `subtract`, `multiply`
-
-#### set_flag
-
-```json
-{"action": "set_flag", "flag": "flags.asked_tiffany", "value": true}
-```
-
-### 2.4 choice
-
-Player decision point.
+Player decision point branching to different nodes.
 
 ```json
 {
   "id": "n1",
   "type": "choice",
   "choices": [
-    {"text": "Help her practice", "target": "n2a"},
-    {"text": "Let her figure it out", "target": "n2b"}
+    {"text": "Help her practice", "next": "n2a"},
+    {"text": "Let her figure it out", "next": "n2b"},
+    {"text": "Ask about the competition", "next": "n2c", "condition": "tiffany_trust >= 3"}
   ]
 }
 ```
 
-### 2.5 if
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"choice"` |
+| `choices` | array | Yes | Array of choice objects |
+| `choices[].text` | string | Yes | Display text for option |
+| `choices[].next` | string | Yes | Node ID to jump to if selected |
+| `choices[].condition` | string | No | Condition expression; hides option if false |
 
-Conditional branching based on game state.
+#### 1.5 if
+
+Conditional branch based on game state expression.
 
 ```json
 {
@@ -168,43 +146,423 @@ Conditional branching based on game state.
 }
 ```
 
-**Condition syntax:**
-- Variables: `tiffany_rot`, `cassian_rot`, `hanami_rot`, etc.
-- Flags: `flags.asked_tiffany`, `player.flags.puppet_mode`, etc.
-- Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`
-- Connectors: `and`, `or`
-- Grouping: parentheses `()`
-- Literals: numbers, `true`, `false`
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"if"` |
+| `condition` | string | Yes | Boolean expression using variables and flags |
+| `trueNode` | string | Yes | Node ID if condition is true |
+| `falseNode` | string | Yes | Node ID if condition is false |
 
-### 2.6 jump
+**Condition syntax:** Variables (`tiffany_rot`), flags (`flags.asked_tiffany`), operators (`==`, `!=`, `<`, `<=`, `>`, `>=`), connectors (`and`, `or`), grouping (`()`), literals (numbers, `true`, `false`).
+
+#### 1.6 jump
 
 Unconditional jump to another node.
 
 ```json
-{"id": "n1", "type": "jump", "target": "n5"}
+{
+  "id": "n1",
+  "type": "jump",
+  "target": "n5"
+}
 ```
 
-### 2.7 game
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"jump"` |
+| `target` | string | Yes | Node ID to jump to |
 
-Launch rhythm gameplay segment.
+#### 1.7 game
+
+Launch a rhythm gameplay segment and resume the VN after completion.
 
 ```json
-{"id": "n1", "type": "game", "song": "gentle_start_duet", "next": "n2"}
+{
+  "id": "n1",
+  "type": "game",
+  "song": "gentle_start_duet",
+  "next": "n2"
+}
 ```
 
-### 2.8 end
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"game"` |
+| `song` | string | Yes | Song ID matching a file in `assets/data/charts/` |
+| `next` | string | Yes | Node ID to resume at after rhythm game ends |
 
-Scene completion, transition to next scene.
+#### 1.8 end
+
+Scene completion, transitions to the next scene.
 
 ```json
-{"id": "n1", "type": "end", "next_scene": "scenes/act1/scene2.json"}
+{
+  "id": "n1",
+  "type": "end",
+  "next_scene": "scenes/act1/scene2.json"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique node identifier |
+| `type` | string | Yes | Must be `"end"` |
+| `next_scene` | string | Yes | Relative path to next scene file |
+
+---
+
+## 2. Action Types Reference
+
+All actions appear as `{"type": "action", "action": "<name>", ...fields, "next": "..."}`.
+
+### show_character
+
+Show a character on screen with optional entrance transition.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | Yes | string | Character ID |
+| `pose` | No | string | Pose name (default: `"default"`) |
+| `transition` | No | string | Entrance transition type |
+| `duration` | No | float | Transition duration in seconds (default: `0.4`) |
+
+```json
+{"action": "show_character", "character": "tiffany", "pose": "smile", "transition": "fade", "duration": 0.4}
+```
+
+### hide_character
+
+Hide a character from screen.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | Yes | string | Character ID |
+| `transition` | No | string | Exit transition type |
+| `duration` | No | float | Transition duration in seconds (default: `0.4`) |
+
+```json
+{"action": "hide_character", "character": "tiffany", "transition": "fade", "duration": 0.3}
+```
+
+### move_character
+
+Slide a character to a new slot position.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | Yes | string | Character ID |
+| `slot` | Yes | string | Target slot name (see Slot Reference) |
+| `duration` | No | float | Slide duration in seconds (default: `0.45`) |
+
+```json
+{"action": "move_character", "character": "tiffany", "slot": "left", "duration": 0.5}
+```
+
+### set_background
+
+Change the background image.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `background` | Yes | string | Path to background image |
+| `transition` | No | string | Transition type (default: `"cut"`) |
+| `duration` | No | float | Transition duration in seconds |
+
+```json
+{"action": "set_bg", "background": "assets/images/bg/classroom1/day1.png", "transition": "fade", "duration": 1.0}
+```
+
+### play_music
+
+Start playing a music track.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `track` | Yes | string | Path to music file |
+| `volume` | No | float | Volume 0.0–1.0 |
+| `transition` | No | string | Audio transition type |
+| `duration` | No | float | Transition duration in seconds |
+
+```json
+{"action": "play_music", "track": "assets/music/theme_melancholy.ogg", "volume": 0.8}
+```
+
+### stop_music
+
+Stop music immediately with no fade.
+
+```json
+{"action": "stop_music"}
+```
+
+### play_sound
+
+Play a one-shot sound effect.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `sound` | Yes | string | Path to sound file |
+| `volume` | No | float | Volume 0.0–1.0 |
+
+```json
+{"action": "play_sound", "sound": "assets/sounds/door_creak.wav", "volume": 0.6}
+```
+
+### fade_in
+
+Fade the screen in from black.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `duration` | No | float | Fade duration in seconds (default: `1.0`) |
+
+```json
+{"action": "fade_in", "duration": 0.8}
+```
+
+### fade_out
+
+Fade the screen out to black.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `duration` | No | float | Fade duration in seconds (default: `1.0`) |
+
+```json
+{"action": "fade_out", "duration": 1.0}
+```
+
+### shake_screen
+
+Apply a screen shake effect.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `intensity` | No | float | Shake magnitude in pixels |
+| `duration` | No | float | Duration in seconds |
+
+```json
+{"action": "shake_screen", "intensity": 8.0, "duration": 0.5}
+```
+
+### flash_screen
+
+Flash the screen to a color.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `color` | No | string | Hex color `#RRGGBB` (default: `#FFFFFF`) |
+| `duration` | No | float | Flash duration in seconds |
+
+```json
+{"action": "flash", "color": "#FFFFFF", "duration": 0.3}
+```
+
+### tint_character
+
+Apply a color tint to one or all characters.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `color` | Yes | string | Hex color `#RRGGBB` or `#AARRGGBB` |
+| `character` | No | string | Character ID; omit to tint all characters |
+
+```json
+{"action": "set_tint", "character": "tiffany", "color": "#888888"}
+{"action": "set_tint", "color": "#666666"}
+```
+
+### clear_tint
+
+Remove color tint from one or all characters.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | No | string | Character ID; omit to clear all |
+
+```json
+{"action": "clear_tint", "character": "tiffany"}
+{"action": "clear_tint"}
+```
+
+### bounce_character
+
+Play a bounce animation on a character.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | Yes | string | Character ID |
+| `height` | No | float | Bounce height in pixels (default: `30.0`) |
+| `duration` | No | float | Animation duration in seconds (default: `0.5`) |
+
+```json
+{"action": "bounce_character", "character": "laura", "height": 40, "duration": 0.5}
+```
+
+### shake_character
+
+Play a shake animation on a character.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `character` | Yes | string | Character ID |
+| `intensity` | No | float | Shake magnitude in pixels (default: `15.0`) |
+| `duration` | No | float | Animation duration in seconds (default: `0.5`) |
+
+```json
+{"action": "shake_character", "character": "cassian", "intensity": 20, "duration": 0.4}
+```
+
+### set_variable
+
+Set or modify a numeric game variable.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `variable` | Yes | string | Variable name |
+| `value` | Yes | float | Numeric value |
+| `op` | No | string | Operation: `set` (default), `add`, `subtract`, `multiply` |
+
+```json
+{"action": "set_variable", "variable": "tiffany_rot", "value": 3}
+{"action": "set_variable", "variable": "tiffany_rot", "op": "add", "value": 1}
+{"action": "set_variable", "variable": "cassian_trust", "op": "subtract", "value": 2}
+```
+
+### set_flag
+
+Set a boolean game flag.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `flag` | Yes | string | Flag name |
+| `value` | No | bool | Value to set (default: `true`) |
+
+```json
+{"action": "set_flag", "flag": "flags.asked_tiffany", "value": true}
+{"action": "set_flag", "flag": "player.flags.puppet_mode", "value": false}
+```
+
+### next_scene
+
+Transition to a different scene file immediately.
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `scene` | Yes | string | Relative path to scene file |
+
+```json
+{"action": "next_scene", "scene": "scenes/act2/scene1.json"}
 ```
 
 ---
 
-## 3. Character Definition Schema
+## 3. Placement File Format
 
-Master registry: `assets/data/characters/characters.json`
+### File Location
+
+```
+assets/data/placements/{scene_id}_placement.json
+```
+
+### Format Specification
+
+The placement file is a flat JSON object mapping node IDs to character position snapshots. Each entry specifies where one or more characters should be repositioned when the engine reaches that node. Characters not listed in a node's entry keep their previous position.
+
+```json
+{
+  "node_id": { "char_id": "slot_name" },
+  "node_id2": { "char_id": "slot_name", "other_char": "hidden" }
+}
+```
+
+- Keys at the top level are **node IDs** from the scene file.
+- Values are objects mapping **character IDs** to **slot name strings**.
+- There is no outer `scene_id` or `placements` wrapper.
+- There are no `x`, `y`, or coordinate fields — slot names only.
+
+### Valid Slot Names
+
+| Slot | X Coordinate | Description |
+|------|-------------|-------------|
+| `far_left` | -200 | Off-screen left (slide-in from left) |
+| `left` | 100 | Left area of screen |
+| `center_left` | 240 | Left of center |
+| `center` | 640 | Screen center |
+| `center_right` | 1040 | Right of center |
+| `right` | 1180 | Right area of screen |
+| `far_right` | 1480 | Off-screen right (slide-in from right) |
+| `hidden` | — | Character is off-screen / not visible |
+
+X coordinates are reference values at 1280×720 resolution (defined in `Constants.hx`).
+
+### X-Coordinate Derivation Rule
+
+If a placement entry has no `slot` field, the slot is derived from the `x` coordinate:
+
+| x range | Derived slot |
+|---------|-------------|
+| `x < 0` | `far_left` |
+| `x < 200` | `left` |
+| `x < 450` | `center_left` |
+| `x < 850` | `center` |
+| `x < 1120` | `center_right` |
+| `x < 1350` | `right` |
+| `x >= 1350` | `far_right` |
+
+### `hidden` Slot Semantics
+
+A character in the `hidden` slot is positioned off-screen and not rendered. This is distinct from `hide_character`, which removes a character from the scene entirely. `hidden` in a placement file reserves the character's state while keeping it invisible, so it can be revealed without a full `show_character` action.
+
+### Persistence Between Nodes
+
+Placement entries are sparse — they only record changes. A character's position persists unchanged from node to node until a new placement entry overrides it. The engine reads the most recent placement entry at or before the current node.
+
+### Example File
+
+```json
+{
+  "scene_start": { "tiffany": "center" },
+  "hanami_enters": { "hanami": "far_left" },
+  "n10": {
+    "tiffany": "right",
+    "hanami": "center_left"
+  },
+  "n25": {
+    "tiffany": "center",
+    "hanami": "left",
+    "cassian": "center_right",
+    "laura": "far_right"
+  }
+}
+```
+
+---
+
+## 4. Slot Position Reference Table
+
+Based on 1280×720 resolution. Defined in `Constants.hx`.
+
+| Slot | X Coord | Description |
+|------|---------|-------------|
+| `far_left` | -200 | Off-screen left (slide-in) |
+| `left` | 100 | Left of screen |
+| `center_left` | 240 | Left of center |
+| `center` | 640 | Screen center |
+| `center_right` | 1040 | Right of center |
+| `right` | 1180 | Right of screen |
+| `far_right` | 1480 | Off-screen right (slide-in) |
+
+---
+
+## 5. Character Definition Schema
+
+### Master Registry
+
+`assets/data/characters/characters.json`
 
 ```json
 {
@@ -223,30 +581,18 @@ Master registry: `assets/data/characters/characters.json`
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Character identifier (matches key) |
-| `vn.png` | VN spritesheet image path |
-| `vn.xml` | VN spritesheet XML atlas |
-| `vn.defaultPose` | Default pose name |
-| `rhythm.png` | Rhythm spritesheet image path |
-| `rhythm.xml` | Rhythm spritesheet XML atlas |
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Character identifier (matches object key) |
+| `vn.png` | Yes | VN spritesheet image path |
+| `vn.xml` | Yes | VN spritesheet XML atlas path |
+| `vn.defaultPose` | Yes | Default pose name used on show |
+| `rhythm.png` | No | Rhythm mode spritesheet image path |
+| `rhythm.xml` | No | Rhythm mode spritesheet XML atlas path |
 
-### Characters
+### Per-Character Poses
 
-| ID | Name | Role | Default Pose |
-|----|------|------|-------------|
-| `mc` | Player | Protagonist | neutral |
-| `tiffany` | Tiffany | Club president, needs control | neutral |
-| `hanami` | Hanami | Emotional anchor | neutral |
-| `cassian` | Cassian | Processes grief through anger | annoyed |
-| `laura` | Laura | Energetic club member | happy |
-
----
-
-## 4. Poses JSON Schema
-
-Per-character: `assets/data/characters/{id}/poses.json`
+`assets/data/characters/{id}/poses.json`
 
 ```json
 {
@@ -261,44 +607,34 @@ Per-character: `assets/data/characters/{id}/poses.json`
         {"frame": "base0001", "x": 0, "y": 0},
         {"frame": "eyes_neutral", "x": 10, "y": 20}
       ]
-    },
-    "smile": {
-      "layers": [
-        {"frame": "base0001", "x": 0, "y": 0},
-        {"frame": "eyes_happy", "x": 10, "y": 20}
-      ]
     }
   }
 }
 ```
 
-- `config.scale`: Global scale multiplier
-- `config.base_offset`: Character centering offset
-- Each pose has `layers`: array of `{frame, x, y}` referencing atlas frame names
-- Rhythm poses: `singLEFT`, `singDOWN`, `singUP`, `singRIGHT`, `idle`, `miss`
+| Field | Description |
+|-------|-------------|
+| `character` | Character ID |
+| `config.scale` | Global scale multiplier for VN display |
+| `config.base_offset` | Centering offset applied to all poses |
+| `poses` | Map of pose name to layer stack |
+| `poses[name].layers` | Array of `{frame, x, y}` referencing atlas frame names |
+
+**Standard rhythm pose names:** `singLEFT`, `singDOWN`, `singUP`, `singRIGHT`, `idle`, `miss`
+
+### Character Registry
+
+| ID | Display Name | Role | Default Pose |
+|----|-------------|------|-------------|
+| `mc` | (Player) | Protagonist | `neutral` |
+| `tiffany` | Tiffany | Club president | `neutral` |
+| `hanami` | Hanami | Emotional anchor | `neutral` |
+| `cassian` | Cassian | Processes grief through anger | `annoyed` |
+| `laura` | Laura | Energetic club member | `happy` |
 
 ---
 
-## 5. Placement JSON Schema
-
-Per-scene: `assets/data/placements/{scene_id}_placement.json`
-
-```json
-{
-  "n5": {
-    "tiffany": {"x": 1100.0, "y": 0, "slot": "right"}
-  },
-  "n10": {
-    "tiffany": {"x": 400.0, "y": 0}
-  }
-}
-```
-
-Maps node IDs to character position overrides. Only stores changes, not full state.
-
----
-
-## 6. Chart JSON Schema (Rhythm)
+## 6. Rhythm Chart Schema
 
 Charts: `assets/data/charts/{song_id}.json` (Psych Engine-compatible format)
 
@@ -323,51 +659,76 @@ Charts: `assets/data/charts/{song_id}.json` (Psych Engine-compatible format)
 }
 ```
 
-**Note format:** `[timeMs, lane, holdMs, noteType]`
+### Song Object Fields
 
-- `timeMs`: Absolute timestamp in milliseconds
-- `lane`: 0-3 positive (player judged), negative (animation only)
-- `holdMs`: 0 for tap, >0 for hold duration
-- `noteType`: 0=normal, 1=swing
+| Field | Type | Description |
+|-------|------|-------------|
+| `song` | string | Song identifier |
+| `bpm` | float | Beats per minute |
+| `offset` | float | Audio offset in milliseconds |
+| `stage` | string | Stage background ID |
+| `player` | string | Player character ID |
+| `singers` | array | All character IDs performing in the song |
+| `notes` | array | Array of section objects |
+
+### Section Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sectionNotes` | array | Array of note arrays (see below) |
+| `singers` | array | Character IDs singing this section |
+| `mustHitSection` | bool | If true, lanes 0-3 are player-judged input |
+| `lengthInSteps` | int | Section length in steps (typically 16) |
+
+### Note Array Format
+
+Each note is `[timeMs, lane, holdMs, noteType]`
+
+| Index | Field | Type | Description |
+|-------|-------|------|-------------|
+| 0 | `timeMs` | float | Absolute timestamp in milliseconds |
+| 1 | `lane` | int | Lane index; negative = animation only |
+| 2 | `holdMs` | float | Hold duration: `0` for tap, `>0` for hold |
+| 3 | `noteType` | int | `0` = normal, `1` = swing |
 
 **Lane decoding:**
-- `mustHitSection=true`: lanes 0-3 = player input (judged), lanes 4+ = opponent
-- `mustHitSection=false`: all lanes = opponent animation only
-- Negative lanes: always animation only
+- `mustHitSection = true`: lanes `0–3` = player input (judged); lanes `4+` = opponent animation
+- `mustHitSection = false`: all lanes = opponent animation only
+- Negative lanes: always animation only, never judged
 
 ---
 
 ## 7. Game State Variables
 
-Managed by `GameState.hx`. All variables start at 0, all flags start at false.
+Managed by `GameState.hx`. All variables default to `0`; all flags default to `false`.
 
 ### Numeric Variables (Float)
 
 | Variable | Range | Description |
 |----------|-------|-------------|
-| `tiffany_rot` | 0-10 | Tiffany deterioration level |
-| `cassian_rot` | 0-10 | Cassian deterioration level |
-| `hanami_rot` | 0-10 | Hanami deterioration level |
-| `harumi_rot` | 0-10 | Harumi deterioration level |
-| `tiffany_trust` | 0-10 | Player trust with Tiffany |
-| `cassian_trust` | 0-10 | Player trust with Cassian |
-| `hanami_trust` | 0-10 | Player trust with Hanami |
-| `harumi_trust` | 0-10 | Player trust with Harumi |
+| `tiffany_rot` | 0–10 | Tiffany deterioration level |
+| `cassian_rot` | 0–10 | Cassian deterioration level |
+| `hanami_rot` | 0–10 | Hanami deterioration level |
+| `harumi_rot` | 0–10 | Harumi deterioration level |
+| `tiffany_trust` | 0–10 | Player trust level with Tiffany |
+| `cassian_trust` | 0–10 | Player trust level with Cassian |
+| `hanami_trust` | 0–10 | Player trust level with Hanami |
+| `harumi_trust` | 0–10 | Player trust level with Harumi |
 
 ### Boolean Flags
 
 | Flag | Description |
 |------|-------------|
-| `flags.asked_tiffany` | Asked Tiffany a key question |
-| `flags.asked_cassian` | Asked Cassian a key question |
-| `flags.met_hanami` | Met Hanami in the story |
-| `flags.met_harumi` | Met Harumi in the story |
-| `flags.first_rhythm_complete` | Completed first rhythm game |
-| `flags.act1_complete` | Completed Act 1 |
-| `flags.act2_complete` | Completed Act 2 |
-| `flags.act3_complete` | Completed Act 3 |
-| `player.flags.puppet_mode` | Act 4 system override active |
-| `player.flags.aware` | Player has become "aware" |
+| `flags.asked_tiffany` | Player has asked Tiffany a key question |
+| `flags.asked_cassian` | Player has asked Cassian a key question |
+| `flags.met_hanami` | Player has met Hanami in the story |
+| `flags.met_harumi` | Player has met Harumi in the story |
+| `flags.first_rhythm_complete` | First rhythm game segment completed |
+| `flags.act1_complete` | Act 1 completed |
+| `flags.act2_complete` | Act 2 completed |
+| `flags.act3_complete` | Act 3 completed |
+| `player.flags.puppet_mode` | Act 4 system override is active |
+| `player.flags.aware` | Player character has become "aware" |
 
 ---
 
@@ -375,12 +736,12 @@ Managed by `GameState.hx`. All variables start at 0, all flags start at false.
 
 | Effect | Parameters | Description |
 |--------|-----------|-------------|
-| `shake` | `effect_intensity` (default 2.0) | Vibrating text |
-| `glitch` | `effect_intensity` (default 5.0) | Random displacement + color flicker |
-| `wave` | `effect_speed` (3.0), `effect_amplitude` (5.0) | Vertical sine wave |
-| `rainbow` | `effect_speed` (default 2.0) | HSB color cycling |
-| `fade` | `effect_speed` (default 2.0) | Alpha pulsing |
-| `typewriter` | `effect_speed` (default 30.0 chars/sec) | Character-by-character reveal |
+| `shake` | `effect_intensity` (default: `2.0`) | Vibrating text displacement |
+| `glitch` | `effect_intensity` (default: `5.0`) | Random displacement and color flicker |
+| `wave` | `effect_speed` (default: `3.0`), `effect_amplitude` (default: `5.0`) | Vertical sine wave |
+| `rainbow` | `effect_speed` (default: `2.0`) | HSB color cycling through all hues |
+| `fade` | `effect_speed` (default: `2.0`) | Alpha pulsing in and out |
+| `typewriter` | `effect_speed` (default: `30.0` chars/sec) | Character-by-character reveal |
 
 ---
 
@@ -388,77 +749,80 @@ Managed by `GameState.hx`. All variables start at 0, all flags start at false.
 
 | Transition | Description |
 |-----------|-------------|
-| `cut` | Instant switch |
-| `fade` | Alpha blend new over old |
-| `crossfade` | Simultaneous fade out old + fade in new |
-| `slide_left` | New slides in from left |
-| `slide_right` | New slides in from right |
-| `slide_up` | New slides in from below |
-| `slide_down` | New slides in from above |
+| `cut` | Instant switch, no animation |
+| `fade` | Alpha blend new image over old |
+| `crossfade` | Simultaneous fade out old and fade in new |
+| `slide_left` | New image slides in from the left |
+| `slide_right` | New image slides in from the right |
+| `slide_up` | New image slides in from below |
+| `slide_down` | New image slides in from above |
 
 ---
 
-## 10. Character Transitions
+## 10. Character Transition Types
 
 | Transition | Description |
 |-----------|-------------|
-| `fade` | Alpha 0 to 1 |
-| `fade_out` | Alpha 1 to 0 |
+| `fade` | Alpha 0 → 1 (show) or 1 → 0 (hide) |
+| `fade_out` | Explicit alpha 1 → 0 |
 | `slide_left` | Slide in from left |
 | `slide_right` | Slide in from right |
 | `slide_up` | Slide in from below |
-| `pop` | Scale 0.1x to 1x with backOut ease |
-| `bounce` | Bounce up then settle |
+| `pop` | Scale from 0.1× to 1× with backOut easing |
+| `bounce` | Bounce up then settle to final position |
 
 ---
 
-## 11. Slot Positions
-
-Based on 1280x720 resolution. Defined in `Constants.hx`.
-
-| Slot | X Coordinate | Description |
-|------|-------------|-------------|
-| `far_left` | -200 | Off-screen left (for slide-in) |
-| `left` | 100 | Left third |
-| `center_left` | 240 | Left of center |
-| `center` | 640 | Middle (default) |
-| `center_right` | 1040 | Right of center |
-| `right` | 1180 | Right third |
-| `far_right` | 1480 | Off-screen right (for slide-in) |
-
----
-
-## 12. Audio Transition Types
+## 11. Audio Transition Types
 
 | Transition | Description |
 |-----------|-------------|
 | `cut` | Instant switch to new track |
-| `fade` | Crossfade old out, new in (default 2.0s) |
-| `wait_till_end` | Queue next track after current finishes |
+| `fade` | Crossfade old track out, new track in (default: `2.0s`) |
+| `wait_till_end` | Queue next track to start after current finishes |
 
 ---
 
-## 13. File Path Conventions
+## 12. File Path Conventions
 
 ```
 assets/
   data/
     characters/
-      characters.json           # Master character registry
-      {id}/poses.json           # Per-character pose definitions
-      {id}/{id}.json            # Rhythm character data (optional)
+      characters.json             # Master character registry
+      {id}/poses.json             # Per-character pose definitions
+      {id}/{id}.json              # Rhythm character data (optional)
     scenes/
-      {act}/scene{N}.json       # Scene files
-      template/                 # Template scenes
+      {act}/scene{N}.json         # Scene files (act1/, act2/, etc.)
+      template/                   # Template scenes for editor
     charts/
-      {song_id}.json            # Rhythm chart data
+      {song_id}.json              # Rhythm chart data
     placements/
-      {scene_id}_placement.json # Character positions
+      {scene_id}_placement.json   # Character slot positions per scene
   images/
-    characters/{id}/            # Character spritesheets
-    bg/{location}/              # Background images (with time variants)
-    stages/                     # Rhythm stage backgrounds
-    ui/                         # UI elements
-  music/                        # BGM tracks (.ogg)
-  sounds/                       # Sound effects (.wav)
+    characters/{id}/              # Character spritesheets (.png + .xml)
+    bg/{location}/                # Background images (with time-of-day variants)
+    stages/                       # Rhythm stage backgrounds
+    ui/                           # UI element images
+  music/                          # BGM tracks (.ogg)
+  sounds/                         # Sound effects (.wav)
+
+source/
+  core/
+    audio/                        # AudioSystem
+    dialogue/                     # DialogueSystem, ChoiceSystem
+    effects/                      # EffectSystem
+    rendering/                    # BackgroundSystem, CharacterSystem
+    scene/                        # SceneRunner
+    state/                        # GameState, SaveSystem
+  rhythm/                         # Rhythm game systems
+  vn/                             # VNCommands, VNReturnContext
+  states/                         # HaxeFlixel game states
+  ui/                             # UI components
+  util/                           # SceneManager, utilities
+
+python/
+  modules/
+    story/                        # Story editor module
+    ui/                           # Widget library
 ```

@@ -29,7 +29,6 @@ class SaveSystem {
         data.visualSnapshot = captureVisualSnapshot();
         data.timestamp = Date.now().toString();
 
-        FlxG.save.data;
         var saves = getSaveSlots();
         saves[slot] = data;
         writeSaveSlots(saves);
@@ -131,11 +130,13 @@ class SaveSystem {
     private static function getSaveSlots():Array<Dynamic> {
         FlxG.save.bind(SAVE_KEY);
         var raw:Dynamic = Reflect.field(FlxG.save.data, "slots");
-        if (raw == null) {
-            var empty:Array<Dynamic> = [for (_ in 0...MAX_SLOTS) null];
-            return empty;
+        if (raw == null || !Std.isOfType(raw, Array)) {
+            return [for (_ in 0...MAX_SLOTS) null];
         }
-        return raw;
+        var arr:Array<Dynamic> = cast raw;
+        // Ensure correct length — pad or trim if save file was corrupted/version mismatch
+        while (arr.length < MAX_SLOTS) arr.push(null);
+        return arr;
     }
 
     private static function writeSaveSlots(slots:Array<Dynamic>):Void {
@@ -157,8 +158,8 @@ class SaveSystem {
         if (charSys != null) {
             var chars:Array<Dynamic> = [];
             for (id in charSys.characters.keys()) {
-            var renderer = charSys.characters.get(id);
-            if (renderer != null && renderer.visible) {
+                var renderer = charSys.characters.get(id);
+                if (renderer != null && renderer.visible) {
                     chars.push({
                         id: id,
                         pose: renderer.currentPose,

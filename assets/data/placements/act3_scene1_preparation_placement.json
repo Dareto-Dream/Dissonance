@@ -1,33 +1,6 @@
 {
-  "scene_id": "act3_scene1_preparation",
-  "placements": {
-    "n9": {
-      "laura": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n11": {
-      "cassian": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n13": {
-      "hanami": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      }
-    },
-    "n17": {
-      "tiffany": {
-        "x": 240,
-        "y": 0,
-        "slot": "center_left"
-      }
-    }
-  }
+  "n9": { "laura": "right" },
+  "n11": { "cassian": "left" },
+  "n13": { "hanami": "center_right" },
+  "n17": { "tiffany": "center_left" }
 }

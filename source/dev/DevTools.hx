@@ -23,7 +23,7 @@ enum abstract RhythmDevMode(Int) from Int to Int
 
 class DevTools
 {
-	public static var ENABLED:Bool = false;
+	public static var ENABLED:Bool = true;
 	public static var SHOW_OVERLAY:Bool = true;
 	public static var LOG_LEVEL:DevLogLevel = INFO;
 

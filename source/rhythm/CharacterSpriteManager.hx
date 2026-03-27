@@ -1,6 +1,5 @@
 package rhythm;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import haxe.Json;
@@ -49,10 +48,7 @@ class CharacterSpriteManager
     // Runtime anchor positions after layout is applied
     private var anchorPositions:Map<String, {x:Float, y:Float}> = new Map();
 
-    public function new()
-    {
-        trace('[CharacterSpriteManager] Initialized (data-driven mode)');
-    }
+    public function new() {}
 
     // ------------------------------------------------------------------
     // Character loading

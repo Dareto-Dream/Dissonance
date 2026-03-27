@@ -69,8 +69,8 @@ class Conductor
         if (!started) return;
         if (FlxG.sound.music == null) return;
 
-        // FlxSound.time is already milliseconds
-        songPositionMs = FlxG.sound.music.time - offsetMs;
+        // FlxSound.time is already milliseconds; clamp to 0 to avoid negative positions
+        songPositionMs = Math.max(0, FlxG.sound.music.time - offsetMs);
 
         // Derived values (never used for gameplay decisions)
         songPositionBeats = songPositionMs / crochetMs;

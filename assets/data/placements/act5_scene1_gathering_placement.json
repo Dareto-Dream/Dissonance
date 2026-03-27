@@ -1,40 +1,7 @@
 {
-  "scene_id": "act5_scene1_gathering",
-  "placements": {
-    "n9": {
-      "hanami": {
-        "x": 580,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n14": {
-      "cassian": {
-        "x": 1100,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n18": {
-      "laura": {
-        "x": 400,
-        "y": 0,
-        "slot": "far_left"
-      }
-    },
-    "n24_tiffany_broken": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n24_tiffany_grateful": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    }
-  }
+  "n9": { "hanami": "left" },
+  "n14": { "cassian": "right" },
+  "n18": { "laura": "far_left" },
+  "n24_tiffany_broken": { "tiffany": "center" },
+  "n24_tiffany_grateful": { "tiffany": "center" }
 }

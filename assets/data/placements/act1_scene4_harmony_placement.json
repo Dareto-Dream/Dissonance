@@ -1,33 +1,6 @@
 {
-  "scene_id": "act1_scene4_harmony",
-  "placements": {
-    "n4": {
-      "tiffany": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n6": {
-      "hanami": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n7": {
-      "cassian": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n8": {
-      "laura": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      }
-    }
-  }
+  "n4": { "tiffany": "center" },
+  "n6": { "hanami": "left" },
+  "n7": { "cassian": "right" },
+  "n8": { "laura": "center_right" }
 }

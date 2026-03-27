@@ -60,9 +60,16 @@ class BackgroundSystem {
         }
     }
 
-    private static function scaleToScreen(bg:FlxSprite):Void {
-        bg.setGraphicSize(FlxG.width, FlxG.height);
-        bg.updateHitbox();
+    private static function scaleToScreen(spr:FlxSprite):Void {
+        if (spr.frameWidth <= 0 || spr.frameHeight <= 0) return;
+        var scaleX = FlxG.width / spr.frameWidth;
+        var scaleY = FlxG.height / spr.frameHeight;
+        var scale = Math.max(scaleX, scaleY); // cover, not stretch
+        spr.scale.set(scale, scale);
+        spr.updateHitbox();
+        // Center the sprite
+        spr.x = (FlxG.width - spr.width) / 2;
+        spr.y = (FlxG.height - spr.height) / 2;
     }
 
     private static function applyCut(group:FlxSpriteGroup):Void {

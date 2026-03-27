@@ -1,0 +1,1 @@
+"""Character editor module."""

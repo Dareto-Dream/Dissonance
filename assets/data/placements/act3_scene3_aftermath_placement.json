@@ -1,33 +1,6 @@
 {
-  "scene_id": "act3_scene3_aftermath",
-  "placements": {
-    "n4": {
-      "hanami": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n6": {
-      "laura": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      }
-    },
-    "n8": {
-      "cassian": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n10": {
-      "tiffany": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    }
-  }
+  "n4": { "hanami": "center" },
+  "n6": { "laura": "center_right" },
+  "n8": { "cassian": "left" },
+  "n10": { "tiffany": "right" }
 }

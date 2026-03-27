@@ -1,10 +1,8 @@
 package vn;
 
-import core.rendering.CharacterSystem;
 import flixel.FlxG;
 import flixel.FlxState;
 import Type;
-import rhythm.RhythmCompletionBridge;
 import rhythm.RhythmState;
 
 /**
@@ -46,7 +44,8 @@ class RhythmBridge
         done:RhythmResult->Void
     ):Void
     {
-        trace("[RhythmBridge] START RHYTHM: " + song);
+        // Stop VN BGM cleanly before handing control to the rhythm game
+        core.audio.AudioSystem.stopMusic();
 
         // --------------------------------------------------
         // Resolve paths

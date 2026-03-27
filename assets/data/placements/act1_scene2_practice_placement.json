@@ -1,33 +1,6 @@
 {
-  "scene_id": "act1_scene2_practice",
-  "placements": {
-    "n4": {
-      "hanami": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n21": {
-      "tiffany": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n25": {
-      "cassian": {
-        "x": 240,
-        "y": 0,
-        "slot": "center_left"
-      }
-    },
-    "n31": {
-      "laura": {
-        "x": 1480,
-        "y": 0,
-        "slot": "far_right"
-      }
-    }
-  }
+  "n4": { "hanami": "center" },
+  "n21": { "tiffany": "right" },
+  "n25": { "cassian": "center_left" },
+  "n31": { "laura": "far_right" }
 }

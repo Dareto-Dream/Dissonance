@@ -50,40 +50,33 @@ class Constants
 	public static inline var STANDARD_CHARACTER_Y:Float = 0;
 	
 	/**
-	 * Slot coordinate definitions
-	 * Maps slot names to X coordinates for character placement
-	 * 
-	 * Based on 1280x720 screen resolution:
-	 * - center = 640 (middle of screen)
-	 * - left/right = positioned in thirds
-	 * - far_left/far_right = off-screen for slide-in effects
+	 * Slot positions as fractions of screen width.
+	 * Negative fractions extend off-screen left; >1.0 off-screen right.
+	 * Resolved against FlxG.width at runtime so all resolutions work.
 	 */
-	private static var SLOT_POSITIONS:Map<String, Float> = [
-		"far_left"     => -200.0,   // Off-screen left (slide in)
-		"left"         => 100.0,    // Left third of screen
-		"center_left"  => 240.0,    // Left of center
-		"center"       => 640.0,    // Middle (default)
-		"center_right" => 1040.0,   // Right of center
-		"right"        => 1180.0,   // Right third of screen
-		"far_right"    => 1480.0    // Off-screen right (slide in)
+	private static var SLOT_FRACTIONS:Map<String, Float> = [
+		"far_left"     => -0.156,  // Off-screen left (slide in)
+		"left"         =>  0.078,  // Left region
+		"center_left"  =>  0.188,  // Left of center
+		"center"       =>  0.500,  // Middle (default)
+		"center_right" =>  0.813,  // Right of center
+		"right"        =>  0.922,  // Right region
+		"far_right"    =>  1.156   // Off-screen right (slide in)
 	];
-	
+
 	/**
-	 * Get X coordinate for a slot name
+	 * Get X coordinate for a slot name, scaled to the current screen width.
 	 * @param slot Slot name (e.g., "center", "left", "right")
 	 * @return X coordinate, or center if slot not found
 	 */
 	public static function getSlotX(slot:String):Float
 	{
-		if (SLOT_POSITIONS.exists(slot))
-		{
-			return SLOT_POSITIONS.get(slot);
-		}
-		else
-		{
-			trace('[Constants] WARNING: Unknown slot "$slot", defaulting to center');
-			return SLOT_POSITIONS.get("center");
-		}
+		var w:Float = flixel.FlxG.width > 0 ? flixel.FlxG.width : 1280.0;
+		if (SLOT_FRACTIONS.exists(slot))
+			return SLOT_FRACTIONS.get(slot) * w;
+
+		trace('[Constants] WARNING: Unknown slot "$slot", defaulting to center');
+		return 0.5 * w;
 	}
 	
 	/**
@@ -102,9 +95,9 @@ class Constants
 	 */
 	public static function isValidSlot(slot:String):Bool
 	{
-		return SLOT_POSITIONS.exists(slot);
+		return SLOT_FRACTIONS.exists(slot);
 	}
-	
+
 	/**
 	 * Get all available slot names
 	 * @return Array of slot names
@@ -112,36 +105,30 @@ class Constants
 	public static function getAllSlotNames():Array<String>
 	{
 		var names:Array<String> = [];
-		for (key in SLOT_POSITIONS.keys())
-		{
+		for (key in SLOT_FRACTIONS.keys())
 			names.push(key);
-		}
 		return names;
 	}
-	
+
 	/**
-	 * Get slot name from X coordinate
-	 * Finds the closest slot to the given X position
-	 * @param x X coordinate
-	 * @return Closest slot name
+	 * Get slot name from X coordinate.
+	 * Finds the closest slot to the given X position at the current resolution.
 	 */
 	public static function getSlotFromX(x:Float):String
 	{
 		var closestSlot:String = "center";
-		var closestDistance:Float = Math.abs(x - SLOT_POSITIONS.get("center"));
-		
-		for (slot in SLOT_POSITIONS.keys())
+		var closestDistance:Float = Math.abs(x - getSlotX("center"));
+
+		for (slot in SLOT_FRACTIONS.keys())
 		{
-			var slotX = SLOT_POSITIONS.get(slot);
-			var distance = Math.abs(x - slotX);
-			
+			var distance = Math.abs(x - getSlotX(slot));
 			if (distance < closestDistance)
 			{
 				closestDistance = distance;
 				closestSlot = slot;
 			}
 		}
-		
+
 		return closestSlot;
 	}
 	

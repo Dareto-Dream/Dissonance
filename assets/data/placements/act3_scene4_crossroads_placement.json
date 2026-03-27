@@ -1,26 +1,5 @@
 {
-  "scene_id": "act3_scene4_crossroads",
-  "placements": {
-    "n10": {
-      "cassian": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n32": {
-      "laura": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n47": {
-      "tiffany": {
-        "x": 640,
-        "y": 0,
-        "slot": "center"
-      }
-    }
-  }
+  "n10": { "cassian": "center" },
+  "n32": { "laura": "center" },
+  "n47": { "tiffany": "center" }
 }

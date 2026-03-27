@@ -3,6 +3,7 @@ package core.audio;
 import flixel.FlxG;
 import flixel.sound.FlxSound;
 import flixel.tweens.FlxTween;
+import openfl.utils.Assets;
 
 class AudioSystem
 {
@@ -17,7 +18,51 @@ class AudioSystem
 	public static var transitionType:String = "fade";
 	public static var transitionDuration:Float = 2.0;
 
-	public static function init():Void {}
+	/**
+	 * Called by VNState.create() each time a VN scene loads.
+	 * Clears stale tween/transition state left over from a state switch,
+	 * and removes dead sound references so playMusic() can reload cleanly.
+	 */
+	public static function init():Void
+	{
+		// Tweens are destroyed on state switch — clear the dead references
+		if (isTransitioning)
+		{
+			musicTween = null;
+			nextMusicTween = null;
+			isTransitioning = false;
+		}
+
+		// nextMusic is not persisted — it gets destroyed on state switch
+		if (nextMusic != null && !nextMusic.alive)
+			nextMusic = null;
+
+		// If our persisted music reference is dead, reset so playMusic() reloads it
+		if (music != null && !music.alive)
+		{
+			music = null;
+			currentTrack = "";
+		}
+	}
+
+	/**
+	 * Call this when returning from the rhythm game to VNState.
+	 * RhythmState uses FlxG.sound.playMusic() directly (its own channel).
+	 * That sound is NOT persisted, so it is already dead after the state switch.
+	 * This method just ensures AudioSystem's own state is consistent.
+	 */
+	public static function onRhythmReturn():Void
+	{
+		// RhythmState stops FlxG.sound.music before switching, but guard here too
+		// in case the state switch happened via an unexpected path (e.g. pause→quit).
+		if (FlxG.sound.music != null)
+		{
+			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+			FlxG.sound.music = null;
+		}
+		init();
+	}
 
 	public static function setDefaultBGM(track:String, volume:Float = 1):Void
 	{
@@ -39,7 +84,11 @@ class AudioSystem
 
 	public static function playSound(sound:String, volume:Float = 1):Void
 	{
-		trace("[AudioSystem] PLAY SOUND " + sound);
+		if (sound == null || sound == "") return;
+		if (!Assets.exists(sound)) {
+			trace("[AudioSystem] WARNING: Sound not found: " + sound);
+			return;
+		}
 		FlxG.sound.play(sound, volume);
 	}
 
@@ -48,11 +97,11 @@ class AudioSystem
 		if (transition == null) transition = transitionType;
 		if (duration == null) duration = transitionDuration;
 
-		trace("[AudioSystem] PLAY MUSIC " + track + " (transition: " + transition + ")");
+		if (currentTrack == track && music != null && music.alive && music.playing && !isTransitioning)
+			return;
 
-		if (currentTrack == track && music != null && music.playing && !isTransitioning)
-		{
-			trace("[AudioSystem] Same track already playing, skipping");
+		if (!Assets.exists(track)) {
+			trace("[AudioSystem] WARNING: Music not found: " + track);
 			return;
 		}
 
@@ -86,6 +135,7 @@ class AudioSystem
 		music = FlxG.sound.load(track, volume, true);
 		if (music != null)
 		{
+			music.persist = true; // survive scene switches within VN
 			music.onComplete = null;
 			music.play();
 		}
@@ -108,6 +158,7 @@ class AudioSystem
 			return;
 		}
 
+		nextMusic.persist = true; // survive scene switches within VN
 		nextMusic.onComplete = null;
 		nextMusic.play();
 

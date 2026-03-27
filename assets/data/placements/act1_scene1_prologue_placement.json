@@ -1,69 +1,14 @@
 {
-  "scene_id": "act1_scene1_prologue",
-  "placements": {
-    "prologue_tiffany": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "tiffany_appears": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "tiffany_position": {
-      "tiffany": {
-        "x": 1100.0,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "hanami_enters": {
-      "hanami": {
-        "x": 580.0,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "cassian_appears": {
-      "cassian": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "laura_peek": {
-      "laura": {
-        "x": 1256.0,
-        "y": 0,
-        "slot": "far_right"
-      }
-    },
-    "scene_end": {
-      "tiffany": {
-        "x": 1100.0,
-        "y": 0,
-        "slot": "right"
-      },
-      "hanami": {
-        "x": 580.0,
-        "y": 0,
-        "slot": "left"
-      },
-      "cassian": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      },
-      "laura": {
-        "x": 1256.0,
-        "y": 0,
-        "slot": "far_right"
-      }
-    }
+  "prologue_tiffany": { "tiffany": "center" },
+  "tiffany_appears": { "tiffany": "center" },
+  "tiffany_position": { "tiffany": "right" },
+  "hanami_enters": { "hanami": "left" },
+  "cassian_appears": { "cassian": "center" },
+  "laura_peek": { "laura": "far_right" },
+  "scene_end": {
+    "tiffany": "right",
+    "hanami": "left",
+    "cassian": "center",
+    "laura": "far_right"
   }
 }

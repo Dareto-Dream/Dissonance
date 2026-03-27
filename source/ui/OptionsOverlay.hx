@@ -22,7 +22,7 @@ class OptionsOverlay extends FlxGroup {
     private static inline var PURPLE:Int = 0xFF8A2BE2;
     private static inline var SAVE_KEY:String = "dissonance_options";
 
-    public var active(default, null):Bool = false;
+    public var isOpen(default, null):Bool = false;
 
     private var backdrop:FlxSprite;
     private var title:FlxText;
@@ -109,7 +109,7 @@ class OptionsOverlay extends FlxGroup {
         closeBtnText.y = closeBtn.y + (closeBtnHeight - closeBtnText.height) / 2;
         add(closeBtnText);
 
-        active = true;
+        isOpen = true;
     }
 
     private function addSlider(x:Int, y:Int, w:Int, h:Int, label:String, value:Float,
@@ -120,7 +120,7 @@ class OptionsOverlay extends FlxGroup {
     }
 
     override public function update(elapsed:Float):Void {
-        if (!active) return;
+        if (!isOpen) return;
         super.update(elapsed);
 
         #if FLX_KEYBOARD
@@ -136,7 +136,7 @@ class OptionsOverlay extends FlxGroup {
     }
 
     public function close():Void {
-        active = false;
+        isOpen = false;
         if (onClose != null) onClose();
     }
 

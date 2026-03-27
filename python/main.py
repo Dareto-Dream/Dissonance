@@ -34,6 +34,7 @@ from modules.placement.scene_placement import ScenePlacement
 from modules.conditions.condition_editor import ConditionEditor
 from modules.rhythm.chart_editor import ChartEditor
 from modules.preview.scene_preview import ScenePreview
+from modules.characters.character_editor import CharacterEditorModule
 
 
 class DissonanceEditor:
@@ -81,6 +82,7 @@ class DissonanceEditor:
             "Text Effects": None,
             "Condition Editor": None,
             "Chart Editor": None,
+            "Characters": None,
         }
         
         self.current_module = None
@@ -173,7 +175,13 @@ class DissonanceEditor:
                 self.theme,
                 self.project_root
             )
-        
+        elif module_name == "Characters":
+            self.current_module = CharacterEditorModule(
+                workspace_rect,
+                self.theme,
+                self.project_root
+            )
+
         self.active_module_name = module_name
         print(f"Switched to: {module_name}")
     
@@ -339,7 +347,8 @@ class DissonanceEditor:
             "- Text Effects - Preview text animations",
             "- Scene Preview - Play through scenes with real assets",
             "- Scene Placement - Position characters with live sprite preview",
-            "- Condition Editor - Build conditional logic"
+            "- Condition Editor - Build conditional logic",
+            "- Characters - Edit character atlas paths and default poses",
         ]
         
         y = center_y - 10

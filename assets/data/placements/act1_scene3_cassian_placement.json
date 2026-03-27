@@ -1,33 +1,6 @@
 {
-  "scene_id": "act1_scene3_cassian",
-  "placements": {
-    "n4": {
-      "cassian": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      }
-    },
-    "n11": {
-      "laura": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n18": {
-      "tiffany": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n19": {
-      "hanami": {
-        "x": 240,
-        "y": 0,
-        "slot": "center_left"
-      }
-    }
-  }
+  "n4": { "cassian": "center_right" },
+  "n11": { "laura": "left" },
+  "n18": { "tiffany": "right" },
+  "n19": { "hanami": "center_left" }
 }

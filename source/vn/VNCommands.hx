@@ -92,18 +92,17 @@ class VNCommands {
 
             // ── Character movement ───────────────────────────────────────
             case "move_character":
-                // Smoothly slide a character to a new slot (or absolute coords).
+                // Smoothly slide a character to a new slot.
                 // JSON example:
                 //   {"action":"move_character","character":"tiffany","slot":"left","duration":0.5}
-                //   {"action":"move_character","character":"tiffany","x":400,"y":0,"duration":0.5}
                 var charSys = CharacterSystem.get();
                 if (charSys != null) {
                     var character:String = node.character;
                     var duration:Float   = node.duration != null ? node.duration : 0.45;
-                    if (node.x != null && node.y != null) {
-                        charSys.moveCharacterAbsolute(character, node.x, node.y, duration);
-                    } else if (node.slot != null) {
+                    if (node.slot != null) {
                         charSys.moveCharacter(character, node.slot, duration);
+                    } else {
+                        trace('[VNCommands] WARNING: move_character on "${character}" has no slot — skipping.');
                     }
                 }
 
@@ -219,7 +218,7 @@ class VNCommands {
                 state.setFlag(flagName, value);
 
             default:
-                throw "Unknown VN action: " + node.action;
+                trace('[VNCommands] WARNING: Unknown action "${node.action}" — skipping.');
         }
 
         runner.goto(nextNode(node));
@@ -244,13 +243,24 @@ class VNCommands {
         if (vnState == null)
             throw '[VNCommands] ERROR: vnState not set. Call VNCommands.setVNState(this) in VN state.create()';
 
-        var resumeNode = nextNode(node);
         var scenePath  = runner.getScenePath();
+        var resumeNode = nextNode(node);
+        var winNode    = node.win_node  != null ? cast(node.win_node,  String) : resumeNode;
+        var failNode   = node.fail_node != null ? cast(node.fail_node, String) : resumeNode;
 
-        VNReturnContext.store(scenePath, resumeNode);
+        // Snapshot current visual state so it can be restored when returning from rhythm
+        var bgPath = BackgroundSystem.currentPath;
+        var charSnaps = CharacterSystem.get() != null ? CharacterSystem.get().getSnapshot() : null;
+
+        VNReturnContext.storeWithBranch(scenePath, resumeNode, winNode, failNode, bgPath, charSnaps);
 
         RhythmBridge.start(node.song, vnState, (result) -> {
-            trace('[VNCommands] Rhythm result: Score=${result.score}, Combo=${result.combo}, Completed=${result.completed}');
+            // Write rhythm outcome to GameState so scene conditions can react
+            var state = GameState.get();
+            state.setVar("last_rhythm_score",    result.score);
+            state.setVar("last_rhythm_accuracy", result.accuracy * 100); // 0–100
+            state.setVar("last_rhythm_health",   result.health   * 100);
+            state.setFlag("last_rhythm_completed", result.completed);
         });
     }
 

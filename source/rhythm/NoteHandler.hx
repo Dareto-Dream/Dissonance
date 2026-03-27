@@ -28,8 +28,8 @@ class NoteHandler
 
     public var spawnAheadMs:Float = 2000;
 
-    private var heldLanes:Map<Int, Bool> = [];
-    private var sustainingLanes:Map<Int, Bool> = [];
+    private var heldLanes:Map<Int, Bool> = new Map();
+    private var sustainingLanes:Map<Int, Bool> = new Map();
 
     public var onNoteSpawn:FlxTypedSignal<Note->Void>;
     public var onNoteHit:FlxTypedSignal<Note->HitRating->Void>;
@@ -129,9 +129,11 @@ class NoteHandler
         onNoteHit.dispatch(tail, judgement.judgeRelease(nowMs - tail.timeMs));
     }
 
+    private static inline var AUTOPLAY_WINDOW_MS:Float = 50.0;
+
     private function handleAnimationOnlyNotes(nowMs:Float):Void
     {
-        var autoplayWindow = 50.0;
+        var autoplayWindow = AUTOPLAY_WINDOW_MS;
         var toAutoplay:Array<Note> = [];
 
         for (note in activeNotes)

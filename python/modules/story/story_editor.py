@@ -45,27 +45,46 @@ DEFAULT_STORY_CONFIG = {
             ]
         },
         "action": {
+            # Supported action types:
+            #   set_bg            : background, transition, duration
+            #   show_character    : character, pose, transition, duration
+            #   hide_character    : character, transition, duration
+            #   move_character    : character, slot, duration
+            #   flip_character    : character, flipped
+            #   bounce_character  : character, height, duration
+            #   shake_character   : character, intensity, duration
+            #   set_tint          : character (optional), color
+            #   clear_tint        : character (optional)
+            #   shake_screen      : intensity, duration
+            #   flash             : color, duration
+            #   glitch            : intensity, duration
+            #   play_sound        : sound, volume
+            #   play_music        : track, volume, transition, duration
+            #   stop_music        : (no extra fields)
+            #   fade_out_music    : duration
+            #   set_variable      : variable, value, op (add/subtract/multiply/set)
+            #   set_flag          : flag, value
             "fields": [
-                {"key": "action", "label": "Action", "type": "text"},
-                {"key": "background", "label": "Background", "type": "text"},
-                {"key": "character", "label": "Character", "type": "text"},
-                {"key": "pose", "label": "Pose", "type": "text"},
-                {"key": "transition", "label": "Transition", "type": "text"},
-                {"key": "duration", "label": "Duration", "type": "float"},
-                {"key": "track", "label": "Track", "type": "text"},
-                {"key": "sound", "label": "Sound", "type": "text"},
-                {"key": "volume", "label": "Volume", "type": "float"},
-                {"key": "slot", "label": "Slot", "type": "text"},
-                {"key": "intensity", "label": "Intensity", "type": "float"},
-                {"key": "color", "label": "Color", "type": "text"},
-                {"key": "flipped", "label": "Flipped", "type": "bool"},
-                {"key": "height", "label": "Height", "type": "float"},
-                {"key": "text_effect", "label": "Text Effect", "type": "text"},
-                {"key": "variable", "label": "Variable (set_variable)", "type": "text"},
-                {"key": "flag", "label": "Flag (set_flag)", "type": "text"},
-                {"key": "op", "label": "Op (add/subtract/set)", "type": "text"},
-                {"key": "value", "label": "Value", "type": "text"},
-                {"key": "next", "label": "Next", "type": "text"},
+                {"key": "action",     "label": "Action Type",           "type": "text"},
+                {"key": "background", "label": "Background (set_bg)",   "type": "text"},
+                {"key": "character",  "label": "Character",             "type": "text"},
+                {"key": "pose",       "label": "Pose",                  "type": "text"},
+                {"key": "slot",       "label": "Slot (far_left/left/center_left/center/center_right/right/far_right)", "type": "text"},
+                {"key": "flipped",    "label": "Flipped",               "type": "bool"},
+                {"key": "height",     "label": "Height (bounce)",       "type": "float"},
+                {"key": "intensity",  "label": "Intensity",             "type": "float"},
+                {"key": "color",      "label": "Color (hex/#rrggbb)",   "type": "text"},
+                {"key": "transition", "label": "Transition",            "type": "text"},
+                {"key": "duration",   "label": "Duration (s)",          "type": "float"},
+                {"key": "sound",      "label": "Sound (play_sound)",    "type": "text"},
+                {"key": "track",      "label": "Track (play_music)",    "type": "text"},
+                {"key": "volume",     "label": "Volume (0-1)",          "type": "float"},
+                {"key": "variable",   "label": "Variable (set_variable)", "type": "text"},
+                {"key": "flag",       "label": "Flag (set_flag)",       "type": "text"},
+                {"key": "op",         "label": "Op (add/subtract/multiply/set)", "type": "text"},
+                {"key": "value",      "label": "Value",                 "type": "text"},
+                {"key": "text_effect","label": "Text Effect",           "type": "text"},
+                {"key": "next",       "label": "Next",                  "type": "text"},
             ]
         },
         "choice": {

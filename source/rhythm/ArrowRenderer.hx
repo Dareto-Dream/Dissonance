@@ -6,7 +6,6 @@ import flixel.group.FlxGroup;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import rhythm.JudgementSystem.HitRating;
-import rhythm.Note.NoteKind;
 import rhythm.Note;
 
 /**
@@ -102,10 +101,6 @@ class ArrowRenderer extends FlxGroup
 
     private function createArrows():Void
     {
-        trace("[ArrowRenderer] Creating ${LANES} arrow receptors");
-        trace("[ArrowRenderer] Layout mode: ${LAYOUT_MODE}");
-        trace("[ArrowRenderer] Asset path: ${ARROW_ASSET_PATH}");
-
         // Calculate layout positions
         var positions = calculateReceptorPositions();
 
@@ -125,21 +120,10 @@ class ArrowRenderer extends FlxGroup
                 arrow.animation.add("hit", [2], 0, false);
                 arrow.animation.add("miss", [3], 0, false);
                 arrow.animation.play("idle");
-                
-                trace('[ArrowRenderer] Receptor ${i}: Asset loaded at (${pos.x}, ${pos.y})');
             }
-            else
+            else if (DEBUG_FALLBACK)
             {
-                // Asset failed - use debug fallback
-                if (DEBUG_FALLBACK)
-                {
-                    createDebugArrow(arrow, i);
-                    trace('[ArrowRenderer] Receptor ${i}: Debug fallback at (${pos.x}, ${pos.y})');
-                }
-                else
-                {
-                    trace('[ArrowRenderer] Receptor ${i}: FAILED (no fallback enabled)');
-                }
+                createDebugArrow(arrow, i);
             }
 
             applyVisualScale(arrow);
@@ -147,8 +131,6 @@ class ArrowRenderer extends FlxGroup
             arrows.push(arrow);
             add(arrow);
         }
-
-        trace("[ArrowRenderer] Setup complete");
     }
 
     /**
@@ -165,8 +147,6 @@ class ArrowRenderer extends FlxGroup
             var centerY = LAYOUT_CENTER_Y >= 0 ? LAYOUT_CENTER_Y : (FlxG.height / 2) + LAYOUT_CENTER_Y_OFFSET;
             var renderWidth = ARROW_FRAME_WIDTH * VISUAL_SCALE;
             var renderHeight = ARROW_FRAME_HEIGHT * VISUAL_SCALE;
-
-            trace('[ArrowRenderer] Radial layout: center=(${centerX}, ${centerY}), radius=${LAYOUT_RADIUS}');
 
             var anglePerLane = (Math.PI * 2) / LANES;
 
@@ -187,12 +167,12 @@ class ArrowRenderer extends FlxGroup
         }
         else // Linear fallback
         {
-            trace('[ArrowRenderer] Linear layout (legacy)');
+            var linearY = FlxG.height > 0 ? FlxG.height - 120.0 : 600.0;
             for (i in 0...LANES)
             {
                 positions.push({
                     x: 100 + i * 150,
-                    y: 600
+                    y: linearY
                 });
             }
         }
@@ -307,7 +287,8 @@ class ArrowRenderer extends FlxGroup
     public function onNoteHit(note:Note, rating:HitRating):Void
     {
         // Only render judged notes (positive lanes that require input)
-        if (!note.isJudged) return;  // ✅ FIXED: was note.isPlayerNote()
+        if (!note.isJudged) return;
+        if (note.inputLane < 0 || note.inputLane >= arrows.length) return;
 
         var arrow = arrows[note.inputLane];
 
@@ -338,7 +319,8 @@ class ArrowRenderer extends FlxGroup
     public function onNoteMiss(note:Note):Void
     {
         // Only render judged notes
-        if (!note.isJudged) return;  // ✅ FIXED: was note.isPlayerNote()
+        if (!note.isJudged) return;
+        if (note.inputLane < 0 || note.inputLane >= arrows.length) return;
 
         var arrow = arrows[note.inputLane];
 
@@ -368,6 +350,7 @@ class ArrowRenderer extends FlxGroup
      */
     public function onGhostTap(inputLane:Int):Void
     {
+        if (inputLane < 0 || inputLane >= arrows.length) return;
         var arrow = arrows[inputLane];
 
         // Try animation if available

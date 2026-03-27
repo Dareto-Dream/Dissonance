@@ -1,40 +1,7 @@
 {
-  "scene_id": "act5_scene2_finale",
-  "placements": {
-    "n7_tiffany_broken": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n7_tiffany_calm": {
-      "tiffany": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n10": {
-      "hanami": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n13": {
-      "cassian": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    },
-    "n17": {
-      "laura": {
-        "x": 840,
-        "y": 0,
-        "slot": "center"
-      }
-    }
-  }
+  "n7_tiffany_broken": { "tiffany": "center" },
+  "n7_tiffany_calm": { "tiffany": "center" },
+  "n10": { "hanami": "center" },
+  "n13": { "cassian": "center" },
+  "n17": { "laura": "center" }
 }

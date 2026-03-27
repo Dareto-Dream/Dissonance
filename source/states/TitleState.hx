@@ -236,7 +236,7 @@ class TitleState extends FlxState
 		}
 
 		// If save/load overlay is active, let it handle input
-		if (saveLoadOverlay != null && saveLoadOverlay.active)
+		if (saveLoadOverlay != null && saveLoadOverlay.isOpen)
 		{
 			return;
 		}

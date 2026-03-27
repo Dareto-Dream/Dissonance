@@ -4,7 +4,6 @@ import flixel.FlxBasic;
 import rhythm.CharacterSpriteManager;
 import rhythm.Conductor;
 import rhythm.JudgementSystem.HitRating;
-import rhythm.Note.NoteKind;
 import rhythm.Note;
 
 /**
@@ -53,7 +52,6 @@ class CharacterAnimationBridge extends FlxBasic
         if (!loadedCharacters.contains(characterID))
         {
             loadedCharacters.push(characterID);
-            trace('[CharacterAnimationBridge] Registered ${characterID}');
         }
     }
 

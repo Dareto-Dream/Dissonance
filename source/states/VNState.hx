@@ -19,6 +19,7 @@ import flixel.util.FlxColor;
 import rhythm.RhythmCompletionBridge;
 import ui.DialogueHistory;
 import ui.PauseOverlay;
+import ui.RhythmResultsOverlay;
 import util.MobileSupport;
 import vn.RhythmBridge;
 import vn.VNCommands;
@@ -39,6 +40,8 @@ class VNState extends FlxState
 	private var pauseOverlay:PauseOverlay;
 	private var pauseButton:FlxSprite;
 	private var dialogueHistory:DialogueHistory;
+
+	private var rhythmResultsOverlay:RhythmResultsOverlay;
 
 	private var devOverlayBg:FlxSprite;
 	private var devOverlayText:FlxText;
@@ -64,8 +67,8 @@ class VNState extends FlxState
 		var returnContext:VNReturnContext = null;
 		if (VNReturnContext.hasPending())
 		{
-			trace('[VNState] Detected return from rhythm gameplay');
 			returnContext = VNReturnContext.consume();
+			AudioSystem.onRhythmReturn();
 		}
 
 		var sceneToLoad:String;
@@ -74,18 +77,24 @@ class VNState extends FlxState
 		if (returnContext != null)
 		{
 			sceneToLoad = returnContext.scenePath;
-			resumeNode = returnContext.resumeNodeId;
-			trace('[VNState] Resuming scene: ${sceneToLoad} at node: ${resumeNode}');
+
+			// Pick win or fail branch based on rhythm result
+			var rhythmResult = RhythmCompletionBridge.getPendingResult();
+			if (rhythmResult != null && (returnContext.winNode != null || returnContext.failNode != null))
+			{
+				resumeNode = rhythmResult.completed
+					? (returnContext.winNode  != null ? returnContext.winNode  : returnContext.resumeNodeId)
+					: (returnContext.failNode != null ? returnContext.failNode : returnContext.resumeNodeId);
+			}
+			else
+			{
+				resumeNode = returnContext.resumeNodeId;
+			}
 		}
 		else
 		{
 			sceneToLoad = scenePath;
-			resumeNode = startNodeOverride;
-			trace('[VNState] Starting new scene: ${sceneToLoad}');
-			if (resumeNode != null)
-			{
-				trace('[VNState] Applying explicit start node: ${resumeNode}');
-			}
+			resumeNode  = startNodeOverride;
 		}
 
 		// Initialize or update GameState
@@ -159,20 +168,45 @@ class VNState extends FlxState
 		// Mobile pause button
 		if (MobileSupport.isMobile())
 		{
-			pauseButton = new FlxSprite(FlxG.width - 52, 12);
+			pauseButton = new FlxSprite(MobileSupport.topRightIconX(), MobileSupport.topIconY());
 			pauseButton.makeGraphic(40, 40, FlxColor.fromRGBFloat(0.1, 0.07, 0.18, 0.7));
 			pauseButton.scrollFactor.set(0, 0);
 			add(pauseButton);
 		}
 
-		if (RhythmCompletionBridge.hasPendingCallback())
+		// Restore pre-rhythm visual state (background + character positions/poses)
+		if (returnContext != null)
 		{
-			trace('[VNState] Executing pending rhythm completion callback');
-			RhythmCompletionBridge.executePendingCallback();
-			trace('[VNState] Rhythm callback executed successfully');
+			if (returnContext.bgPath != null && returnContext.bgPath != "")
+				BackgroundSystem.set(returnContext.bgPath, "cut");
+
+			var charSys = CharacterSystem.get();
+			if (charSys != null)
+				charSys.restoreSnapshot(returnContext.charSnapshots);
 		}
 
-		runner.next();
+		if (RhythmCompletionBridge.hasPendingCallback())
+		{
+			// Read result values BEFORE executePendingCallback() clears them
+			var pendingResult = RhythmCompletionBridge.getPendingResult();
+			var showCompleted = pendingResult != null ? pendingResult.completed : true;
+			var showScore     = pendingResult != null ? pendingResult.score     : 0;
+			var showAccuracy  = pendingResult != null ? pendingResult.accuracy * 100 : 0.0;
+
+			// Execute the callback (writes result to GameState)
+			RhythmCompletionBridge.executePendingCallback();
+
+			// Show results overlay — runner.next() fires after player dismisses it
+			rhythmResultsOverlay = new RhythmResultsOverlay(showCompleted, showScore, showAccuracy, () -> {
+				rhythmResultsOverlay.visible = false;
+				runner.next();
+			});
+			add(rhythmResultsOverlay);
+		}
+		else
+		{
+			runner.next();
+		}
 	}
 
 	override public function update(elapsed:Float):Void
@@ -199,6 +233,13 @@ class VNState extends FlxState
 			dialogueHistory.toggle();
 		}
 		#end
+
+		// When rhythm results overlay is showing, only update it
+		if (rhythmResultsOverlay != null && rhythmResultsOverlay.visible)
+		{
+			rhythmResultsOverlay.update(elapsed);
+			return;
+		}
 
 		// When dialogue history is open, only update it
 		if (dialogueHistory.isOpen)

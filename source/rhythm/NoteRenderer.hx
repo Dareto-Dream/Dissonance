@@ -34,10 +34,6 @@ class NoteRenderer extends FlxGroup
 
         this.conductor = conductor;
         this.arrowRenderer = arrowRenderer;
-
-        trace("[NoteRenderer] Initialized");
-        trace("[NoteRenderer] Asset path: ${NOTE_ASSET_PATH}");
-        trace("[NoteRenderer] Spawn ahead: ${SPAWN_AHEAD_MS}ms at radius ${SPAWN_RADIUS}");
     }
 
     public function spawnNote(note:Note):Void
@@ -65,8 +61,6 @@ class NoteRenderer extends FlxGroup
 
         activeNotes.set(note, sprite);
         add(sprite);
-
-        trace('[NoteRenderer] Spawned note: lane=${note.inputLane}, judged=${note.isJudged}, time=${note.timeMs}');
     }
 
     public function removeNote(note:Note):Void

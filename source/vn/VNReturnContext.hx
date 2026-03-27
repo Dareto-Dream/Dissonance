@@ -1,5 +1,7 @@
 package vn;
 
+import core.rendering.CharacterSystem.CharacterSnapshot;
+
 /**
  * VNReturnContext
  * ===============
@@ -23,28 +25,64 @@ class VNReturnContext
     public var scenePath:String;
     
     /**
-     * Node ID to resume at after rhythm completes
-     * Example: "n6_after_rhythm"
+     * Node ID to resume at after rhythm completes (used when no win/fail split).
      */
     public var resumeNodeId:String;
-    
+
+    /**
+     * Node to jump to if the player cleared the song (completed=true).
+     * Falls back to resumeNodeId if null.
+     */
+    public var winNode:String;
+
+    /**
+     * Node to jump to if the player failed the song (completed=false).
+     * Falls back to resumeNodeId if null.
+     */
+    public var failNode:String;
+
+    /** Background path active when rhythm started — restored on return. */
+    public var bgPath:String;
+
+    /** Character visual state captured before rhythm — restored on return. */
+    public var charSnapshots:Array<CharacterSnapshot>;
+
     // -----------------------------------------------
     // Static Storage (Single Pending Context)
     // -----------------------------------------------
-    
+
     private static var pendingContext:VNReturnContext = null;
-    
+
     /**
-     * Store a return context before entering rhythm.
-     * Called by RhythmBridge before state switch.
+     * Store a return context before entering rhythm (no win/fail branching).
      */
-    public static function store(scenePath:String, resumeNodeId:String):Void
+    public static function store(scenePath:String, resumeNodeId:String,
+                                 bgPath:String = "", ?charSnapshots:Array<CharacterSnapshot>):Void
     {
-        trace('[VNReturnContext] Storing: scene=$scenePath, resumeNode=$resumeNodeId');
-        
         pendingContext = new VNReturnContext();
-        pendingContext.scenePath = scenePath;
-        pendingContext.resumeNodeId = resumeNodeId;
+        pendingContext.scenePath      = scenePath;
+        pendingContext.resumeNodeId   = resumeNodeId;
+        pendingContext.winNode        = null;
+        pendingContext.failNode       = null;
+        pendingContext.bgPath         = bgPath;
+        pendingContext.charSnapshots  = charSnapshots;
+    }
+
+    /**
+     * Store a return context with separate win/fail branches.
+     * bgPath and charSnapshots restore visual state on return.
+     */
+    public static function storeWithBranch(scenePath:String, resumeNodeId:String,
+                                           winNode:String, failNode:String,
+                                           bgPath:String = "", ?charSnapshots:Array<CharacterSnapshot>):Void
+    {
+        pendingContext = new VNReturnContext();
+        pendingContext.scenePath     = scenePath;
+        pendingContext.resumeNodeId  = resumeNodeId;
+        pendingContext.winNode       = winNode;
+        pendingContext.failNode      = failNode;
+        pendingContext.bgPath        = bgPath;
+        pendingContext.charSnapshots = charSnapshots;
     }
     
     /**
@@ -64,28 +102,13 @@ class VNReturnContext
      */
     public static function consume():VNReturnContext
     {
-        if (pendingContext == null)
-        {
-            trace('[VNReturnContext] WARNING: consume() called with no pending context');
-            return null;
-        }
-        
-        trace('[VNReturnContext] Consuming context');
         var ctx = pendingContext;
         pendingContext = null;
         return ctx;
     }
-    
-    /**
-     * Clear pending context without consumption.
-     * Use for cleanup or reset.
-     */
+
     public static function clear():Void
     {
-        if (pendingContext != null)
-        {
-            trace('[VNReturnContext] Clearing pending context');
-        }
         pendingContext = null;
     }
     

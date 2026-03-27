@@ -29,6 +29,10 @@ class DialogueSystem
 	public static var history:Array<DialogueEntry> = [];
 	private static inline var MAX_HISTORY:Int = 100;
 
+	// Cache box dimensions to avoid makeGraphic on every node
+	private static var _lastBoxW:Int = -1;
+	private static var _lastBoxH:Int = -1;
+
 	// -------------------------------------------------
 	//  INIT
 	// -------------------------------------------------
@@ -51,6 +55,8 @@ class DialogueSystem
 
 		timer = new FlxTimer();
 		history = [];
+		_lastBoxW = -1;
+		_lastBoxH = -1;
 	}
 
 	// -------------------------------------------------
@@ -268,7 +274,12 @@ class DialogueSystem
 
 		box.x = margin;
 		box.y = FlxG.height - boxHeight - bottomMargin;
-		box.makeGraphic(Std.int(boxWidth), boxHeight, 0xaa000000);
+		var bw = Std.int(boxWidth);
+		if (bw != _lastBoxW || boxHeight != _lastBoxH) {
+			box.makeGraphic(bw, boxHeight, 0xaa000000);
+			_lastBoxW = bw;
+			_lastBoxH = boxHeight;
+		}
 		box.scrollFactor.set(0, 0);
 
 		label.x = box.x + padding;

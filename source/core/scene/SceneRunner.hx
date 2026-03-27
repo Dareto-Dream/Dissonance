@@ -41,21 +41,9 @@ class SceneRunner {
     public function loadPlacementFile():Void {
         var placementPath = 'placements/${parser.sceneId}_placement.json';
         
-        try {
-            var charSys = CharacterSystem.get();
-            if (charSys != null && charSys.placementManager != null) {
-                var loaded = charSys.placementManager.loadPlacements(placementPath);
-                if (loaded) {
-                    trace('[SceneRunner] Loaded placements for scene: ${parser.sceneId}');
-                } else {
-                    trace('[SceneRunner] No placements found for scene: ${parser.sceneId} (using defaults)');
-                }
-            } else {
-                trace('[SceneRunner] WARNING: CharacterSystem not available for placement loading');
-            }
-        } catch (e:Dynamic) {
-            trace('[SceneRunner] Could not load placements for ${parser.sceneId}: $e (using defaults)');
-        }
+        var charSys = CharacterSystem.get();
+        if (charSys != null)
+            charSys.placementManager.load(placementPath);
     }
 
     public function update():Void {

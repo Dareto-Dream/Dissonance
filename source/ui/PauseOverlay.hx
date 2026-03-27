@@ -12,6 +12,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import states.TitleState;
 import states.VNState;
+import ui.OptionsOverlay;
 import ui.SaveLoadOverlay;
 import util.MobileSupport;
 
@@ -31,6 +32,7 @@ class PauseOverlay extends FlxGroup {
     private var buttons:Array<PauseButton>;
     private var selectedIndex:Int = 0;
     private var saveLoadOverlay:SaveLoadOverlay;
+    private var optionsOverlay:OptionsOverlay;
     private var vnState:VNState;
 
     public function new(vnState:VNState) {
@@ -61,13 +63,13 @@ class PauseOverlay extends FlxGroup {
 
         // Menu buttons
         buttons = [];
-        var btnWidth = mobile ? 400 : 300;
+        var btnWidth = Std.int(Math.min(mobile ? 400 : 300, sw - 40));
         var btnHeight = mobile ? 60 : 44;
         var btnSpacing = mobile ? 70 : 56;
         var startY = mobile ? 220 : 180;
         var btnX = Std.int((sw - btnWidth) / 2);
 
-        var items = ["RESUME", "SAVE", "LOAD", "RETURN TO TITLE"];
+        var items = ["RESUME", "SAVE", "LOAD", "OPTIONS", "RETURN TO TITLE"];
         for (i in 0...items.length) {
             var btn = new PauseButton(
                 btnX, startY + i * btnSpacing,
@@ -81,7 +83,7 @@ class PauseOverlay extends FlxGroup {
     }
 
     public function toggle():Void {
-        if (saveLoadOverlay != null && saveLoadOverlay.active) return;
+        if (saveLoadOverlay != null && saveLoadOverlay.isOpen) return;
 
         if (isPaused) resume();
         else pause();
@@ -119,6 +121,12 @@ class PauseOverlay extends FlxGroup {
             saveLoadOverlay = null;
         }
 
+        if (optionsOverlay != null) {
+            remove(optionsOverlay, true);
+            optionsOverlay.destroy();
+            optionsOverlay = null;
+        }
+
         // Resume music
         if (FlxG.sound.music != null && !FlxG.sound.music.playing) {
             FlxG.sound.music.resume();
@@ -129,8 +137,13 @@ class PauseOverlay extends FlxGroup {
         if (!isPaused) return;
 
         // Handle save/load overlay first
-        if (saveLoadOverlay != null && saveLoadOverlay.active) {
+        if (saveLoadOverlay != null && saveLoadOverlay.isOpen) {
             saveLoadOverlay.update(elapsed);
+            return;
+        }
+
+        if (optionsOverlay != null) {
+            optionsOverlay.update(elapsed);
             return;
         }
 
@@ -174,7 +187,9 @@ class PauseOverlay extends FlxGroup {
                 openSaveLoad(SAVE);
             case 2: // LOAD
                 openSaveLoad(LOAD);
-            case 3: // RETURN TO TITLE
+            case 3: // OPTIONS
+                openOptions();
+            case 4: // RETURN TO TITLE
                 resume();
                 AudioSystem.fadeOutMusic(0.3);
                 FlxG.camera.fade(FlxColor.BLACK, 0.3, false, () -> {
@@ -211,6 +226,21 @@ class PauseOverlay extends FlxGroup {
         });
 
         add(saveLoadOverlay);
+    }
+
+    private function openOptions():Void {
+        if (optionsOverlay != null) {
+            remove(optionsOverlay, true);
+            optionsOverlay.destroy();
+        }
+        optionsOverlay = new OptionsOverlay(() -> {
+            if (optionsOverlay != null) {
+                remove(optionsOverlay, true);
+                optionsOverlay.destroy();
+                optionsOverlay = null;
+            }
+        });
+        add(optionsOverlay);
     }
 }
 

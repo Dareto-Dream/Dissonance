@@ -1,55 +1,12 @@
 {
-  "scene_id": "act2_scene4_fracture",
-  "placements": {
-    "n4": {
-      "hanami": {
-        "x": 240,
-        "y": 0,
-        "slot": "center_left"
-      }
-    },
-    "n6": {
-      "tiffany": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      }
-    },
-    "n8": {
-      "cassian": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      }
-    },
-    "n18": {
-      "laura": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    },
-    "n35": {
-      "tiffany": {
-        "x": 1040,
-        "y": 0,
-        "slot": "center_right"
-      },
-      "cassian": {
-        "x": 100,
-        "y": 0,
-        "slot": "left"
-      },
-      "hanami": {
-        "x": 240,
-        "y": 0,
-        "slot": "center_left"
-      },
-      "laura": {
-        "x": 1180,
-        "y": 0,
-        "slot": "right"
-      }
-    }
+  "n4": { "hanami": "center_left" },
+  "n6": { "tiffany": "center_right" },
+  "n8": { "cassian": "left" },
+  "n18": { "laura": "right" },
+  "n35": {
+    "tiffany": "center_right",
+    "cassian": "left",
+    "hanami": "center_left",
+    "laura": "right"
   }
 }

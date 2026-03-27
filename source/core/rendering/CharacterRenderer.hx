@@ -20,9 +20,34 @@ import vn.Constants;
  * screenX/Y   → where the character stands on screen (set by slot keyword or absolute coords)
  * characterOffsetX/Y → per-character centering loaded from poses.json config.base_offset
  * layerOffsetX/Y     → per-layer fine-tuning from the pose definition
+ *
+ * Atlas and pose data are cached statically so scene switches don't re-parse/re-upload textures.
  */
 class CharacterRenderer extends FlxGroup
 {
+	// =========================================================================
+	// Static atlas + pose cache (survives scene switches)
+	// =========================================================================
+	private static var _poseCache:Map<String, Dynamic>         = new Map();
+	private static var _vnFramesCache:Map<String, FlxAtlasFrames>     = new Map();
+	private static var _rhythmFramesCache:Map<String, FlxAtlasFrames> = new Map();
+
+	/** Call this to fully evict a character from the cache (e.g. when assets change). */
+	public static function evictCache(characterName:String):Void
+	{
+		_poseCache.remove(characterName);
+		_vnFramesCache.remove(characterName);
+		_rhythmFramesCache.remove(characterName);
+	}
+
+	/** Clear the entire cache. */
+	public static function clearCache():Void
+	{
+		_poseCache.clear();
+		_vnFramesCache.clear();
+		_rhythmFramesCache.clear();
+	}
+
 	// =========================================================================
 	// Atlas data
 	// =========================================================================
@@ -101,6 +126,14 @@ class CharacterRenderer extends FlxGroup
 
 	private function loadPoseData(characterName:String):Void
 	{
+		// Cache hit: reuse previously parsed data
+		if (_poseCache.exists(characterName))
+		{
+			poseData = _poseCache.get(characterName);
+			_applyPoseData();
+			return;
+		}
+
 		var jsonPath = 'assets/data/characters/$characterName/poses.json';
 		try
 		{
@@ -109,29 +142,8 @@ class CharacterRenderer extends FlxGroup
 
 			if (poseData == null) throw "Parsed JSON is null";
 
-			config = poseData.config;
-			if (config == null)
-			{
-				config = { scale: 1.0, base_offset: { x: 0, y: 0 } };
-			}
-
-			if (config.base_offset != null)
-			{
-				characterOffsetX = config.base_offset.x;
-				characterOffsetY = config.base_offset.y;
-			}
-
-			if (poseData.poses == null)
-			{
-				hasPoseData = false;
-				return;
-			}
-
-			poses = new Map<String, Dynamic>();
-			for (field in Reflect.fields(poseData.poses))
-				poses.set(field, Reflect.field(poseData.poses, field));
-
-			hasPoseData = true;
+			_poseCache.set(characterName, poseData);
+			_applyPoseData();
 		}
 		catch (e:Dynamic)
 		{
@@ -140,25 +152,68 @@ class CharacterRenderer extends FlxGroup
 		}
 	}
 
+	private function _applyPoseData():Void
+	{
+		config = poseData.config;
+		if (config == null)
+			config = { scale: 1.0, base_offset: { x: 0, y: 0 } };
+
+		if (config.base_offset != null)
+		{
+			characterOffsetX = config.base_offset.x;
+			characterOffsetY = config.base_offset.y;
+		}
+
+		if (poseData.poses == null)
+		{
+			hasPoseData = false;
+			return;
+		}
+
+		poses = new Map<String, Dynamic>();
+		for (field in Reflect.fields(poseData.poses))
+			poses.set(field, Reflect.field(poseData.poses, field));
+
+		hasPoseData = true;
+	}
+
 	private function loadVNAtlas(characterName:String):Void
 	{
+		// Cache hit
+		if (_vnFramesCache.exists(characterName))
+		{
+			vnFrames = _vnFramesCache.get(characterName);
+			hasVNAtlas = (vnFrames != null);
+			return;
+		}
+
 		try
 		{
-			vnFrames  = FlxAtlasFrames.fromSparrow(
+			vnFrames = FlxAtlasFrames.fromSparrow(
 				'assets/images/characters/$characterName/$characterName.png',
 				'assets/images/characters/$characterName/$characterName.xml'
 			);
 			hasVNAtlas = true;
+			_vnFramesCache.set(characterName, vnFrames);
 		}
 		catch (e:Dynamic)
 		{
 			trace("[CharacterRenderer] ERROR loading VN atlas for " + characterName + ": " + e);
 			hasVNAtlas = false;
+			_vnFramesCache.set(characterName, null); // cache miss so we don't retry every load
 		}
 	}
 
 	private function loadRhythmAtlas(characterName:String):Void
 	{
+		// Cache hit
+		if (_rhythmFramesCache.exists(characterName))
+		{
+			rhythmFrames = _rhythmFramesCache.get(characterName);
+			hasRhythmAtlas = (rhythmFrames != null);
+			return;
+		}
+
 		try
 		{
 			var png = 'assets/images/characters/$characterName/${characterName}_rhythm.png';
@@ -167,15 +222,18 @@ class CharacterRenderer extends FlxGroup
 			if (!Assets.exists(png) || !Assets.exists(xml))
 			{
 				hasRhythmAtlas = false;
+				_rhythmFramesCache.set(characterName, null);
 				return;
 			}
 
-			rhythmFrames   = FlxAtlasFrames.fromSparrow(png, xml);
+			rhythmFrames = FlxAtlasFrames.fromSparrow(png, xml);
 			hasRhythmAtlas = true;
+			_rhythmFramesCache.set(characterName, rhythmFrames);
 		}
 		catch (e:Dynamic)
 		{
 			hasRhythmAtlas = false;
+			_rhythmFramesCache.set(characterName, null);
 		}
 	}
 
@@ -370,10 +428,11 @@ class CharacterRenderer extends FlxGroup
 			var lox:Float = entry.x;
 			var loy:Float = entry.y;
 
-			// Mirror layer X offset when flipped
+			// Mirror both layer offset and character base offset when flipped
 			var fx = isFlipped ? -lox : lox;
+			var ox = isFlipped ? -characterOffsetX : characterOffsetX;
 
-			var finalX = screenX + characterOffsetX + fx;
+			var finalX = screenX + ox + fx;
 			var finalY = screenY + characterOffsetY + loy;
 
 			var spr = vnLayers.get(frame);
@@ -696,6 +755,15 @@ class CharacterRenderer extends FlxGroup
 	{
 		for (spr in vnLayers)     spr.visible = false;
 		for (spr in rhythmLayers) spr.visible = false;
+	}
+
+	/** True if any VN or rhythm layer sprite is currently visible. */
+	public var isShowing(get, never):Bool;
+	private function get_isShowing():Bool
+	{
+		for (spr in vnLayers)     if (spr.visible) return true;
+		for (spr in rhythmLayers) if (spr.visible) return true;
+		return false;
 	}
 
 	// =========================================================================

@@ -2,194 +2,120 @@ package core.scene;
 
 import haxe.Json;
 import openfl.utils.Assets;
+import vn.Constants;
 
 /**
- * PlacementManager - Handles character positioning with state persistence
- * 
- * Key features:
- * - Only loads placement changes, not full state at every node
- * - Characters maintain positions until explicitly moved
- * - Backwards compatible with old placement format
- * - Significantly reduced memory usage
- * - Auto-loads based on scene_id
+ * PlacementManager - Character slot assignments per scene node.
+ *
+ * FORMAT (assets/data/placements/{scene_id}_placement.json):
+ * {
+ *   "node_id": { "char_id": "slot_name" },
+ *   "node_id2": { "char_id": "hidden" }
+ * }
+ *
+ * Slot names: far_left | left | center_left | center | center_right | right | far_right
+ * Special:    "hidden" — character is removed from stage at this node
+ *
+ * getSlot() returns:
+ *   - A slot name  → move character to that slot
+ *   - "hidden"     → hide character at this node
+ *   - null         → no entry; caller keeps current position
+ *
+ * This class is a pure lookup table. It holds no mutable character state.
+ * Character position state lives in CharacterRenderer.
  */
 class PlacementManager
 {
-	private var placements:Map<String, Map<String, PlacementData>>;
-	private var currentPositions:Map<String, PlacementData>;
-	private var sceneId:String;
+    // nodeId → (charId → slot)
+    private var data:Map<String, Map<String, String>> = new Map();
 
-	public function new()
-	{
-		placements = new Map();
-		currentPositions = new Map();
-	}
-
-	/**
-	 * Load placement data from JSON file
-	 * Supports both slot-based and custom coordinate positioning
-	 */
-	public function loadPlacements(placementPath:String):Bool
-	{
-		try {
-			var fullPath = "assets/data/" + placementPath;
-			
-			trace('[PlacementManager] Attempting to load: $fullPath');
-			
-			var jsonText = Assets.getText(fullPath);
-			var data:Dynamic = Json.parse(jsonText);
-
-			if (data == null || data.placements == null)
-			{
-				trace("[PlacementManager] WARNING: No placements found in " + fullPath);
-				return false;
-			}
-
-			sceneId = data.scene_id;
-			placements.clear();
-
-			var placementsObj:Dynamic = data.placements;
-			var nodeIds:Array<String> = Reflect.fields(placementsObj);
-
-			for (nodeId in nodeIds)
-			{
-				var nodeData:Dynamic = Reflect.field(placementsObj, nodeId);
-				var characterMap = new Map<String, PlacementData>();
-
-				var characterIds:Array<String> = Reflect.fields(nodeData);
-				for (charId in characterIds)
-				{
-					var posData:Dynamic = Reflect.field(nodeData, charId);
-					
-					// Build placement data - support both formats
-					var placement:PlacementData = {};
-					
-					// Check if custom coordinates provided
-					if (Reflect.hasField(posData, "x") && Reflect.hasField(posData, "y"))
-					{
-						placement.x = posData.x;
-						placement.y = posData.y;
-					}
-					
-					// Check if slot provided (used if no x/y, or as documentation)
-					if (Reflect.hasField(posData, "slot"))
-					{
-						placement.slot = posData.slot;
-					}
-					
-					characterMap.set(charId, placement);
-				}
-
-				placements.set(nodeId, characterMap);
-			}
-
-			var nodeCount = Lambda.count(placements);
-			trace('[PlacementManager] ✓ Loaded $nodeCount nodes with placement data for scene: $sceneId');
-			return true;
-		}
-		catch (e:Dynamic)
-		{
-			trace("[PlacementManager] Could not load placements (will use defaults): " + e);
-			return false;
-		}
-	}
-
-	/**
-	 * Apply placements for a specific node
-	 * Only updates positions that changed at this node
-	 */
-	public function applyNode(nodeId:String):Void
-	{
-		if (!placements.exists(nodeId))
-		{
-			// No placement changes at this node, keep current positions
-			return;
-		}
-
-		var nodePlacements = placements.get(nodeId);
-		for (charId in nodePlacements.keys())
-		{
-			var placement = nodePlacements.get(charId);
-			currentPositions.set(charId, {
-				x: placement.x,
-				y: placement.y,
-				slot: placement.slot
-			});
-		}
-	}
-
-	/**
-	 * Get the current position for a character
-	 * Returns null if character doesn't have a saved position
-	 */
-	public function getPosition(characterId:String):Null<PlacementData>
-	{
-		return currentPositions.get(characterId);
-	}
-
-	/**
-	 * Check if a character has a custom position
-	 */
-	public function hasPosition(characterId:String):Bool
-	{
-		return currentPositions.exists(characterId);
-	}
-
-	/**
-	 * Remove a character from position tracking (when they're hidden)
-	 */
-	public function removeCharacter(characterId:String):Void
-	{
-		currentPositions.remove(characterId);
-	}
-
-	/**
-	 * Clear all current positions (e.g., when loading new scene)
-	 */
-	public function reset():Void
-	{
-		currentPositions.clear();
-	}
-
-	/**
-	 * Debug: Get all currently tracked characters
-	 */
-	public function getTrackedCharacters():Array<String>
-	{
-		var chars = [];
-		for (key in currentPositions.keys())
-			chars.push(key);
-		return chars;
-	}
-}
-
-/**
- * Position data for a character.
- * Supports slot-based, absolute coordinate, and animated placement.
- */
-typedef PlacementData =
-{
-    /** Custom X coordinate. Takes precedence over slot when set. */
-    var ?x:Float;
-
-    /** Custom Y coordinate. Takes precedence over slot when set. */
-    var ?y:Float;
-
-    /** Named slot (far_left / left / center_left / center / center_right / right / far_right). */
-    var ?slot:String;
-
-    /** Mirror the character horizontally when true. */
-    var ?flip:Bool;
-
-    /** Draw order within the character group — higher = in front. */
-    var ?z_order:Int;
+    public function new() {}
 
     /**
-     * Named entrance transition to play when this placement is applied.
-     * Values: "fade" | "slide_left" | "slide_right" | "slide_up" | "pop" | "bounce"
+     * Load placement data from a path relative to assets/data/.
+     * Returns true if the file was found and parsed successfully.
      */
-    var ?transition:String;
+    public function load(path:String):Bool
+    {
+        var fullPath = "assets/data/" + path;
 
-    /** Duration for the per-placement transition (seconds). Defaults to show node duration. */
-    var ?transition_duration:Float;
+        if (!Assets.exists(fullPath))
+            return false;
+
+        try
+        {
+            var raw:Dynamic = Json.parse(Assets.getText(fullPath));
+            data.clear();
+
+            for (nodeId in Reflect.fields(raw))
+            {
+                var nodeObj:Dynamic = Reflect.field(raw, nodeId);
+                var nodeMap = new Map<String, String>();
+
+                for (charId in Reflect.fields(nodeObj))
+                {
+                    var slot:Dynamic = Reflect.field(nodeObj, charId);
+                    if (slot != null)
+                        nodeMap.set(charId, Std.string(slot));
+                }
+
+                data.set(nodeId, nodeMap);
+            }
+
+            return true;
+        }
+        catch (e:Dynamic)
+        {
+            trace('[PlacementManager] Failed to parse ${fullPath}: ${e}');
+            return false;
+        }
+    }
+
+    /**
+     * Get the slot assignment for a character at a specific node.
+     *
+     * Returns:
+     *   slot string  — move to this slot
+     *   "hidden"     — hide this character
+     *   null         — no entry at this node; keep current position
+     */
+    public function getSlot(nodeId:String, charId:String):Null<String>
+    {
+        var nodeMap = data.get(nodeId);
+        if (nodeMap == null) return null;
+        return nodeMap.get(charId);
+    }
+
+    /**
+     * Get all slot assignments defined at a node.
+     * Returns null if no placements exist for this node.
+     */
+    public function getNodePlacements(nodeId:String):Null<Map<String, String>>
+    {
+        return data.get(nodeId);
+    }
+
+    /**
+     * True if any placements are defined for this node.
+     */
+    public inline function hasNode(nodeId:String):Bool
+    {
+        return data.exists(nodeId);
+    }
+
+    /**
+     * True if the slot value is legal (a known slot name or "hidden").
+     */
+    public inline function isValidSlot(slot:String):Bool
+    {
+        return slot == "hidden" || Constants.isValidSlot(slot);
+    }
+
+    /**
+     * Clear loaded data (call before loading a new scene).
+     */
+    public function reset():Void
+    {
+        data.clear();
+    }
 }

@@ -1,10 +1,15 @@
 package core.rendering;
 
-import core.scene.PlacementManager.PlacementData;
 import core.scene.PlacementManager;
 import flixel.group.FlxGroup;
-import flixel.tweens.FlxEase;
-import flixel.util.FlxColor;
+
+typedef CharacterSnapshot = {
+	name:    String,
+	pose:    String,
+	slot:    String,
+	flipped: Bool,
+	showing: Bool
+}
 
 class CharacterSystem
 {
@@ -18,18 +23,15 @@ class CharacterSystem
 
 	public var placementManager:PlacementManager;
 
-	public static function init(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
+	public static function init(group:FlxGroup, charDefs:Array<Dynamic>)
 	{
-		instance = new CharacterSystem(group, charDefs, placementPath);
+		instance = new CharacterSystem(group, charDefs);
 	}
 
-	public function new(group:FlxGroup, charDefs:Array<Dynamic>, ?placementPath:String)
+	public function new(group:FlxGroup, charDefs:Array<Dynamic>)
 	{
 		this.group = group;
-
 		placementManager = new PlacementManager();
-		if (placementPath != null && placementPath != "")
-			placementManager.loadPlacements(placementPath);
 
 		var index = 0;
 		for (c in charDefs)
@@ -45,8 +47,6 @@ class CharacterSystem
 			characters.set(c.id, renderer);
 			group.add(renderer);
 		}
-
-		trace("[CharacterSystem] Loaded " + Lambda.count(characters) + " character definitions.");
 	}
 
 	// =========================================================================
@@ -54,8 +54,13 @@ class CharacterSystem
 	// =========================================================================
 
 	/**
-	 * Show a character with placement + transition support.
-	 * Reads flip, z_order, and entry transition from placement data when present.
+	 * Show a character, applying its placement slot for this node if defined.
+	 *
+	 * Slot lookup rules (in priority order):
+	 *   1. placement file has a slot for (nodeId, name)  → move there
+	 *   2. "hidden" slot in placement                     → hide instead
+	 *   3. no placement entry + character already placed  → keep position
+	 *   4. no placement entry + character new             → default "center"
 	 */
 	public function show(name:String, pose:String, transition:String, duration:Float, ?nodeId:String)
 	{
@@ -66,49 +71,24 @@ class CharacterSystem
 			return;
 		}
 
-		// Apply placement for this node
-		var placement:Null<PlacementData> = null;
 		if (nodeId != null)
 		{
-			placementManager.applyNode(nodeId);
-			placement = placementManager.getPosition(name);
-		}
-
-		if (placement != null)
-		{
-			// --- Position ---
-			if (placement.x != null && placement.y != null)
-				r.setAbsolutePosition(placement.x, placement.y);
-			else if (placement.slot != null)
-				r.setPositionKeyword(placement.slot);
-			else if (r.currentPosition != null && r.currentPosition != "")
-				{ /* keep current */ }
-			else
-				r.setPositionKeyword("center");
-
-			if (placement.slot != null) r.currentPosition = placement.slot;
-
-			// --- Flip ---
-			if (placement.flip != null)
-				r.flip(placement.flip);
-
-			// --- Entry transition override from placement ---
-			if (placement.transition != null && placement.transition != "")
+			var slot = placementManager.getSlot(nodeId, name);
+			if (slot == "hidden")
 			{
-				var dur = placement.transition_duration != null ? placement.transition_duration : duration;
-				r.setPose(pose);
-				r.playTransition(placement.transition, dur);
+				hide(name, "fade_out", duration > 0 ? duration : 0.3);
 				return;
 			}
-		}
-		else
-		{
-			// State persistence: keep position if character already placed
-			if (r.currentPosition == null || r.currentPosition == "")
+			if (slot != null)
+				r.setPositionKeyword(slot);
+			else if (r.currentPosition == null || r.currentPosition == "")
 				r.setPositionKeyword("center");
 		}
+		else if (r.currentPosition == null || r.currentPosition == "")
+		{
+			r.setPositionKeyword("center");
+		}
 
-		// Set pose then play transition
 		r.setPose(pose);
 		if (transition != null && transition != "")
 			r.playTransition(transition, duration);
@@ -123,8 +103,6 @@ class CharacterSystem
 			r.fadeOut(duration > 0 ? duration : 0.4);
 		else
 			r.hide();
-
-		placementManager.removeCharacter(name);
 	}
 
 	// =========================================================================
@@ -141,14 +119,6 @@ class CharacterSystem
 			return;
 		}
 		r.moveTo(slot, duration, ease);
-	}
-
-	/** Smoothly slide a character to absolute screen coordinates. */
-	public function moveCharacterAbsolute(name:String, x:Float, y:Float, duration:Float = 0.45, ?ease:Float->Float):Void
-	{
-		var r = characters.get(name);
-		if (r == null) return;
-		r.moveToAbsolute(x, y, duration, ease);
 	}
 
 	// =========================================================================
@@ -253,15 +223,6 @@ class CharacterSystem
 	}
 
 	// =========================================================================
-	// Placement helpers
-	// =========================================================================
-
-	public function resetPlacements():Void
-	{
-		placementManager.reset();
-	}
-
-	// =========================================================================
 	// Rhythm game integration
 	// =========================================================================
 
@@ -279,11 +240,41 @@ class CharacterSystem
 		r.isLooping = looping;
 	}
 
+	/** Capture current visibility/pose/position for all characters. */
+	public function getSnapshot():Array<CharacterSnapshot>
+	{
+		var snaps:Array<CharacterSnapshot> = [];
+		for (name in characters.keys())
+		{
+			var r = characters.get(name);
+			snaps.push({
+				name:    name,
+				pose:    r.currentPose,
+				slot:    r.currentPosition,
+				flipped: r.isFlipped,
+				showing: r.isShowing
+			});
+		}
+		return snaps;
+	}
+
+	/** Restore a snapshot previously captured by getSnapshot(). */
+	public function restoreSnapshot(snaps:Array<CharacterSnapshot>):Void
+	{
+		if (snaps == null) return;
+		for (snap in snaps)
+		{
+			if (!snap.showing || snap.pose == null) continue;
+			show(snap.name, snap.pose, "", 0);
+			if (snap.flipped) flipCharacter(snap.name, true);
+		}
+	}
+
 	public function hasPose(name:String, pose:String):Bool
 	{
 		var r = characters.get(name);
 		if (r == null) return false;
-		return r.poses.exists(pose);
+		return r.poses != null && r.poses.exists(pose);
 	}
 
 	public function enableRhythmMode():Void

@@ -10,14 +10,50 @@ class MobileSupport
 		return FlxG.onMobile;
 	}
 
+	// =========================================================================
+	// Safe area insets
+	// Safe areas account for display cutouts (notches/punch-holes) and system
+	// bars on mobile devices. In landscape on Android the cutout is on the
+	// left or right short edge; navigation gesture bars add bottom inset.
+	// All layout functions below incorporate these automatically.
+	// =========================================================================
+
+	/**
+	 * Horizontal safe inset (each side) in game pixels.
+	 * Keeps UI away from left/right edge cutouts in landscape.
+	 */
+	public static inline function safeX():Float
+	{
+		return isMobile() ? 48 : 0;
+	}
+
+	/**
+	 * Vertical safe inset (each side) in game pixels.
+	 * Keeps UI away from top status bar remnants and bottom nav bar.
+	 */
+	public static inline function safeY():Float
+	{
+		return isMobile() ? 24 : 0;
+	}
+
+	// Shorthand accessors used internally
+	private static inline function sw():Float { return FlxG.width; }
+	private static inline function sh():Float { return FlxG.height; }
+
+	// =========================================================================
+	// Dialogue
+	// =========================================================================
+
 	public static inline function dialogueMargin():Float
 	{
-		return isMobile() ? 24 : 40;
+		// left/right margin: safe zone + inner padding
+		return safeX() + (isMobile() ? 16 : 40);
 	}
 
 	public static inline function dialogueBottomMargin():Float
 	{
-		return isMobile() ? 20 : 40;
+		// keep dialogue box above nav bar
+		return safeY() + (isMobile() ? 12 : 40);
 	}
 
 	public static inline function dialogueHeight():Int
@@ -30,9 +66,14 @@ class MobileSupport
 		return isMobile() ? 28 : 20;
 	}
 
+	// =========================================================================
+	// Title / menu
+	// =========================================================================
+
 	public static inline function titleMenuX():Float
 	{
-		return isMobile() ? 60 : 40;
+		// Push menu buttons away from left-edge cutout
+		return safeX() + (isMobile() ? 24 : 40);
 	}
 
 	public static inline function titleButtonWidth():Int
@@ -60,14 +101,19 @@ class MobileSupport
 		return isMobile() ? 22 : 14;
 	}
 
+	// =========================================================================
+	// Choices
+	// =========================================================================
+
 	public static inline function choiceSideMargin():Float
 	{
-		return isMobile() ? 36 : 60;
+		// Keep choice buttons away from side cutouts
+		return safeX() + (isMobile() ? 20 : 60);
 	}
 
 	public static inline function choiceBottomMargin():Float
 	{
-		return isMobile() ? 32 : 36;
+		return safeY() + (isMobile() ? 20 : 36);
 	}
 
 	public static inline function choiceButtonHeight():Float
@@ -85,6 +131,10 @@ class MobileSupport
 		return isMobile() ? 30 : 24;
 	}
 
+	// =========================================================================
+	// Rhythm touch pads
+	// =========================================================================
+
 	public static inline function rhythmPadHeight():Float
 	{
 		return isMobile() ? 128 : 0;
@@ -97,7 +147,8 @@ class MobileSupport
 
 	public static inline function rhythmPadBottomMargin():Float
 	{
-		return isMobile() ? 18 : 0;
+		// Keep pads above the bottom nav bar gesture area
+		return safeY() + (isMobile() ? 10 : 0);
 	}
 
 	public static inline function rhythmPadIdleAlpha():Float
@@ -108,6 +159,27 @@ class MobileSupport
 	public static inline function rhythmPadPressedAlpha():Float
 	{
 		return isMobile() ? 0.55 : 0;
+	}
+
+	// =========================================================================
+	// Pause / overlay buttons
+	// =========================================================================
+
+	/**
+	 * X position for a top-right corner icon (pause button etc.).
+	 * Pulled inward from the right edge to avoid cutout areas.
+	 */
+	public static inline function topRightIconX():Float
+	{
+		return FlxG.width - safeX() - (isMobile() ? 52 : 52);
+	}
+
+	/**
+	 * Y position for a top-edge icon.
+	 */
+	public static inline function topIconY():Float
+	{
+		return safeY() + (isMobile() ? 12 : 12);
 	}
 
 	public static function anyPointerJustPressed():Bool

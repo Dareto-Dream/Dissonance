@@ -34,18 +34,25 @@ class RhythmCompletionBridge
      */
     public static function storeResult(result:RhythmResult, callback:RhythmResult->Void):Void
     {
-        trace('[RhythmCompletionBridge] Storing result for deferred execution');
         storedResult = result;
         storedCallback = callback;
     }
     
     /**
      * Check if there's a pending rhythm completion callback.
-     * Called by VN state on create/resume
      */
     public static function hasPendingCallback():Bool
     {
         return storedCallback != null;
+    }
+
+    /**
+     * Read the pending result without consuming it.
+     * Used by VNState to pick the win/fail resume node before running the scene.
+     */
+    public static function getPendingResult():RhythmResult
+    {
+        return storedResult;
     }
     
     /**
@@ -56,22 +63,15 @@ class RhythmCompletionBridge
      */
     public static function executePendingCallback():Void
     {
-        if (storedCallback == null)
-        {
-            trace('[RhythmCompletionBridge] No pending callback');
-            return;
-        }
-        
-        trace('[RhythmCompletionBridge] Executing deferred callback');
-        
+        if (storedCallback == null) return;
+
         var callback = storedCallback;
-        var result = storedResult;
-        
+        var result   = storedResult;
+
         // Clear before calling to prevent re-execution
         storedCallback = null;
-        storedResult = null;
-        
-        // Now safe to call VN code - renderers exist
+        storedResult   = null;
+
         callback(result);
     }
     

@@ -14,11 +14,11 @@ import rhythm.CharacterSpriteManager;
 import rhythm.ChartData;
 import rhythm.ChartHandler;
 import rhythm.Conductor;
-import rhythm.JudgementSystem.HitRating;
 import rhythm.JudgementSystem;
 import rhythm.Note;
 import rhythm.NoteHandler;
 import rhythm.NoteRenderer;
+import rhythm.ScoreTracker;
 import util.MobileSupport;
 
 class RhythmState extends FlxState
@@ -45,6 +45,24 @@ class RhythmState extends FlxState
 	private var devOverlayBg:FlxSprite;
 	private var devOverlayText:FlxText;
 
+	private var scoreTracker:ScoreTracker;
+
+	// HUD
+	private var hudHealthBg:FlxSprite;
+	private var hudHealthFill:FlxSprite;
+	private var hudHealthMaxWidth:Int;
+	private var hudScoreText:FlxText;
+	private var hudComboText:FlxText;
+	private var hudJudgeText:FlxText;
+	private var hudJudgeFadeTimer:Float = 0;
+	private static inline var HUD_JUDGE_FADE:Float = 0.6;
+
+	private var isPaused:Bool = false;
+	private var pauseOverlayBg:FlxSprite;
+	private var pauseOverlayTitle:FlxText;
+	private var pauseMenuBtns:Array<{bg:FlxSprite, label:FlxText}> = [];
+	private var pauseBtn:FlxSprite;
+
 	override public function create():Void
 	{
 		super.create();
@@ -63,10 +81,14 @@ class RhythmState extends FlxState
 			add(stageSprite);
 		}
 
-		FlxG.sound.playMusic('assets/music/${chart.song.song}.ogg', 1.0, false);
+		var musicPath = 'assets/music/${chart.song.song}.ogg';
+		if (!Assets.exists(musicPath))
+			throw 'RhythmState could not find music at ${musicPath}';
+		FlxG.sound.playMusic(musicPath, 1.0, false);
 
 		conductor = new Conductor(chart.song.bpm, chart.song.offset);
 		judgement = new JudgementSystem();
+		scoreTracker = new ScoreTracker();
 		chartHandler = new ChartHandler(chart, conductor);
 		noteHandler = new NoteHandler(chartHandler, conductor, judgement);
 		noteHandler.spawnAheadMs = NoteRenderer.SPAWN_AHEAD_MS;
@@ -92,22 +114,14 @@ class RhythmState extends FlxState
 			}
 		}
 
-		trace('[RhythmState] Loading ${allCharacterIDs.length} unique characters');
-
 		for (i in 0...allCharacterIDs.length)
 		{
 			var characterID = allCharacterIDs[i];
-			trace('[RhythmState] Loading character: ${characterID}');
-
 			var sprite = characterSprites.loadCharacter(characterID);
 			if (sprite != null)
 			{
-				// Use the base position from the character JSON directly.
-				// The xOffset override was wrong: it ignored per-character positioning data.
 				var basePos = characterSprites.getBasePosition(characterID);
 				characterSprites.setCharacterPosition(characterID, basePos.x, basePos.y);
-				trace('[RhythmState]   Positioned at: [${basePos.x}, ${basePos.y}]');
-
 				add(sprite);
 				loadedCharacterIDs.push(characterID);
 			}
@@ -117,7 +131,6 @@ class RhythmState extends FlxState
 		for (characterID in loadedCharacterIDs)
 		{
 			characterBridge.registerCharacter(characterID);
-			trace('[RhythmState] Registered character for animations: ${characterID}');
 		}
 
 		add(arrowRenderer);
@@ -139,6 +152,18 @@ class RhythmState extends FlxState
 			createTouchControls();
 		}
 
+		createHUD();
+		createPauseUI();
+
+		// Mobile pause button (top-right corner, inside safe area)
+		if (MobileSupport.isMobile())
+		{
+			pauseBtn = new FlxSprite(MobileSupport.topRightIconX(), MobileSupport.topIconY());
+			pauseBtn.makeGraphic(40, 40, FlxColor.fromRGBFloat(0.1, 0.07, 0.18, 0.7));
+			pauseBtn.scrollFactor.set(0, 0);
+			add(pauseBtn);
+		}
+
 		conductor.start();
 	}
 
@@ -146,6 +171,27 @@ class RhythmState extends FlxState
 	{
 		super.update(elapsed);
 
+		// Pause toggle
+		#if FLX_KEYBOARD
+		if (FlxG.keys.justPressed.ESCAPE && !isFinishingSong)
+		{
+			togglePause();
+			return;
+		}
+		#end
+		if (pauseBtn != null && MobileSupport.pointerJustPressedOver(pauseBtn))
+		{
+			togglePause();
+			return;
+		}
+
+		if (isPaused)
+		{
+			updatePauseMenu();
+			return;
+		}
+
+		updateHUD(elapsed);
 		conductor.update();
 		noteHandler.update();
 
@@ -302,7 +348,7 @@ class RhythmState extends FlxState
 		var gap = MobileSupport.rhythmPadGap();
 		var bottomMargin = MobileSupport.rhythmPadBottomMargin();
 		var padHeight = MobileSupport.rhythmPadHeight();
-		var sideMargin = 18.0;
+		var sideMargin = MobileSupport.safeX() + 8.0; // keep pads inside cutout zone
 		var padWidth = (FlxG.width - (sideMargin * 2) - (gap * 3)) / 4;
 		var y = FlxG.height - padHeight - bottomMargin;
 		var labels = ["LEFT", "DOWN", "UP", "RIGHT"];
@@ -373,6 +419,14 @@ class RhythmState extends FlxState
 		noteRenderer.removeNote(note);
 		arrowRenderer.onNoteHit(note, rating);
 		characterBridge.onNoteHit(note, rating);
+
+		if (note.isJudged)
+		{
+			scoreTracker.onNoteHit(rating);
+			showJudgement(rating);
+			if (scoreTracker.isDead())
+				triggerFail();
+		}
 	}
 
 	private function onNoteMiss(note:Note):Void
@@ -380,11 +434,34 @@ class RhythmState extends FlxState
 		noteRenderer.removeNote(note);
 		arrowRenderer.onNoteMiss(note);
 		characterBridge.onNoteMiss(note);
+
+		if (note.isJudged)
+		{
+			scoreTracker.onNoteMiss();
+			showJudgement(HitRating.MISS);
+			if (scoreTracker.isDead())
+				triggerFail();
+		}
 	}
 
 	private function onGhostTap(lane:Int):Void
 	{
 		arrowRenderer.onGhostTap(lane);
+		scoreTracker.onGhostTap();
+		if (scoreTracker.isDead())
+			triggerFail();
+	}
+
+	private function triggerFail():Void
+	{
+		if (isFinishingSong) return;
+		finishSong({
+			score: scoreTracker.score,
+			combo: scoreTracker.maxCombo,
+			accuracy: scoreTracker.getAccuracy(),
+			health: 0.0,
+			completed: false
+		});
 	}
 
 	private function createStageSprite(stageId:String):FlxSprite
@@ -454,19 +531,14 @@ class RhythmState extends FlxState
 
 	private function finishSong(?resultOverride:Dynamic):Void
 	{
-		if (isFinishingSong)
-		{
-			return;
-		}
-
+		if (isFinishingSong) return;
 		isFinishingSong = true;
-		trace("[RhythmState] Song complete");
 
 		var result = {
-			score: 0,
-			combo: 0,
-			accuracy: 0.0,
-			health: 1.0,
+			score: scoreTracker != null ? scoreTracker.score : 0,
+			combo: scoreTracker != null ? scoreTracker.maxCombo : 0,
+			accuracy: scoreTracker != null ? scoreTracker.getAccuracy() : 0.0,
+			health: scoreTracker != null ? scoreTracker.health : 1.0,
 			completed: true
 		};
 
@@ -479,30 +551,229 @@ class RhythmState extends FlxState
 		}
 
 		if (onComplete != null)
-		{
 			rhythm.RhythmCompletionBridge.storeResult(result, onComplete);
-			trace("[RhythmState] Stored completion callback for deferred execution");
+
+		// Stop rhythm music before returning so it never bleeds into the VN
+		if (FlxG.sound.music != null)
+		{
+			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+			FlxG.sound.music = null;
 		}
 
 		if (returnStateFactory != null)
 		{
-			trace("[RhythmState] Returning to VN state (rebuilding new instance)");
 			FlxG.switchState(() -> returnStateFactory());
+		}
+		else if (onComplete != null)
+		{
+			onComplete(result);
+		}
+	}
+
+	private function createHUD():Void
+	{
+		var sw = FlxG.width;
+		var sh = FlxG.height;
+		var mobile = MobileSupport.isMobile();
+
+		// Health bar — bottom center
+		var barW = mobile ? 500 : 400;
+		var barH = mobile ? 20 : 14;
+		var barX = Std.int((sw - barW) / 2);
+		var barY = sh - (mobile ? 50 : 36);
+		hudHealthMaxWidth = barW;
+
+		hudHealthBg = new FlxSprite(barX, barY);
+		hudHealthBg.makeGraphic(barW, barH, FlxColor.fromRGB(15, 8, 25));
+		hudHealthBg.scrollFactor.set(0, 0);
+		add(hudHealthBg);
+
+		hudHealthFill = new FlxSprite(barX, barY);
+		hudHealthFill.makeGraphic(barW, barH, 0xFF8A2BE2);
+		hudHealthFill.scrollFactor.set(0, 0);
+		hudHealthFill.origin.x = 0;
+		add(hudHealthFill);
+
+		// Score — top right
+		hudScoreText = new FlxText(sw - (mobile ? 220 : 180), mobile ? 12 : 8,
+			mobile ? 200 : 164, "0");
+		hudScoreText.setFormat(null, mobile ? 22 : 16, FlxColor.WHITE, RIGHT);
+		hudScoreText.scrollFactor.set(0, 0);
+		add(hudScoreText);
+
+		// Combo — top center
+		hudComboText = new FlxText(0, mobile ? 12 : 8, sw, "");
+		hudComboText.setFormat(null, mobile ? 26 : 20, 0xFF8A2BE2, CENTER);
+		hudComboText.scrollFactor.set(0, 0);
+		add(hudComboText);
+
+		// Judgement flash — upper-center of screen
+		hudJudgeText = new FlxText(0, Std.int(sh * 0.34), sw, "");
+		hudJudgeText.setFormat(null, mobile ? 38 : 30, FlxColor.WHITE, CENTER);
+		hudJudgeText.scrollFactor.set(0, 0);
+		hudJudgeText.alpha = 0;
+		add(hudJudgeText);
+	}
+
+	private function updateHUD(elapsed:Float):Void
+	{
+		// Health bar fill — scale from left edge
+		hudHealthFill.scale.x = Math.max(0, scoreTracker.health);
+
+		// Tint the fill based on health level
+		if (scoreTracker.health > 0.5)
+			hudHealthFill.color = 0xFF8A2BE2;      // purple (safe)
+		else if (scoreTracker.health > 0.25)
+			hudHealthFill.color = 0xFFBB7700;      // amber (warning)
+		else
+			hudHealthFill.color = 0xFFCC2222;      // red (danger)
+
+		// Score
+		hudScoreText.text = Std.string(scoreTracker.score);
+
+		// Combo (hide at 0 or 1)
+		hudComboText.text = scoreTracker.combo >= 2 ? '${scoreTracker.combo}x' : "";
+
+		// Fade judgement text
+		if (hudJudgeFadeTimer > 0)
+		{
+			hudJudgeFadeTimer -= elapsed;
+			hudJudgeText.alpha = Math.max(0, hudJudgeFadeTimer / HUD_JUDGE_FADE);
+		}
+	}
+
+	private function showJudgement(rating:HitRating):Void
+	{
+		switch (rating)
+		{
+			case SICK:
+				hudJudgeText.text  = "SICK!";
+				hudJudgeText.color = 0xFF8A2BE2;
+			case GOOD:
+				hudJudgeText.text  = "GOOD";
+				hudJudgeText.color = FlxColor.WHITE;
+			case BAD:
+				hudJudgeText.text  = "BAD";
+				hudJudgeText.color = FlxColor.fromRGB(255, 160, 40);
+			case MISS:
+				hudJudgeText.text  = "MISS";
+				hudJudgeText.color = FlxColor.RED;
+		}
+		hudJudgeText.alpha    = 1.0;
+		hudJudgeFadeTimer     = HUD_JUDGE_FADE;
+	}
+
+	private function createPauseUI():Void
+	{
+		var sw = FlxG.width;
+		var sh = FlxG.height;
+		var mobile = MobileSupport.isMobile();
+
+		pauseOverlayBg = new FlxSprite(0, 0);
+		pauseOverlayBg.makeGraphic(sw, sh, FlxColor.fromRGBFloat(0, 0, 0, 0.7));
+		pauseOverlayBg.scrollFactor.set(0, 0);
+		pauseOverlayBg.visible = false;
+		add(pauseOverlayBg);
+
+		pauseOverlayTitle = new FlxText(0, mobile ? 100 : 80, sw, "PAUSED");
+		pauseOverlayTitle.setFormat(null, mobile ? 36 : 28, 0xFF8A2BE2, CENTER);
+		pauseOverlayTitle.scrollFactor.set(0, 0);
+		pauseOverlayTitle.visible = false;
+		add(pauseOverlayTitle);
+
+		var items = ["RESUME", "RESTART", "QUIT"];
+		var btnW = mobile ? 400 : 300;
+		var btnH = mobile ? 60 : 44;
+		var spacing = mobile ? 70 : 56;
+		var startY = mobile ? 220 : 180;
+		var btnX = Std.int((sw - btnW) / 2);
+
+		for (i in 0...items.length)
+		{
+			var bg = new FlxSprite(btnX, startY + i * spacing);
+			bg.makeGraphic(btnW, btnH, FlxColor.fromRGB(18, 12, 32));
+			bg.scrollFactor.set(0, 0);
+			bg.visible = false;
+			add(bg);
+
+			var lbl = new FlxText(bg.x, bg.y, btnW, items[i]);
+			lbl.setFormat(null, mobile ? 26 : 20, 0xFF8A2BE2, CENTER);
+			lbl.scrollFactor.set(0, 0);
+			lbl.y = bg.y + (btnH - lbl.height) / 2;
+			lbl.visible = false;
+			add(lbl);
+
+			pauseMenuBtns.push({bg: bg, label: lbl});
+		}
+	}
+
+	private function togglePause():Void
+	{
+		if (isFinishingSong) return;
+		isPaused = !isPaused;
+
+		pauseOverlayBg.visible = isPaused;
+		pauseOverlayTitle.visible = isPaused;
+		for (btn in pauseMenuBtns)
+		{
+			btn.bg.visible = isPaused;
+			btn.label.visible = isPaused;
+		}
+
+		if (isPaused)
+		{
+			if (FlxG.sound.music != null && FlxG.sound.music.playing)
+				FlxG.sound.music.pause();
 		}
 		else
 		{
-			trace("[RhythmState] WARNING: No returnStateFactory provided, cannot transition back to VN");
-			if (onComplete != null)
+			if (FlxG.sound.music != null && !FlxG.sound.music.playing)
+				FlxG.sound.music.resume();
+		}
+	}
+
+	private function updatePauseMenu():Void
+	{
+		for (i in 0...pauseMenuBtns.length)
+		{
+			var btn = pauseMenuBtns[i];
+			if (MobileSupport.pointerOverlaps(btn.bg))
 			{
-				onComplete(result);
+				btn.bg.color = FlxColor.fromRGB(35, 25, 60);
+				if (MobileSupport.pointerJustPressedOver(btn.bg))
+				{
+					switch (i)
+					{
+						case 0: // RESUME
+							togglePause();
+						case 1: // RESTART
+							togglePause();
+							restartChart(song);
+						case 2: // QUIT
+							isPaused = false;
+							finishSong({score: 0, combo: 0, accuracy: 0.0, health: 0.0, completed: false});
+					}
+				}
+			}
+			else
+			{
+				btn.bg.color = FlxColor.fromRGB(18, 12, 32);
 			}
 		}
+
+		#if FLX_KEYBOARD
+		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE)
+		{
+			togglePause();
+		}
+		#end
 	}
 
 	private function createDevOverlay():Void
 	{
 		devOverlayBg = new FlxSprite(8, 8);
-		devOverlayBg.makeGraphic(560, 166, FlxColor.fromRGB(10, 10, 10, 180));
+		devOverlayBg.makeGraphic(560, 198, FlxColor.fromRGB(10, 10, 10, 180));
 		devOverlayBg.scrollFactor.set(0, 0);
 		devOverlayBg.alpha = 0.8;
 		add(devOverlayBg);
@@ -527,12 +798,14 @@ class RhythmState extends FlxState
 			return;
 		}
 
+		var acc = Std.int(scoreTracker.getAccuracy() * 10000) / 100;
 		devOverlayText.text =
 			'DEV RHYTHM | Song=${song} | Log=${DevTools.logLevelName(DevTools.LOG_LEVEL)} | Last=${DevTools.lastAction}\n'
 			+ 'Mode=${DevTools.rhythmModeName(DevTools.RHYTHM_MODE)} | AutoFinishDelay=${DevTools.formatFloat(DevTools.RHYTHM_AUTO_FINISH_DELAY)}s | Time=${DevTools.formatFloat(conductor.songPositionMs)}ms\n'
 			+ 'Selected Chart=${DevTools.getSelectedChart()} | Active Notes=${noteHandler.getActiveCount()} | Finishing=${isFinishingSong}\n'
+			+ 'Score=${scoreTracker.score} | Combo=${scoreTracker.combo} (max ${scoreTracker.maxCombo}) | Health=${Std.int(scoreTracker.health * 100)}% | Acc=${acc}%\n'
+			+ 'SICK=${scoreTracker.sickCount} GOOD=${scoreTracker.goodCount} BAD=${scoreTracker.badCount} MISS=${scoreTracker.missCount}\n'
 			+ 'M+1 overlay | Shift+M+1 log | M+2 rhythm mode | M+3 restart current | M+4 success | Shift+M+4 fail\n'
-			+ 'M+5/M+6 chart | M+7 load selected chart | M+8/M+9 auto-finish delay\n'
-			+ 'Manual input remains active when mode=OFF. BOTPLAY auto-hits notes. AUTO_* ends the song with a forced result.';
+			+ 'M+5/M+6 chart | M+7 load selected chart | M+8/M+9 auto-finish delay';
 	}
 }

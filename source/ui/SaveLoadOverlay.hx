@@ -22,6 +22,8 @@ class SaveLoadOverlay extends FlxGroup {
     private static inline var PURPLE:Int = 0xFF8A2BE2;
     private static inline var DARK_BG:Int = 0xCC0A0A14;
 
+    public var isOpen(default, null):Bool = false;
+
     private var mode:SaveLoadMode;
     private var onClose:Void->Void;
     private var onLoad:Dynamic->Void;
@@ -103,7 +105,7 @@ class SaveLoadOverlay extends FlxGroup {
         closeBtnText.y = closeBtn.y + (closeBtnHeight - closeBtnText.height) / 2;
         add(closeBtnText);
 
-        active = true;
+        isOpen = true;
     }
 
     override public function update(elapsed:Float):Void {
@@ -165,7 +167,7 @@ class SaveLoadOverlay extends FlxGroup {
     }
 
     public function close():Void {
-        active = false;
+        isOpen = false;
         if (onClose != null) onClose();
     }
 
