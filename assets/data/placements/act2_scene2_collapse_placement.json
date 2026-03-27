@@ -1,0 +1,77 @@
+{
+  "scene_id": "act2_scene2_collapse",
+  "placements": {
+    "n4": {
+      "hanami": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n7": {
+      "tiffany": {
+        "x": 1040,
+        "y": 0,
+        "slot": "center_right"
+      }
+    },
+    "n8": {
+      "cassian": {
+        "x": 240,
+        "y": 0,
+        "slot": "center_left"
+      }
+    },
+    "n9": {
+      "laura": {
+        "x": 1180,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n23": {
+      "hanami": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      },
+      "tiffany": {
+        "x": 1040,
+        "y": 0,
+        "slot": "center_right"
+      },
+      "cassian": {
+        "x": 240,
+        "y": 0,
+        "slot": "center_left"
+      },
+      "laura": {
+        "x": 1180,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n36": {
+      "hanami": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      },
+      "tiffany": {
+        "x": 1040,
+        "y": 0,
+        "slot": "center_right"
+      },
+      "cassian": {
+        "x": 240,
+        "y": 0,
+        "slot": "center_left"
+      },
+      "laura": {
+        "x": 1180,
+        "y": 0,
+        "slot": "right"
+      }
+    }
+  }
+}

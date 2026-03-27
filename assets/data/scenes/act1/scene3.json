@@ -136,9 +136,14 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "It's not a big deal. We all forget things sometimes.",
-      "set_flag": {
-        "defended_laura": true
-      },
+      "next": "n16_defend_flag"
+    },
+    {
+      "id": "n16_defend_flag",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.defended_laura",
+      "value": true,
       "next": "n17_defend"
     },
     {
@@ -245,7 +250,7 @@
     {
       "id": "n28",
       "type": "game",
-      "song": "echoes_in_harmony_full",
+      "song": "echoes_in_harmony_full_generated",
       "next": "n29"
     },
     {
@@ -399,9 +404,14 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "Hey, you did fine. Don't let him get to you.",
-      "set_flag": {
-        "comforted_laura": true
-      },
+      "next": "n46_comfort_flag"
+    },
+    {
+      "id": "n46_comfort_flag",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.comforted_laura",
+      "value": true,
       "next": "n47_comfort"
     },
     {
@@ -418,9 +428,14 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "Is Cassian always like this?",
-      "set_flag": {
-        "asked_about_cassian": true
-      },
+      "next": "n46_tiffany_flag"
+    },
+    {
+      "id": "n46_tiffany_flag",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.asked_about_cassian",
+      "value": true,
       "next": "n47_tiffany"
     },
     {

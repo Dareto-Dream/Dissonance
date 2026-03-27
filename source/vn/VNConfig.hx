@@ -6,43 +6,45 @@ import openfl.utils.Assets;
 
 /**
  * Data/config utilities for the VN engine.
- * Currently: character definition loading.
+ * Loads character definitions from characters.json.
  */
 
-// Single character definition from data
-typedef CharacterDef = {
-    var id:String;         // "cassian"
-    var png:String;        // "assets/images/characters/cassian/cassian.png"
-    var xml:String;        // "assets/images/characters/cassian/cassian.xml"
-    var defaultPose:String;// e.g. "neutral"
+/** VN-specific atlas paths and default pose. */
+typedef VNAtlasDef = {
+    var png:String;
+    var xml:String;
+    var defaultPose:String;
 };
 
-// Map of id → def
+/** Rhythm-specific atlas paths. */
+typedef RhythmAtlasDef = {
+    var png:String;
+    var xml:String;
+};
+
+/** Full character definition matching the actual characters.json schema. */
+typedef CharacterDef = {
+    var id:String;
+    var vn:VNAtlasDef;
+    var rhythm:RhythmAtlasDef;
+};
+
 typedef CharacterDefMap = StringMap<CharacterDef>;
 
 class VNConfig
 {
-    // Path to the character definitions JSON in your assets
     public static inline var CHARACTER_DEFS_PATH:String =
         "assets/data/characters/characters.json";
 
     /**
-     * Load character definitions from JSON and return a CharacterDefMap.
+     * Load character definitions from JSON.
      *
      * Expected JSON shape:
-     *
      * {
      *   "cassian": {
      *     "id": "cassian",
-     *     "png": "assets/images/characters/cassian/cassian.png",
-     *     "xml": "assets/images/characters/cassian/cassian.xml",
-     *     "defaultPose": "neutral"
-     *   },
-     *   "tiffany": {
-     *     "id": "tiffany",
-     *     "png": "assets/images/characters/tiffany/tiffany.png",
-     *     "xml": "assets/images/characters/tiffany/tiffany.xml",
-     *     "defaultPose": "neutral"
+     *     "rhythm": { "png": "...", "xml": "..." },
+     *     "vn": { "png": "...", "xml": "...", "defaultPose": "neutral" }
      *   }
      * }
      */
@@ -55,7 +57,7 @@ class VNConfig
             raw = Assets.getText(CHARACTER_DEFS_PATH);
         } catch (e:Dynamic) {
             trace("[VNConfig] Could not load character defs at " + CHARACTER_DEFS_PATH + ": " + e);
-            return map; // empty
+            return map;
         }
 
         if (raw == null || raw.length == 0) {
@@ -71,20 +73,25 @@ class VNConfig
             return map;
         }
 
-        // Iterate top-level fields as character IDs
         var fields = Reflect.fields(dyn);
         for (id in fields) {
             var d:Dynamic = Reflect.field(dyn, id);
             if (d == null) continue;
 
-            // Allow "id" to be omitted and default to key
+            var vnData = d.vn;
+            var rhythmData = d.rhythm;
+
             var def:CharacterDef = {
-                id: (Reflect.hasField(d, "id") && d.id != null) ? d.id : id,
-                png: d.png,
-                xml: d.xml,
-                defaultPose: (Reflect.hasField(d, "defaultPose") && d.defaultPose != null)
-                    ? d.defaultPose
-                    : "neutral"
+                id: (d.id != null) ? d.id : id,
+                vn: {
+                    png: vnData != null ? vnData.png : 'assets/images/characters/$id/$id.png',
+                    xml: vnData != null ? vnData.xml : 'assets/images/characters/$id/$id.xml',
+                    defaultPose: (vnData != null && vnData.defaultPose != null) ? vnData.defaultPose : "neutral"
+                },
+                rhythm: {
+                    png: rhythmData != null ? rhythmData.png : 'assets/images/characters/$id/${id}_rhythm.png',
+                    xml: rhythmData != null ? rhythmData.xml : 'assets/images/characters/$id/${id}_rhythm.xml'
+                }
             };
 
             map.set(def.id, def);

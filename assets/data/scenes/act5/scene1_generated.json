@@ -1,0 +1,343 @@
+{
+  "scene_id": "act5_scene1_gathering",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/front/evening1.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/my_little_world.ogg",
+      "volume": 0.4,
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The school gate looms ahead, bathed in the warm glow of evening. I've walked this path so many times now.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "But today feels different. Heavier. Like the air itself knows this is the last time.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "I remember the first day I found the club room. The sound of Hanami's humming through the door. The chaos. The arguments. The laughter.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "narration",
+      "text": "All of it led here. To this one last evening.",
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club3/evening1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "narration",
+      "text": "The club room is decorated. Someone hung paper stars from the ceiling and arranged the chairs in a half-circle. It looks beautiful. It looks like a farewell.",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "narration",
+      "text": "Hanami is already here. She's paler than usual, but her eyes are bright.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "I wouldn't miss this for anything.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Are you sure you're okay to play? You look—",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I'm okay. I promise. Some things are worth being a little tired for.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "Cassian walks in carrying a guitar case — a nicer one than usual. He brought his best guitar.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "What? If it's the last time, might as well sound good.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "narration",
+      "text": "His hands are steady as he unlatches the case, but I notice the way his jaw tightens. He's nervous.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "cheerful",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "cheerful",
+      "text": "Remember when I couldn't even play without shaking? God, that feels like a lifetime ago.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "You've come a long way, Laura.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "happy",
+      "text": "We all have.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "narration",
+      "text": "The door opens one last time.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "if",
+      "condition": "tiffany_rot >= 7",
+      "trueNode": "n24_tiffany_broken",
+      "falseNode": "n24_tiffany_grateful"
+    },
+    {
+      "id": "n24_tiffany_broken",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n25_tiffany_broken"
+    },
+    {
+      "id": "n25_tiffany_broken",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 1.5,
+      "duration": 0.4,
+      "next": "n26_tiffany_broken"
+    },
+    {
+      "id": "n26_tiffany_broken",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "I'm here. I'm... I'm still here.",
+      "text_effect": "glitch",
+      "effect_intensity": 2.0,
+      "next": "n27_tiffany_broken"
+    },
+    {
+      "id": "n27_tiffany_broken",
+      "type": "narration",
+      "text": "Something is very wrong. Her eyes are unfocused, her hands trembling. She looks like she's held together by nothing but willpower.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n24_tiffany_grateful",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n25_tiffany_grateful"
+    },
+    {
+      "id": "n25_tiffany_grateful",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "Thank you. All of you. For not giving up on me.",
+      "next": "n26_tiffany_grateful"
+    },
+    {
+      "id": "n26_tiffany_grateful",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Don't get sappy on us now. Save it for after.",
+      "next": "n27_tiffany_grateful"
+    },
+    {
+      "id": "n27_tiffany_grateful",
+      "type": "narration",
+      "text": "Tiffany laughs through her tears. It's the first real laugh I've heard from her in weeks.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n30_converge",
+      "type": "narration",
+      "text": "Everyone takes their places. One last rehearsal before the real thing.",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/guitar_tuning.wav",
+      "volume": 0.4,
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "game",
+      "song": "final_rehearsal_generated",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "The last note hangs in the air like a held breath.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "narration",
+      "text": "Nobody speaks. We all know what tomorrow means. But right now, in this room, the music is still alive.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.final_day",
+      "value": true,
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "end",
+      "next_scene": "scenes/act5/scene2_generated.json"
+    }
+  ]
+}

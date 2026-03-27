@@ -1,0 +1,33 @@
+{
+  "scene_id": "act3_scene2_performance",
+  "placements": {
+    "n6": {
+      "tiffany": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n8": {
+      "hanami": {
+        "x": 240,
+        "y": 0,
+        "slot": "center_left"
+      }
+    },
+    "n9": {
+      "cassian": {
+        "x": 1040,
+        "y": 0,
+        "slot": "center_right"
+      }
+    },
+    "n10": {
+      "laura": {
+        "x": 1180,
+        "y": 0,
+        "slot": "right"
+      }
+    }
+  }
+}

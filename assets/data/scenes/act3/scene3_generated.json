@@ -1,0 +1,479 @@
+{
+  "scene_id": "act3_scene3_aftermath",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/classroom1/evening1.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/unsettled.ogg",
+      "volume": 0.5,
+      "transition": "fade",
+      "duration": 2,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "An empty classroom. The festival noise is muffled through the walls, distant and meaningless.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "sad",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Hanami is sitting at a desk, a blanket draped over her shoulders. She looks small. Fragile in a way you've never let yourself see before.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "narration",
+      "text": "Laura sits beside her, holding Hanami's hand. Tears run silently down her cheeks, but she hasn't said a word.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "narration",
+      "text": "Cassian is by the window, arms crossed, staring at nothing. His jaw is clenched so tight you can see the muscle working.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "narration",
+      "text": "Tiffany is pacing. Three steps one way, three steps back. Her hands are trembling.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Okay. You need to rest. We can talk about this later. The festival isn't over, and we still have--",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Tiffany. Stop.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "narration",
+      "text": "The room goes quiet. Hanami's voice is soft, but it carries the weight of something she's held inside for too long.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I need to tell you all something. I should have said it a long time ago.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "narration",
+      "text": "She takes a slow breath. Her fingers tighten around Laura's hand.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I have a chronic illness. It's been getting worse for a while now. The doctors... they're not sure how much longer I'll be able to keep up with everything.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "narration",
+      "text": "The words land like stones dropped into still water. No one moves.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I don't know how much longer I can keep playing. I wanted to get through the festival first. I wanted to give us that, at least.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "Hanami...",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "narration",
+      "text": "Laura's voice breaks. She squeezes Hanami's hand tighter, tears flowing freely now.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "suprised",
+      "text": "No. No, we'll find a way. There are treatments, there are specialists. The club NEEDS you, Hanami. We can't just--",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Tiffany, please. I've seen the specialists. This isn't something you can schedule your way out of.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 5,
+      "duration": 0.3,
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_slam.wav",
+      "volume": 0.7,
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "DAMN IT!",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "narration",
+      "text": "Cassian's fist slams into the desk. The sound cracks through the room like a gunshot. Laura flinches. Tiffany goes still.",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "narration",
+      "text": "For a moment, there's only the sound of Cassian breathing hard, his hand flat against the desk, trembling.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "Not again. I can't... I can't do this again.",
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "narration",
+      "text": "His voice breaks on the last word. The anger drains out of him all at once, and what's left underneath is something raw and old and terrible.",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Cassian... I'm sorry. I know this brings back--",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Don't. Just... don't apologize for being sick.",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "He turns away, pressing his forehead against the window glass. His shoulders shake once, then go rigid.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "text": "We're here, Hanami. Whatever happens. We're not going anywhere.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "There has to be something we can do. There has to be.",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "narration",
+      "text": "Tiffany's voice has lost its commanding edge. She sounds like a girl grasping for control in a world that won't give her any.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "You can be here. That's what you can do. That's enough.",
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "narration",
+      "text": "She looks at you. Her eyes are calm, steady, as if she's had time to make peace with this in a way none of you have.",
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "We'll support you no matter what.",
+          "target": "n40_support"
+        },
+        {
+          "text": "You should have told us sooner.",
+          "target": "n40_sooner"
+        }
+      ]
+    },
+    {
+      "id": "n40_support",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "We'll support you. No matter what. Whatever you need, whenever you need it -- we're here.",
+      "next": "n41_support_trust"
+    },
+    {
+      "id": "n41_support_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 2,
+      "op": "add",
+      "next": "n42_support_react"
+    },
+    {
+      "id": "n42_support_react",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Thank you. That means more than you know.",
+      "next": "n46_converge"
+    },
+    {
+      "id": "n40_sooner",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Why didn't you tell us sooner? We could have helped. We could have... I don't know. Done something.",
+      "next": "n41_sooner_react"
+    },
+    {
+      "id": "n41_sooner_react",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Because I didn't want to be the reason everything fell apart. I wanted to be part of the music, not the thing that stopped it.",
+      "next": "n42_sooner_tiffany"
+    },
+    {
+      "id": "n42_sooner_tiffany",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "You wouldn't have been. We would have adjusted. We should have known.",
+      "next": "n43_sooner_rot1"
+    },
+    {
+      "id": "n43_sooner_rot1",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n43_sooner_rot2"
+    },
+    {
+      "id": "n43_sooner_rot2",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n46_converge"
+    },
+    {
+      "id": "n46_converge",
+      "type": "narration",
+      "text": "The silence that follows is heavy, but it's shared. For the first time, there are no masks in this room.",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.hanami_truth_revealed",
+      "value": true,
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_rot",
+      "value": 2,
+      "op": "add",
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "My sister... she was sick too. She didn't tell anyone until it was too late.",
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "narration",
+      "text": "Everyone looks at Cassian. He's still facing the window, but his voice is steady now. Hollow, but steady.",
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "I'm not going to pretend this is okay. It's not. But at least you told us. At least we know.",
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I'm sorry I waited so long.",
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "text": "Don't be sorry. Just... let us be there for you. Please.",
+      "next": "n54"
+    },
+    {
+      "id": "n54",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "We'll figure this out. We always do.",
+      "next": "n55"
+    },
+    {
+      "id": "n55",
+      "type": "narration",
+      "text": "But Tiffany's hands are still shaking. And you can see it in her eyes -- she doesn't believe her own words.",
+      "next": "n56"
+    },
+    {
+      "id": "n56",
+      "type": "narration",
+      "text": "Outside, the festival continues. Music drifts in from somewhere far away. It sounds like another world.",
+      "next": "n57"
+    },
+    {
+      "id": "n57",
+      "type": "end",
+      "next_scene": "scenes/act3/scene4_generated.json"
+    }
+  ]
+}

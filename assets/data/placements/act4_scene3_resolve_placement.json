@@ -1,0 +1,40 @@
+{
+  "scene_id": "act4_scene3_resolve",
+  "placements": {
+    "n6": {
+      "hanami": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n16": {
+      "cassian": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n23": {
+      "laura": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n32_tiffany_broken": {
+      "tiffany": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n32_tiffany_sincere": {
+      "tiffany": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    }
+  }
+}

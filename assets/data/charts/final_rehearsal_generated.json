@@ -1,0 +1,105 @@
+{
+  "song": {
+    "song": "final_rehearsal",
+    "bpm": 115,
+    "offset": 0.0,
+    "stage": "stage1",
+    "player": "mc",
+    "singers": ["mc", "hanami"],
+    "notes": [
+      {
+        "sectionNotes": [
+          [0, 0, 1043, 0],
+          [1565, 1, 521, 0],
+          [2608, 2, 1043, 0],
+          [4174, 3, 521, 0]
+        ],
+        "singers": ["mc"],
+        "mustHitSection": true,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      },
+      {
+        "sectionNotes": [
+          [4174, 3, 521, 0],
+          [5217, 2, 1043, 0],
+          [6782, 1, 521, 0],
+          [7826, 0, 1043, 0]
+        ],
+        "singers": ["hanami"],
+        "mustHitSection": false,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      },
+      {
+        "sectionNotes": [
+          [8348, 0, 521, 0],
+          [9391, 1, 0, 0],
+          [9652, 2, 0, 0],
+          [9913, 3, 0, 0],
+          [10434, 2, 1043, 0],
+          [12000, 0, 0, 0],
+          [12261, 1, 0, 0],
+          [12521, 3, 521, 0]
+        ],
+        "singers": ["mc"],
+        "mustHitSection": true,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      },
+      {
+        "sectionNotes": [
+          [13043, 3, 1043, 0],
+          [14608, 2, 0, 0],
+          [14869, 1, 0, 0],
+          [15130, 0, 0, 0],
+          [15652, 1, 1043, 0],
+          [17217, 3, 0, 0],
+          [17478, 2, 521, 0]
+        ],
+        "singers": ["hanami"],
+        "mustHitSection": false,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      },
+      {
+        "sectionNotes": [
+          [17739, 0, 1043, 0],
+          [19304, 1, 521, 0],
+          [19826, 2, 0, 0],
+          [20087, 3, 0, 0],
+          [20348, 2, 0, 0],
+          [20608, 1, 0, 0],
+          [20869, 0, 1043, 0],
+          [22434, 3, 521, 0]
+        ],
+        "singers": ["mc"],
+        "mustHitSection": true,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      },
+      {
+        "sectionNotes": [
+          [22956, 0, 0, 0],
+          [22956, 3, 0, 0],
+          [23478, 1, 0, 0],
+          [23478, 2, 0, 0],
+          [24000, 0, 1565, 0],
+          [24000, 3, 1565, 0],
+          [26087, 1, 2087, 0],
+          [26087, 2, 2087, 0]
+        ],
+        "singers": ["mc", "hanami"],
+        "mustHitSection": true,
+        "playerLaneCount": 4,
+        "lengthInSteps": 16,
+        "bpm": 115
+      }
+    ]
+  }
+}

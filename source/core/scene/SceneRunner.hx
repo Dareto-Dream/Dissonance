@@ -1,6 +1,7 @@
 package core.scene;
 
 import core.rendering.CharacterSystem;
+import core.state.GameState;
 import vn.VNCommands;
 import vn.VNConditions;
 
@@ -101,6 +102,9 @@ class SceneRunner {
 
     public function goto(targetNode:String):Void {
         currentNode = targetNode;
+        var state = GameState.get();
+        state.currentNode = targetNode;
+        state.recordNode(scenePath, targetNode);
         next();
     }
 }

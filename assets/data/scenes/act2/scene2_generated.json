@@ -1,0 +1,482 @@
+{
+  "scene_id": "act2_scene2_collapse",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club3/evening1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/my_little_world.ogg",
+      "volume": 0.4,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "Evening practice. The golden light through the windows makes everything look warmer than it feels.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Hanami is at the keyboard, playing a soft melody. Her fingers move with effortless grace.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/piano_chord.wav",
+      "volume": 0.4,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "happy",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "happy",
+      "text": "Hanami, that sounds beautiful! What piece is that?",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Just something I've been working on. It's not finished yet.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "It's lovely, Hanami. But let's focus on the festival setlist. We need to nail the opening number.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "narration",
+      "text": "Everyone takes their positions. Hanami's hands hover over the keys.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "narration",
+      "text": "The first few bars are beautiful. Hanami leads the melody, and for a moment everything clicks.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "Then, mid-phrase, Hanami's fingers stumble. A wrong note rings out.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/piano_chord.wav",
+      "volume": 0.8,
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Sorry, I... I just lost my place for a second...",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "narration",
+      "text": "She reaches for her sheet music but her hand is shaking. The pages scatter across the floor.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 3,
+      "duration": 0.5,
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "narration",
+      "text": "Hanami sways on the bench. Her face has gone pale.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I'm... I'm fine, I just need a...",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 5,
+      "duration": 0.8,
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "Hanami collapses. She slides off the bench and crumples to the floor.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "HANAMI!",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hanami!",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "narration",
+      "text": "Everyone rushes to her side. She's conscious but barely.",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "if",
+      "condition": "flags.asked_hanami_concern == true",
+      "trueNode": "n28_knew",
+      "falseNode": "n28_shocked"
+    },
+    {
+      "id": "n28_knew",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I'm sorry... I should have told you all sooner. I've been... having these episodes for a while now.",
+      "next": "n29_knew"
+    },
+    {
+      "id": "n29_knew",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I had a feeling something was wrong. You should have said something.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n28_shocked",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "What just happened? Has this happened before?",
+      "next": "n29_shocked"
+    },
+    {
+      "id": "n29_shocked",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "It's... it's nothing. I just forgot to eat today, that's all.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n30_converge",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "suprised",
+      "text": "Hanami, why didn't you say anything? We would have stopped!",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "narration",
+      "text": "Tiffany's composure cracks. Her hands are trembling. For a moment, she looks less like a leader and more like a scared girl.",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "I... I should have noticed. I was so focused on the music that I...",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "narration",
+      "text": "Cassian has gone completely still. He's staring at Hanami with an expression you've never seen on him before. Something distant. Something haunted.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "Is she going to be okay? Should we call someone? I don't know what to do!",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "Stay with Hanami",
+          "target": "n37_stay"
+        },
+        {
+          "text": "Go get help",
+          "target": "n37_help"
+        }
+      ]
+    },
+    {
+      "id": "n37_stay",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'm staying right here. Hanami, can you hear me? Just focus on my voice.",
+      "next": "n38_stay_trust"
+    },
+    {
+      "id": "n38_stay_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n39_stay"
+    },
+    {
+      "id": "n39_stay",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Thank you... I'm okay. Really. Just give me a minute.",
+      "next": "n40_stay"
+    },
+    {
+      "id": "n40_stay",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Cassian, go find a teacher. Laura, get some water.",
+      "next": "n42_converge"
+    },
+    {
+      "id": "n37_help",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'll go find the nurse. Someone stay with her!",
+      "next": "n38_help"
+    },
+    {
+      "id": "n38_help",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway/evening1.png",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n39_help"
+    },
+    {
+      "id": "n39_help",
+      "type": "narration",
+      "text": "You sprint down the hallway. Your footsteps echo off the empty walls.",
+      "next": "n40_help"
+    },
+    {
+      "id": "n40_help",
+      "type": "narration",
+      "text": "By the time you return with help, Hanami is sitting up, color slowly returning to her face.",
+      "next": "n41_help"
+    },
+    {
+      "id": "n41_help",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club3/evening1.png",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n42_converge"
+    },
+    {
+      "id": "n42_converge",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.hanami_collapsed",
+      "value": true,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "narration",
+      "text": "The nurse checks on Hanami and says she needs rest. Practice is over.",
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I'm sorry, everyone. I didn't mean to worry you.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Don't apologize. Just... take care of yourself. Please.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "narration",
+      "text": "The club room empties. Instruments sit abandoned. The sheet music is still scattered on the floor.",
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "narration",
+      "text": "That night, you can't stop thinking about the way Hanami fell. The way Cassian froze. The way Tiffany's mask slipped.",
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "narration",
+      "text": "Something is wrong. Not just with Hanami. With all of them.",
+      "next": "n54"
+    },
+    {
+      "id": "n54",
+      "type": "end",
+      "next_scene": "scenes/act2/scene3_generated.json"
+    }
+  ]
+}

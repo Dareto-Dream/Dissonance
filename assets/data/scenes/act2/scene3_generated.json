@@ -1,0 +1,446 @@
+{
+  "scene_id": "act2_scene3_truth",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/roof/evening1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/unsettled.ogg",
+      "volume": 0.4,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The next day. You haven't been able to shake the image of Cassian's face when Hanami collapsed. That look of recognition.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "You find him on the roof after classes, sitting alone against the railing.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "narration",
+      "text": "He's not playing his guitar. He's just staring at the sky, completely still.",
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hey.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "What do you want?",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Just checking in. You seemed... different yesterday. After Hanami collapsed.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "I'm fine. Go bother someone else.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'm not leaving.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "narration",
+      "text": "A long silence. The wind carries distant sounds from the schoolyard below.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...You're stubborn, you know that?",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I've been told.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "Cassian exhales slowly. He doesn't look at you.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "I had a sister. Younger. Her name was Mei.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Had?",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "She was sick. For a long time. The kind of sick that doesn't get better.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "His voice is steady, but his hands are gripping his knees.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Music was our thing. I'd play guitar, she'd sing. Even when she could barely sit up, she'd hum along.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "She made me promise to keep playing. To play it right. 'No half-measures, Cass.' That's what she'd say.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "She passed two years ago. And yesterday, when Hanami fell... it was like watching it happen all over again.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "The weight of his words settles between you like something physical.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "If we're going to play, we play it RIGHT. That's what she would have wanted.",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "I understand now.",
+          "target": "n26_empathy"
+        },
+        {
+          "text": "That doesn't excuse being harsh to everyone.",
+          "target": "n26_challenge"
+        }
+      ]
+    },
+    {
+      "id": "n26_empathy",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I understand now. Why it matters so much to you. Thank you for telling me.",
+      "next": "n27_empathy_trust"
+    },
+    {
+      "id": "n27_empathy_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 2,
+      "op": "add",
+      "next": "n28_empathy_rot"
+    },
+    {
+      "id": "n28_empathy_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_rot",
+      "value": 1,
+      "op": "subtract",
+      "next": "n29_empathy_react"
+    },
+    {
+      "id": "n29_empathy_react",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...Don't go getting sappy on me. I just... needed to say it out loud.",
+      "next": "n32_converge"
+    },
+    {
+      "id": "n26_challenge",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'm sorry about your sister. Truly. But Mei wouldn't want you to hurt people in her name.",
+      "next": "n27_challenge_rot"
+    },
+    {
+      "id": "n27_challenge_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n28_challenge_react"
+    },
+    {
+      "id": "n28_challenge_react",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "You don't get to tell me what she would have wanted.",
+      "next": "n29_challenge"
+    },
+    {
+      "id": "n29_challenge",
+      "type": "narration",
+      "text": "He stands up abruptly. For a moment you think he's going to leave.",
+      "next": "n30_challenge"
+    },
+    {
+      "id": "n30_challenge",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...But maybe you're not completely wrong.",
+      "next": "n32_converge"
+    },
+    {
+      "id": "n32_converge",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "Cassian leaves without another word. But something has shifted. The wall between you is thinner now.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/classroom2/evening1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "narration",
+      "text": "On your way out, you pass a classroom with the light still on. Through the window, you see Tiffany hunched over a desk.",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "narration",
+      "text": "She's writing something. Not sheet music. Something else.",
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_knock.wav",
+      "volume": 0.5,
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany?",
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "suprised",
+      "text": "Oh! I didn't hear you--",
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "narration",
+      "text": "She sweeps the papers into a folder with one quick motion. Her smile snaps back into place, but a second too late.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Just planning for the festival. You know me, always working!",
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Are you okay? You've been staying late a lot.",
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Someone has to. Especially now with Hanami... well. We need to be ready.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "narration",
+      "text": "Her smile doesn't reach her eyes. The folder is pressed tight against her chest, like a shield.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "You should head home. It's getting late.",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "...Yeah. Don't stay too long.",
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway/evening1.png",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "narration",
+      "text": "You glance back through the classroom window as you leave. Tiffany has already pulled the papers back out.",
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "narration",
+      "text": "Whatever she's hiding, she's holding onto it tight. And the cracks are starting to show.",
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "end",
+      "next_scene": "scenes/act2/scene4_generated.json"
+    }
+  ]
+}

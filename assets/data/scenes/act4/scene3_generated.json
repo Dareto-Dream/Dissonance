@@ -1,0 +1,403 @@
+{
+  "scene_id": "act4_scene3_resolve",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/roof/evening3.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/dissonance.ogg",
+      "volume": 0.4,
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The rooftop. The sky is painted in shades of amber and violet, the sun sinking toward the horizon.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "I come up here to think. About the club. About everyone. About what happens when the music stops.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "The door behind me opens.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "gentle",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I thought I'd find you up here.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hanami. How are you feeling?",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Tired. But that's nothing new.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "narration",
+      "text": "She leans against the railing, looking out at the fading light. There's something peaceful about her, even now.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Whatever happens with the club... I'm glad I met all of you. Music gave me something to hold onto when everything else felt uncertain.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "So thank you. For that.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "narration",
+      "text": "She smiles, and for a moment, the weight of everything lifts just a little.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "She heads back inside. A few minutes later, the door opens again.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Hanami said you were brooding up here.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I'm not brooding. I'm... processing.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Sure. Look, I'm still pissed at Tiffany. But if we're going down, we go down playing. That's the only way this ends right.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "narration",
+      "text": "Coming from Cassian, that's practically a declaration of love for the club.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "narration",
+      "text": "He leaves with his hands in his pockets, not looking back. The door opens once more.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "friendly",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "friendly",
+      "text": "Hey. Room for one more?",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Always.",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "cheerful",
+      "text": "I used to be so scared of messing up. Every note, every practice — I was terrified of being the weak link.",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "friendly",
+      "text": "But you all taught me it's okay. The wrong notes... they're part of the song too, you know?",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "narration",
+      "text": "She's changed so much since I first met her. The nervousness is still there, but there's steel underneath it now.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "narration",
+      "text": "Laura heads inside with a small wave. The sky has darkened to deep purple. I'm about to go inside when—",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "if",
+      "condition": "tiffany_rot >= 7",
+      "trueNode": "n32_tiffany_broken",
+      "falseNode": "n32_tiffany_sincere"
+    },
+    {
+      "id": "n32_tiffany_broken",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n33_tiffany_broken"
+    },
+    {
+      "id": "n33_tiffany_broken",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 2.0,
+      "duration": 0.5,
+      "next": "n34_tiffany_broken"
+    },
+    {
+      "id": "n34_tiffany_broken",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "I don't... I can't... they're all counting on me and I already failed...",
+      "text_effect": "glitch",
+      "effect_intensity": 3.0,
+      "next": "n35_tiffany_broken"
+    },
+    {
+      "id": "n35_tiffany_broken",
+      "type": "narration",
+      "text": "She looks like she's barely holding herself together. Her words come out fractured, incomplete.",
+      "next": "n36_tiffany_broken"
+    },
+    {
+      "id": "n36_tiffany_broken",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany. Hey. Look at me. We're still here. We're not going anywhere.",
+      "next": "n40_converge"
+    },
+    {
+      "id": "n32_tiffany_sincere",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n33_tiffany_sincere"
+    },
+    {
+      "id": "n33_tiffany_sincere",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I owe you an apology. All of you. I let my fear turn me into someone I don't recognize.",
+      "next": "n34_tiffany_sincere"
+    },
+    {
+      "id": "n34_tiffany_sincere",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "You were trying to protect something you love. That's not something to apologize for.",
+      "next": "n35_tiffany_sincere"
+    },
+    {
+      "id": "n35_tiffany_sincere",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "Maybe. But I should have trusted you all enough to share the burden. I'm sorry.",
+      "next": "n40_converge"
+    },
+    {
+      "id": "n40_converge",
+      "type": "narration",
+      "text": "We stand together on the rooftop as the last light fades. The decision has already been made, even if no one said it aloud.",
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "narration",
+      "text": "One final performance. Not to save the club. Not to prove anything. For ourselves.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.final_performance_decided",
+      "value": true,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "narration",
+      "text": "As if on cue, we hear Hanami, Cassian, and Laura coming back through the rooftop door. They already know.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/piano_chord.wav",
+      "volume": 0.4,
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "narration",
+      "text": "Someone — Laura, maybe — starts humming. Then Hanami joins in. Then Cassian, with a quiet guitar strum he pretends not to care about.",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "narration",
+      "text": "Five people on a rooftop, holding onto a melody as the stars come out. It feels like a promise.",
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "narration",
+      "text": "Act 4 — End",
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "end",
+      "next_scene": "scenes/act5/scene1_generated.json"
+    }
+  ]
+}

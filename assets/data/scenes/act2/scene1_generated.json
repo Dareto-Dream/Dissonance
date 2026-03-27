@@ -1,0 +1,413 @@
+{
+  "scene_id": "act2_scene1_pressure",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club2/day1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/editors_life.ogg",
+      "volume": 0.5,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The festival is two weeks away. What used to feel like excitement now feels like a countdown.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "No, no, no. The transition into the bridge is all wrong. We've been over this.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "anxious",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "anxious",
+      "text": "S-sorry, I thought I had the timing right this time...",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Thinking isn't enough. You need to know it. From the top, everyone.",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "annoyed",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "We've done it from the top six times already, Tiffany. Maybe the problem isn't us.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Excuse me? The arrangement is fine. The execution is what's lacking.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Or maybe you're pushing too hard and everyone's too tense to play properly.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "gentle",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Maybe we could take a short break? Everyone's been working really hard and--",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "Hanami winces mid-sentence, her hand drifting to her side. She covers it quickly with a smile.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "--and I think fresh ears would help us hear where we need to improve.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "We don't have time for breaks. The festival committee isn't going to give us extra minutes because we needed to rest.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "text": "I-I can keep going! I'll get it right, I promise!",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "Laura's hands are trembling over her sheet music. She's trying so hard it's making everything worse.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "See? You're scaring her. That's not how you get good music out of people.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "And your way is what, exactly? Slouch around and hope it works out?",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "narration",
+      "text": "The tension in the room is suffocating. Everyone's looking at you.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "Side with Tiffany's strict approach",
+          "target": "n24_tiffany"
+        },
+        {
+          "text": "Side with Cassian's relaxed approach",
+          "target": "n24_cassian"
+        }
+      ]
+    },
+    {
+      "id": "n24_tiffany",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany's right. We only get one shot at this. Let's push through.",
+      "next": "n25_tiffany_trust"
+    },
+    {
+      "id": "n25_tiffany_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n26_tiffany_react"
+    },
+    {
+      "id": "n26_tiffany_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Thank you. At least someone understands what's at stake.",
+      "next": "n27_tiffany_cassian"
+    },
+    {
+      "id": "n27_tiffany_cassian",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Fine. Don't come crying to me when everyone burns out.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n24_cassian",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Cassian has a point. We're not going to sound good if everyone's stressed out.",
+      "next": "n25_cassian_trust"
+    },
+    {
+      "id": "n25_cassian_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n26_cassian_rot"
+    },
+    {
+      "id": "n26_cassian_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n27_cassian_react"
+    },
+    {
+      "id": "n27_cassian_react",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "See? Even the new kid gets it.",
+      "next": "n28_tiffany_react"
+    },
+    {
+      "id": "n28_tiffany_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "...Fine. Five minutes. Then we're running it again.",
+      "next": "n29_narration"
+    },
+    {
+      "id": "n29_narration",
+      "type": "narration",
+      "text": "Tiffany turns away, but you catch something in her expression. Not anger. Something closer to hurt.",
+      "next": "n30_converge"
+    },
+    {
+      "id": "n30_converge",
+      "type": "narration",
+      "text": "After a tense silence, everyone takes their positions again.",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "From the bridge. On my count.",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/countdown_beep.wav",
+      "volume": 0.5,
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "game",
+      "song": "pressure_rehearsal_generated",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "narration",
+      "text": "The last note fades. Nobody speaks.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Better. But the second verse still drags. And the finale needs more energy.",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Of course. Nothing's ever good enough.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "It will be. It has to be.",
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "narration",
+      "text": "There's a weight behind her words that goes beyond the festival. Like she's talking about something else entirely.",
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "narration",
+      "text": "Practice ends in silence. Everyone packs up without a word, avoiding each other's eyes.",
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "narration",
+      "text": "The club room feels emptier than it should. The instruments sit untouched, like they're holding their breath too.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "end",
+      "next_scene": "scenes/act2/scene2_generated.json"
+    }
+  ]
+}

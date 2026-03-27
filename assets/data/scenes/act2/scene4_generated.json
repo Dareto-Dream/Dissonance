@@ -1,0 +1,484 @@
+{
+  "scene_id": "act2_scene4_fracture",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club4/day1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/editors_life.ogg",
+      "volume": 0.5,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "Three days until the festival. The club room feels like a pressure cooker with the lid screwed on too tight.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Hanami is back. She insisted she was fine, but she moves slower now. More carefully.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Alright, everyone. We have three days. The setlist is locked in. We just need to execute.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "annoyed",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Execute. Right. With half the group falling apart.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Hanami said she's fine. We're not postponing.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "She collapsed three days ago! 'Fine' doesn't mean what you think it means.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Cassian, really, I'm okay. I want to play.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "That's exactly what-- that's what people always say right before--",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "narration",
+      "text": "He stops himself. His jaw clenches. Everyone knows what he almost said.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Cassian, I know you're concerned, but we can't throw away months of work. The festival committee is counting on us.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "Who cares about the committee? I care about the people in this room!",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "And I don't?! Everything I've done has been for this club!",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "anxious",
+      "transition": "fade",
+      "duration": 0.3,
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "Laura is shrinking in her seat, clutching her sheet music like a lifeline.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Enough arguing. Let's just play. Laura, start us off.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "anxious",
+      "text": "M-me? Start? But I usually come in after the--",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "We're rearranging. You need to be able to carry the opening. Go.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "Laura's hands are shaking. She lifts them to play, but nothing comes out.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "I can't... I can't do it. Everyone's watching and I just... I can't...",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "narration",
+      "text": "Laura breaks down, tears streaming. The sheet music slips from her hands and drifts to the floor.",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Great. This is exactly what I was talking about.",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Laura...",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "narration",
+      "text": "Tiffany reaches out, then pulls her hand back. She doesn't know what to do. None of them do.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "...Let's just try the piece. All together. One more time.",
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/countdown_beep.wav",
+      "volume": 0.5,
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "game",
+      "song": "fractured_melody_generated",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "narration",
+      "text": "The last note dies. Silence fills the room like water.",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "Nobody says it was good. Nobody says it was bad. Nobody says anything at all.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "narration",
+      "text": "They all know. The music that once brought them together is tearing them apart.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "We can still do this.",
+          "target": "n36_optimistic"
+        },
+        {
+          "text": "Maybe we should take a break.",
+          "target": "n36_realistic"
+        }
+      ]
+    },
+    {
+      "id": "n36_optimistic",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hey. Look at me, all of you. We can still do this. We didn't come this far to give up now.",
+      "next": "n37_optimistic_trust"
+    },
+    {
+      "id": "n37_optimistic_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n38_optimistic_react"
+    },
+    {
+      "id": "n38_optimistic_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "...You're right. We just need to keep going.",
+      "next": "n39_optimistic"
+    },
+    {
+      "id": "n39_optimistic",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Keep going. Sure. Because that's been working so well.",
+      "next": "n42_converge"
+    },
+    {
+      "id": "n36_realistic",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I think we all need to step back. Take a breath. We're not going to fix anything like this.",
+      "next": "n37_realistic_hanami"
+    },
+    {
+      "id": "n37_realistic_hanami",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n38_realistic_rot"
+    },
+    {
+      "id": "n38_realistic_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n39_realistic_react"
+    },
+    {
+      "id": "n39_realistic_react",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I think that's wise. We should take care of each other first.",
+      "next": "n40_realistic"
+    },
+    {
+      "id": "n40_realistic",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "A break. Three days before the festival. That's your answer.",
+      "next": "n41_realistic"
+    },
+    {
+      "id": "n41_realistic",
+      "type": "narration",
+      "text": "Tiffany's voice is brittle. Like she's one word away from shattering.",
+      "next": "n42_converge"
+    },
+    {
+      "id": "n42_converge",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.act2_complete",
+      "value": true,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "narration",
+      "text": "One by one, they leave. No goodbyes. No 'see you tomorrow.' Just the sound of the door closing, again and again.",
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_slam.wav",
+      "volume": 0.6,
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/dissonance.ogg",
+      "volume": 0.3,
+      "transition": "fade",
+      "duration": 2,
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "narration",
+      "text": "You stand alone in the empty club room. The instruments are still set up, waiting for players who might not come back.",
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "narration",
+      "text": "Tiffany's hidden papers. Cassian's grief. Hanami's illness. Laura's fear. Every crack was there from the beginning.",
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "narration",
+      "text": "You just weren't listening closely enough to hear them.",
+      "next": "n54"
+    },
+    {
+      "id": "n54",
+      "type": "narration",
+      "text": "End of Act 2.",
+      "next": "n55"
+    },
+    {
+      "id": "n55",
+      "type": "end",
+      "next_scene": "scenes/act3/scene1_generated.json"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import core.effects.EffectSystem;
 import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
 import core.scene.SceneRunner;
+import core.state.GameState;
 import flixel.FlxState;
 import flixel.util.FlxColor;
 import util.SceneManager;
@@ -194,6 +195,28 @@ class VNCommands {
 
             case "clear_text_effect":
                 DialogueSystem.clearEffect();
+
+            // ── Game state ──────────────────────────────────────────────
+            case "set_variable":
+                var state = GameState.get();
+                var varName:String = node.variable;
+                var value:Float = node.value != null ? node.value : 0.0;
+                if (node.op != null) {
+                    switch (cast(node.op, String)) {
+                        case "add":      state.addVar(varName, value);
+                        case "subtract": state.addVar(varName, -value);
+                        case "multiply": state.setVar(varName, state.getVar(varName) * value);
+                        default:         state.setVar(varName, value);
+                    }
+                } else {
+                    state.setVar(varName, value);
+                }
+
+            case "set_flag":
+                var state = GameState.get();
+                var flagName:String = node.flag;
+                var value:Bool = node.value != null ? (node.value == true) : true;
+                state.setFlag(flagName, value);
 
             default:
                 throw "Unknown VN action: " + node.action;

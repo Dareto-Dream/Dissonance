@@ -198,7 +198,7 @@
     {
       "id": "n23",
       "type": "game",
-      "song": "converging_paths",
+      "song": "converging_paths_generated",
       "next": "n24"
     },
     {
@@ -477,7 +477,7 @@
     {
       "id": "n60",
       "type": "end",
-      "next_scene": "scenes/act2/scene1.json"
+      "next_scene": "scenes/act2/scene1_generated.json"
     }
   ]
 }

@@ -9,12 +9,27 @@ import pygame.freetype
 from modules.ui.widgets import TextInput
 
 AVAILABLE_STATS = [
+    # Character influence stats (numeric, 0-10 range)
     "tiffany_rot",
     "cassian_rot",
     "hanami_rot",
+    "harumi_rot",
+    "tiffany_trust",
+    "cassian_trust",
+    "hanami_trust",
+    "harumi_trust",
+    # Story flags (boolean)
     "flags.asked_tiffany",
     "flags.asked_cassian",
+    "flags.met_hanami",
+    "flags.met_harumi",
+    "flags.first_rhythm_complete",
+    "flags.act1_complete",
+    "flags.act2_complete",
+    "flags.act3_complete",
+    # Player state flags
     "player.flags.puppet_mode",
+    "player.flags.aware",
 ]
 
 OPERATORS = ["==", "!=", "<", "<=", ">", ">="]
@@ -38,13 +53,25 @@ class ConditionEditor:
             "tiffany_rot": 1,
             "cassian_rot": 4,
             "hanami_rot": 3,
+            "harumi_rot": 2,
+            "tiffany_trust": 5,
+            "cassian_trust": 3,
+            "hanami_trust": 7,
+            "harumi_trust": 4,
             "flags": {
                 "asked_tiffany": True,
                 "asked_cassian": False,
+                "met_hanami": True,
+                "met_harumi": False,
+                "first_rhythm_complete": False,
+                "act1_complete": False,
+                "act2_complete": False,
+                "act3_complete": False,
             },
             "player": {
                 "flags": {
                     "puppet_mode": False,
+                    "aware": False,
                 }
             }
         }

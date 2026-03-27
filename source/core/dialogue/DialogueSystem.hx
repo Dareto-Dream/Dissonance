@@ -11,15 +11,11 @@ import util.MobileSupport;
 
 class DialogueSystem
 {
-	// UI attachment point (set from VNState)
 	static var uiGroup:FlxGroup;
-
-	// Reused UI elements
 	static var box:FlxSprite;
 	static var label:FlxText;
 	static var timer:FlxTimer;
 
-	// Text effect tracking
 	static var currentEffect:TextEffect = None;
 	static var persistentEffect:TextEffect = None;
 	static var originalX:Float = 0;
@@ -29,6 +25,10 @@ class DialogueSystem
 	static var typewriterCompleted:Bool = false;
 	static var canManualAdvance:Bool = false;
 
+	/** Recent dialogue entries for history/backlog. */
+	public static var history:Array<DialogueEntry> = [];
+	private static inline var MAX_HISTORY:Int = 100;
+
 	// -------------------------------------------------
 	//  INIT
 	// -------------------------------------------------
@@ -36,7 +36,6 @@ class DialogueSystem
 	{
 		uiGroup = group;
 
-		// Create base box and label once
 		box = new FlxSprite();
 		box.scrollFactor.set(0, 0);
 
@@ -51,11 +50,11 @@ class DialogueSystem
 		label.visible = false;
 
 		timer = new FlxTimer();
-
+		history = [];
 	}
 
 	// -------------------------------------------------
-	//  UPDATE (call this from VNState update)
+	//  UPDATE
 	// -------------------------------------------------
 	public static function update(elapsed:Float):Void
 	{
@@ -64,37 +63,23 @@ class DialogueSystem
 			TextEffectSystem.update(elapsed);
 			TextEffectSystem.applyEffect(label, currentEffect, elapsed);
 
-			// Check if typewriter is complete and needs to advance
 			if (isTypewriterEffect(currentEffect) && TextEffectSystem.isTypewriterComplete())
 			{
-				// Auto advance after typewriter completes (only once)
 				if (autoAdvanceEnabled && doneCallback != null && !typewriterCompleted)
 				{
 					typewriterCompleted = true;
-					trace("TYPEWRITER COMPLETE - Starting auto-advance timer");
 					timer.start(0.5, function(_)
 					{
-						trace("TYPEWRITER AUTO-ADVANCE - Calling callback");
 						hide();
 						var callback = doneCallback;
 						doneCallback = null;
-						if (callback != null)
-						{
-							trace("TYPEWRITER - Executing callback");
-							callback();
-						}
-						else
-						{
-							trace("TYPEWRITER ERROR - Callback was null!");
-						}
+						if (callback != null) callback();
 					});
 				}
 				else if (!autoAdvanceEnabled && !typewriterCompleted)
 				{
-					// Enable manual advancement after typewriter completes
 					typewriterCompleted = true;
 					canManualAdvance = true;
-					trace("TYPEWRITER COMPLETE - Manual advance enabled");
 				}
 			}
 		}
@@ -106,9 +91,7 @@ class DialogueSystem
 	public static function handleInput():Void
 	{
 		if (label == null || !label.visible || autoAdvanceEnabled || doneCallback == null)
-		{
 			return;
-		}
 
 		var confirmPressed = false;
 
@@ -117,9 +100,7 @@ class DialogueSystem
 		#end
 
 		if (!confirmPressed)
-		{
 			confirmPressed = MobileSupport.anyPointerJustPressed();
-		}
 
 		if (confirmPressed)
 		{
@@ -133,15 +114,11 @@ class DialogueSystem
 
 			if (canManualAdvance)
 			{
-				trace("MANUAL ADVANCE - Space/Enter pressed");
 				canManualAdvance = false;
 				hide();
 				var callback = doneCallback;
 				doneCallback = null;
-				if (callback != null)
-				{
-					callback();
-				}
+				if (callback != null) callback();
 			}
 		}
 	}
@@ -151,76 +128,37 @@ class DialogueSystem
 	// -------------------------------------------------
 	public static function show(speaker:String, text:String, done:Void->Void, ?effectData:Dynamic):Void
 	{
-        trace("DIALOGUE: " + speaker + ": " + text);
+		history.push({speaker: speaker, text: text});
+		if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
 
-		if (uiGroup == null)
-		{
-            done();
-            return;
-        }
-
-		// Reset position and effect
-		applyLayout();
-		resetTextPosition();
-
-		// If there's a persistent effect and no node-specific effect, use persistent
-		var nodeEffect = parseTextEffect(effectData);
-		currentEffect = (nodeEffect != None) ? nodeEffect : persistentEffect;
-
-		TextEffectSystem.reset();
-		doneCallback = done;
-		typewriterCompleted = false;
-		canManualAdvance = false;
-
-		// Show box and text
-		box.visible = true;
-		label.visible = true;
-		label.text = speaker + ": " + text;
-		label.alpha = 1;
-		label.color = 0xFFFFFFFF;
-
-		// Auto advance (unless it's typewriter - that handles its own timing in update())
-		timer.cancel();
-		if (autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
-		{
-			timer.start(0.9, function(_)
-			{
-				trace("NORMAL AUTO-ADVANCE");
-				hide();
-				var callback = doneCallback;
-				doneCallback = null;
-				if (callback != null) callback();
-			});
-		}
-		else if (isTypewriterEffect(currentEffect))
-		{
-			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
-		}
-		else if (!autoAdvanceEnabled)
-		{
-			// Enable manual advancement immediately for non-typewriter effects
-			canManualAdvance = true;
-			trace("MANUAL ADVANCE ENABLED - Waiting for Space/Enter");
-		}
-    }
+		_displayText(speaker + ": " + text, done, effectData);
+	}
 
 	// -------------------------------------------------
 	//  NARRATION
 	// -------------------------------------------------
 	public static function showNarration(text:String, done:Void->Void, ?effectData:Dynamic):Void
 	{
-        trace("NARRATION: " + text);
+		history.push({speaker: null, text: text});
+		if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
+
+		_displayText(text, done, effectData);
+	}
+
+	// -------------------------------------------------
+	//  SHARED DISPLAY LOGIC
+	// -------------------------------------------------
+	private static function _displayText(displayText:String, done:Void->Void, effectData:Dynamic):Void
+	{
 		if (uiGroup == null)
 		{
-            done();
-            return;
-        }
+			done();
+			return;
+		}
 
-		// Reset position and effect
 		applyLayout();
 		resetTextPosition();
 
-		// If there's a persistent effect and no node-specific effect, use persistent
 		var nodeEffect = parseTextEffect(effectData);
 		currentEffect = (nodeEffect != None) ? nodeEffect : persistentEffect;
 
@@ -231,7 +169,7 @@ class DialogueSystem
 
 		box.visible = true;
 		label.visible = true;
-		label.text = text;
+		label.text = displayText;
 		label.alpha = 1;
 		label.color = 0xFFFFFFFF;
 
@@ -240,24 +178,17 @@ class DialogueSystem
 		{
 			timer.start(0.9, function(_)
 			{
-				trace("NORMAL AUTO-ADVANCE");
 				hide();
 				var callback = doneCallback;
 				doneCallback = null;
 				if (callback != null) callback();
 			});
 		}
-		else if (isTypewriterEffect(currentEffect))
+		else if (!autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
 		{
-			trace("TYPEWRITER EFFECT - Waiting for completion in update()");
-		}
-		else if (!autoAdvanceEnabled)
-		{
-			// Enable manual advancement immediately for non-typewriter effects
 			canManualAdvance = true;
-			trace("MANUAL ADVANCE ENABLED - Waiting for Space/Enter");
 		}
-    }
+	}
 
 	// -------------------------------------------------
 	//  TEXT EFFECT PARSING
@@ -265,42 +196,39 @@ class DialogueSystem
 	private static function parseTextEffect(effectData:Dynamic):TextEffect
 	{
 		if (effectData == null || effectData.text_effect == null)
-		{
 			return None;
-		}
 
 		var effectType:String = effectData.text_effect;
 
-		switch(effectType)
+		return switch (effectType)
 		{
 			case "shake":
 				var intensity = effectData.effect_intensity != null ? effectData.effect_intensity : 2.0;
-				return Shake(intensity);
+				Shake(intensity);
 
 			case "glitch":
 				var intensity = effectData.effect_intensity != null ? effectData.effect_intensity : 5.0;
-				return Glitch(intensity);
+				Glitch(intensity);
 
 			case "wave":
 				var speed = effectData.effect_speed != null ? effectData.effect_speed : 3.0;
 				var amplitude = effectData.effect_amplitude != null ? effectData.effect_amplitude : 5.0;
-				return Wave(speed, amplitude);
+				Wave(speed, amplitude);
 
 			case "rainbow":
 				var speed = effectData.effect_speed != null ? effectData.effect_speed : 2.0;
-				return Rainbow(speed);
+				Rainbow(speed);
 
 			case "fade":
 				var speed = effectData.effect_speed != null ? effectData.effect_speed : 2.0;
-				return Fade(speed);
+				Fade(speed);
 
 			case "typewriter":
 				var speed = effectData.effect_speed != null ? effectData.effect_speed : 30.0;
-				return Typewriter(speed);
+				Typewriter(speed);
 
-			default:
-				return None;
-		}
+			default: None;
+		};
 	}
 
 	// -------------------------------------------------
@@ -308,21 +236,14 @@ class DialogueSystem
 	// -------------------------------------------------
 	public static function hide():Void
 	{
-		if (timer != null)
-		{
-			timer.cancel();
-		}
-
-		if (box == null || label == null)
-		{
-			return;
-		}
+		if (timer != null) timer.cancel();
+		if (box == null || label == null) return;
 
 		box.visible = false;
 		label.visible = false;
 		label.text = "";
 		resetTextPosition();
-		currentEffect = persistentEffect; // Keep persistent effect
+		currentEffect = persistentEffect;
 		canManualAdvance = false;
 	}
 
@@ -337,10 +258,7 @@ class DialogueSystem
 
 	private static function applyLayout():Void
 	{
-		if (box == null || label == null)
-		{
-			return;
-		}
+		if (box == null || label == null) return;
 
 		var margin = MobileSupport.dialogueMargin();
 		var bottomMargin = MobileSupport.dialogueBottomMargin();
@@ -368,7 +286,6 @@ class DialogueSystem
 		persistentEffect = parseTextEffect(effectData);
 		currentEffect = persistentEffect;
 		TextEffectSystem.reset();
-		trace("SET PERSISTENT EFFECT: " + persistentEffect);
 	}
 
 	public static function clearEffect():Void
@@ -381,7 +298,6 @@ class DialogueSystem
 			label.alpha = 1;
 			label.color = 0xFFFFFFFF;
 		}
-		trace("CLEARED PERSISTENT EFFECT");
 	}
 
 	public static function setAutoAdvance(enabled:Bool):Void
@@ -402,9 +318,7 @@ class DialogueSystem
 	public static function forceAdvance():Bool
 	{
 		if (label == null || !label.visible || doneCallback == null)
-		{
 			return false;
-		}
 
 		if (isTypewriterEffect(currentEffect) && !TextEffectSystem.isTypewriterComplete())
 		{
@@ -417,20 +331,22 @@ class DialogueSystem
 		hide();
 		var callback = doneCallback;
 		doneCallback = null;
-		if (callback != null)
-		{
-			callback();
-		}
+		if (callback != null) callback();
 
 		return true;
 	}
 
 	private static function isTypewriterEffect(effect:TextEffect):Bool
 	{
-		return switch(effect)
+		return switch (effect)
 		{
 			case Typewriter(_): true;
 			default: false;
-		}
+		};
 	}
 }
+
+typedef DialogueEntry = {
+	speaker:String,
+	text:String
+};

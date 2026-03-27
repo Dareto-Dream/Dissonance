@@ -8,6 +8,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import haxe.Json;
 import openfl.utils.Assets;
+import vn.Constants;
 
 /**
  * CharacterRenderer - Renders a single VN character with full positioning control.
@@ -260,24 +261,11 @@ class CharacterRenderer extends FlxGroup
 
 	/**
 	 * Converts a named slot to a screen X coordinate.
-	 * Extracted so both setPositionKeyword and moveTo can use it.
+	 * Delegates to Constants.getSlotX() for a single source of truth.
 	 */
 	public function slotToScreenX(slot:String):Float
 	{
-		var screenW = flixel.FlxG.width;
-		var centerX = (screenW / 2) - 250;
-
-		return switch (slot)
-		{
-			case "far_left":    -200;
-			case "left":         100;
-			case "center_left":  centerX - 400;
-			case "center":       centerX;
-			case "center_right": centerX + 400;
-			case "right":        screenW - 500;
-			case "far_right":    screenW + 200;
-			default:             centerX;
-		};
+		return Constants.getSlotX(slot);
 	}
 
 	// =========================================================================

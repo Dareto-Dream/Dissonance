@@ -1,0 +1,525 @@
+{
+  "scene_id": "act4_scene1_secrets",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club3/night1.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/unsettled.ogg",
+      "volume": 0.5,
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The hallways are empty. I shouldn't even be here this late, but I left my notes in the club room.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "A faint light spills out from under the club room door. Someone's still inside.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_knock.wav",
+      "volume": 0.3,
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "narration",
+      "text": "I push the door open quietly. Tiffany is hunched over one of the desks, writing furiously by the light of a single lamp.",
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "narration",
+      "text": "She doesn't notice me. Her pen moves with a desperate urgency, like she's racing against something only she can see.",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "narration",
+      "text": "I step closer. The notebook is open, and before I can look away, I catch the words at the top of the page.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "narration",
+      "text": "\"To the members of the music club — by the time you read this...\"",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "narration",
+      "text": "A goodbye letter.",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany...?",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "suprised",
+      "text": "—!",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "narration",
+      "text": "She slams the notebook shut and clutches it to her chest, spinning around. Her eyes are wide, panicked.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "suprised",
+      "text": "What are you doing here?! You can't just — it's nothing! Just... planning! For the club!",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 1.5,
+      "duration": 0.4,
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "narration",
+      "text": "Her voice cracks on the word \"planning.\" We both know what I saw.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "Tiffany, please talk to me.",
+          "target": "n19_talk"
+        },
+        {
+          "text": "I saw what you wrote.",
+          "target": "n19_direct"
+        }
+      ]
+    },
+    {
+      "id": "n19_talk",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany, please... talk to me. Whatever this is, you don't have to carry it alone.",
+      "next": "n20_talk_trust"
+    },
+    {
+      "id": "n20_talk_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n21_talk_react"
+    },
+    {
+      "id": "n21_talk_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "You don't understand. Nobody understands what I've been trying to—",
+      "next": "n24_converge"
+    },
+    {
+      "id": "n19_direct",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I saw what you wrote, Tiffany. That wasn't planning. That was a goodbye.",
+      "next": "n20_direct_rot"
+    },
+    {
+      "id": "n20_direct_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n21_direct_react"
+    },
+    {
+      "id": "n21_direct_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "You had no right to read that! That was private!",
+      "next": "n22_direct"
+    },
+    {
+      "id": "n22_direct",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Then why does it look like you were saying goodbye to all of us?",
+      "next": "n23_direct"
+    },
+    {
+      "id": "n23_direct",
+      "type": "narration",
+      "text": "She flinches. The anger drains out of her, replaced by something hollow.",
+      "next": "n24_converge"
+    },
+    {
+      "id": "n24_converge",
+      "type": "narration",
+      "text": "Tiffany sinks into a chair. The notebook falls from her hands, pages splaying open on the floor.",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "The school is shutting down the music club.",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "narration",
+      "text": "The words hang in the air like a wrong note that won't stop ringing.",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "What...?",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "Budget cuts. They told me before the festival. After this semester, we're done. No more club. No more room. No more... us.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Before the festival? You've known this whole time?",
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I thought if we were good enough, they'd change their minds. If we proved we were worth keeping... that's why I pushed everyone so hard. That's why I couldn't let anything be less than perfect.",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "narration",
+      "text": "It all clicks into place. The relentless rehearsals. The breakdowns. The way she clung to every note like it was a lifeline.",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "It wasn't enough. The festival wasn't enough. Nothing I do is ever enough.",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "Her shoulders are shaking. This is what's been eating her alive for weeks.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 2,
+      "op": "add",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.club_shutdown_revealed",
+      "value": true,
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany... the others need to know.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I know. I just... I couldn't be the one to tell them. I couldn't watch their faces when they found out everything was for nothing.",
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "narration",
+      "text": "I stay with her until the tears stop. Neither of us has any answers. But at least she doesn't have to carry this secret alone anymore.",
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "narration",
+      "text": "The next morning.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/classroom1/day1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "narration",
+      "text": "I find Cassian before class. He needs to hear this from me before rumors start.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Cassian... I found out something last night. About the club.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "What about it?",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "The school is shutting it down. Budget cuts. Tiffany's known since before the festival.",
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "narration",
+      "text": "Cassian goes very still. His jaw tightens.",
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "She KNEW? This whole time she knew, and she didn't say a single word to any of us?",
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "She thought if the festival went well enough—",
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "She should have TOLD us! We deserved to know! All that pressure, all that suffering — and she was just using us to save something that was already dead!",
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_slam.wav",
+      "volume": 0.7,
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "narration",
+      "text": "He slams his fist on the desk and storms out of the classroom. The door bangs shut behind him.",
+      "next": "n54"
+    },
+    {
+      "id": "n54",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n55"
+    },
+    {
+      "id": "n55",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway/day1.png",
+      "transition": "slide_left",
+      "duration": 0.6,
+      "next": "n56"
+    },
+    {
+      "id": "n56",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "anxious",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n57"
+    },
+    {
+      "id": "n57",
+      "type": "narration",
+      "text": "Laura is standing just outside the door. From her expression, she heard everything.",
+      "next": "n58"
+    },
+    {
+      "id": "n58",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "anxious",
+      "text": "Is it true? The club is really...?",
+      "next": "n59"
+    },
+    {
+      "id": "n59",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Yeah. I'm sorry, Laura.",
+      "next": "n60"
+    },
+    {
+      "id": "n60",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "anxious",
+      "text": "What are we going to do?",
+      "next": "n61"
+    },
+    {
+      "id": "n61",
+      "type": "narration",
+      "text": "I wish I had an answer. But the truth is, I don't know if there's anything left to do.",
+      "next": "n62"
+    },
+    {
+      "id": "n62",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n63"
+    },
+    {
+      "id": "n63",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n64"
+    },
+    {
+      "id": "n64",
+      "type": "end",
+      "next_scene": "scenes/act4/scene2_generated.json"
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "scene_id": "act3_scene2_performance",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club4/day2.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/dissonance.ogg",
+      "volume": 0.7,
+      "transition": "fade",
+      "duration": 2,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The performance hall is packed. Rows of folding chairs, standing room in the back, faces you recognize and dozens you don't.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "Stage lights cut through the dimness, casting long shadows behind the equipment. The microphone stand gleams under the spotlight.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Your heart is hammering. This is it.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "This is it. Everything we've worked for.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "gentle",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "neutral",
+      "text": "There are so many people...",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Good. More people to impress.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Let's give them something beautiful.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/countdown_beep.wav",
+      "volume": 0.6,
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "The countdown. Three... two... one.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "game",
+      "song": "festival_performance_generated",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "narration",
+      "text": "The final chord rings out and hangs in the air. For one perfect, suspended moment -- silence.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "narration",
+      "text": "Then the applause hits like a wave. Cheering. Whistling. Someone in the back row is on their feet.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "happy",
+      "text": "We did it! Oh my god, we actually did it!",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Not bad. Not bad at all.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "happy",
+      "text": "That was perfect. You were all perfect.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "narration",
+      "text": "Tiffany is beaming, genuinely beaming, and for a moment the weight she's been carrying seems to lift.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "But then you see it. Hanami, just offstage, swaying on her feet. Her hand shoots out to grip the edge of a desk.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 3,
+      "duration": 0.4,
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "I'm... I just need a second...",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Hanami--",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "narration",
+      "text": "Cassian moves fast. His arm catches her just as her knees buckle. The audience can't see -- they're still clapping, still cheering.",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Keep smiling. Everyone keep smiling.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "narration",
+      "text": "Tiffany's voice is steady but her eyes are wide. She steps forward, drawing the audience's attention with a wave and a bow.",
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "text": "Thank you all so much! We're the music club, and we hope you enjoyed our performance!",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "narration",
+      "text": "Laura's voice barely shakes. She holds the crowd's gaze while behind her, Cassian helps Hanami to a chair backstage.",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "narration",
+      "text": "The applause fades. The lights come up. To everyone out there, it was a triumph.",
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "But backstage, something has broken.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "end",
+      "next_scene": "scenes/act3/scene3_generated.json"
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "scene_id": "act5_scene2_finale",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club4/evening1.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/dissonance.ogg",
+      "volume": 0.5,
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The largest room in the music wing. Chairs are arranged in rows. An audience is forming — classmates, teachers, even the principal near the back.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "This isn't about saving the club anymore. This is about what the music means.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Backstage — if you can call a corner behind a curtain \"backstage\" — everyone is preparing.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "if",
+      "condition": "tiffany_rot >= 7",
+      "trueNode": "n7_tiffany_broken",
+      "falseNode": "n7_tiffany_calm"
+    },
+    {
+      "id": "n7_tiffany_broken",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n8_tiffany_broken"
+    },
+    {
+      "id": "n8_tiffany_broken",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "One last time. Let's... let's make it beautiful.",
+      "text_effect": "glitch",
+      "effect_intensity": 1.5,
+      "next": "n9_converge_tiffany"
+    },
+    {
+      "id": "n7_tiffany_calm",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n8_tiffany_calm"
+    },
+    {
+      "id": "n8_tiffany_calm",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "One last time. Let's make it beautiful.",
+      "next": "n9_converge_tiffany"
+    },
+    {
+      "id": "n9_converge_tiffany",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "gentle",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Music never really ends. It just... resonates.",
+      "text_effect": "wave",
+      "effect_amplitude": 2.0,
+      "effect_speed": 1.5,
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "For everyone who ever needed a song.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "He's sincere for once. No smirk, no edge. Just a musician about to play his heart out.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "happy",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "happy",
+      "text": "I'm not afraid anymore.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "And she means it. Every word.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "narration",
+      "text": "We take our positions. The room falls silent. Every eye is on us.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/countdown_beep.wav",
+      "volume": 0.4,
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "narration",
+      "text": "A breath. A beat. And then—",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "game",
+      "song": "dissonance_finale_generated",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "if",
+      "condition": "tiffany_trust >= 4 and cassian_trust >= 4 and hanami_trust >= 3 and laura_trust >= 3",
+      "trueNode": "n26_ovation",
+      "falseNode": "n26_bittersweet"
+    },
+    {
+      "id": "n26_ovation",
+      "type": "narration",
+      "text": "The last chord rings out — and for a single, breathless second, the world is perfectly still.",
+      "next": "n27_ovation"
+    },
+    {
+      "id": "n27_ovation",
+      "type": "action",
+      "action": "flash",
+      "color": "#FFFFFF",
+      "duration": 0.8,
+      "next": "n28_ovation"
+    },
+    {
+      "id": "n28_ovation",
+      "type": "narration",
+      "text": "Then the applause crashes over us like a wave. People are standing. The principal is standing. Everyone is on their feet.",
+      "next": "n29_ovation"
+    },
+    {
+      "id": "n29_ovation",
+      "type": "narration",
+      "text": "I look at the others. Hanami is crying. Cassian is pretending he isn't. Laura is beaming. Tiffany...",
+      "next": "n30_ovation"
+    },
+    {
+      "id": "n30_ovation",
+      "type": "narration",
+      "text": "Tiffany is just... smiling. A real smile. Like she finally found what she was looking for.",
+      "next": "n35_converge"
+    },
+    {
+      "id": "n26_bittersweet",
+      "type": "narration",
+      "text": "The last chord fades. The applause comes — warm, genuine — but there's something underneath it.",
+      "next": "n27_bittersweet"
+    },
+    {
+      "id": "n27_bittersweet",
+      "type": "action",
+      "action": "flash",
+      "color": "#FFFFFF",
+      "duration": 0.6,
+      "next": "n28_bittersweet"
+    },
+    {
+      "id": "n28_bittersweet",
+      "type": "narration",
+      "text": "The music was beautiful. But if you looked closely, you could see the cracks. The places where we almost fell apart.",
+      "next": "n29_bittersweet"
+    },
+    {
+      "id": "n29_bittersweet",
+      "type": "narration",
+      "text": "Maybe that's what made it real. The imperfection. The dissonance that never quite resolved.",
+      "next": "n35_converge"
+    },
+    {
+      "id": "n35_converge",
+      "type": "narration",
+      "text": "It's over. The song. The performance. Maybe everything.",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "narration",
+      "text": "But right now, standing in this room with these people, the silence after the music feels like the most beautiful sound in the world.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "end",
+      "next_scene": "scenes/act5/scene3_generated.json"
+    }
+  ]
+}

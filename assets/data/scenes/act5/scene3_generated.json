@@ -1,0 +1,768 @@
+{
+  "scene_id": "act5_scene3_epilogue",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/roof/night1.png",
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/my_little_world.ogg",
+      "volume": 0.4,
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The rooftop again. Nighttime. The stars are out in full, and the city glows faintly on the horizon.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "The performance is over. The audience has gone home. But I'm not ready to leave yet.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "The door opens behind me. I already know who it is before I turn around.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "if",
+      "condition": "tiffany_rot >= 7",
+      "trueNode": "n_broken_harmony_start",
+      "falseNode": "n7_check_hanami"
+    },
+    {
+      "id": "n7_check_hanami",
+      "type": "if",
+      "condition": "hanami_rot >= 5",
+      "trueNode": "n_fading_notes_start",
+      "falseNode": "n8_check_best"
+    },
+    {
+      "id": "n8_check_best",
+      "type": "if",
+      "condition": "cassian_trust >= 5",
+      "trueNode": "n_new_harmony_start",
+      "falseNode": "n_echoes_start"
+    },
+    {
+      "id": "n_broken_harmony_start",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n_bh2"
+    },
+    {
+      "id": "n_bh2",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 2.5,
+      "duration": 0.6,
+      "next": "n_bh3"
+    },
+    {
+      "id": "n_bh3",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "I couldn't hold it together... I'm sorry... I'm so sorry...",
+      "text_effect": "glitch",
+      "effect_intensity": 3.0,
+      "next": "n_bh4"
+    },
+    {
+      "id": "n_bh4",
+      "type": "narration",
+      "text": "She's shaking. The performance took everything she had left, and there's nothing remaining.",
+      "next": "n_bh5"
+    },
+    {
+      "id": "n_bh5",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Tiffany—",
+      "next": "n_bh6"
+    },
+    {
+      "id": "n_bh6",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "I kept telling myself... if I just held on a little longer... if the music was perfect enough... but I broke. I broke and I can't put myself back together.",
+      "text_effect": "glitch",
+      "effect_intensity": 2.0,
+      "next": "n_bh7"
+    },
+    {
+      "id": "n_bh7",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 2,
+      "duration": 0.4,
+      "next": "n_bh8"
+    },
+    {
+      "id": "n_bh8",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "sad",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_bh9"
+    },
+    {
+      "id": "n_bh9",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_bh10"
+    },
+    {
+      "id": "n_bh10",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_bh11"
+    },
+    {
+      "id": "n_bh11",
+      "type": "narration",
+      "text": "The others arrive. They see her. No one needs an explanation.",
+      "next": "n_bh12"
+    },
+    {
+      "id": "n_bh12",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Hey. Tiffany. Listen to me. You don't have to be perfect. You never had to be.",
+      "next": "n_bh13"
+    },
+    {
+      "id": "n_bh13",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "We're going to help you. Okay? You helped all of us, and now it's our turn.",
+      "next": "n_bh14"
+    },
+    {
+      "id": "n_bh14",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "The music was haunting tonight. Beautiful and broken, just like us. And that's okay.",
+      "next": "n_bh15"
+    },
+    {
+      "id": "n_bh15",
+      "type": "narration",
+      "text": "The performance was haunting. The kind of beauty that comes from things falling apart. The audience felt it too — that rawness, that desperate honesty.",
+      "next": "n_bh16"
+    },
+    {
+      "id": "n_bh16",
+      "type": "narration",
+      "text": "The club ends tonight. But the others make a promise — to each other, to Tiffany — that this isn't the end of them.",
+      "next": "n_bh17"
+    },
+    {
+      "id": "n_bh17",
+      "type": "narration",
+      "text": "Some music is born from pain. And sometimes, the most broken songs are the ones that stay with you the longest.",
+      "next": "n_bh18"
+    },
+    {
+      "id": "n_bh18",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_bh19"
+    },
+    {
+      "id": "n_bh19",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_bh20"
+    },
+    {
+      "id": "n_bh20",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_bh21"
+    },
+    {
+      "id": "n_bh21",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_ending_title"
+    },
+    {
+      "id": "n_fading_notes_start",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "sad",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n_fn2"
+    },
+    {
+      "id": "n_fn2",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "It was beautiful tonight, wasn't it?",
+      "next": "n_fn3"
+    },
+    {
+      "id": "n_fn3",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "It was. You were amazing, Hanami.",
+      "next": "n_fn4"
+    },
+    {
+      "id": "n_fn4",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "I need to tell you something. My doctor says... I need to step back. From music. From a lot of things.",
+      "next": "n_fn5"
+    },
+    {
+      "id": "n_fn5",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hanami...",
+      "next": "n_fn6"
+    },
+    {
+      "id": "n_fn6",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Don't look like that. I'll always hear the music... even when I can't play.",
+      "text_effect": "fade",
+      "effect_speed": 0.8,
+      "next": "n_fn7"
+    },
+    {
+      "id": "n_fn7",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_fn8"
+    },
+    {
+      "id": "n_fn8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_fn9"
+    },
+    {
+      "id": "n_fn9",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_fn10"
+    },
+    {
+      "id": "n_fn10",
+      "type": "narration",
+      "text": "The others join us on the roof. Tiffany tells us she recorded the whole performance on her phone.",
+      "next": "n_fn11"
+    },
+    {
+      "id": "n_fn11",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I thought... maybe we'd want to remember it. How we sounded together.",
+      "next": "n_fn12"
+    },
+    {
+      "id": "n_fn12",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Send it to all of us. Every one of us should have it.",
+      "next": "n_fn13"
+    },
+    {
+      "id": "n_fn13",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "text": "So the music doesn't end. Even if we're not together.",
+      "next": "n_fn14"
+    },
+    {
+      "id": "n_fn14",
+      "type": "narration",
+      "text": "The club ends. Hanami has to step back. The recording lives on — five voices caught in amber, preserved in a moment when everything aligned.",
+      "next": "n_fn15"
+    },
+    {
+      "id": "n_fn15",
+      "type": "narration",
+      "text": "Some songs are written to be played once. And that's what makes them precious.",
+      "next": "n_fn16"
+    },
+    {
+      "id": "n_fn16",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_fn17"
+    },
+    {
+      "id": "n_fn17",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_fn18"
+    },
+    {
+      "id": "n_fn18",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_fn19"
+    },
+    {
+      "id": "n_fn19",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_ending_title"
+    },
+    {
+      "id": "n_new_harmony_start",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "happy",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n_nh2"
+    },
+    {
+      "id": "n_nh2",
+      "type": "narration",
+      "text": "Tiffany bursts through the rooftop door, breathless. She's holding her phone, and her eyes are wide with disbelief.",
+      "next": "n_nh3"
+    },
+    {
+      "id": "n_nh3",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "happy",
+      "text": "The principal just emailed me. She said... she said...",
+      "next": "n_nh4"
+    },
+    {
+      "id": "n_nh4",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "What? What did she say?",
+      "next": "n_nh5"
+    },
+    {
+      "id": "n_nh5",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "They're giving us another chance! The performance — she said it reminded her why the arts matter. They're restructuring the budget. The club stays!",
+      "next": "n_nh6"
+    },
+    {
+      "id": "n_nh6",
+      "type": "action",
+      "action": "flash",
+      "color": "#FFFFFF",
+      "duration": 0.5,
+      "next": "n_nh7"
+    },
+    {
+      "id": "n_nh7",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_nh8"
+    },
+    {
+      "id": "n_nh8",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "smirk",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_nh9"
+    },
+    {
+      "id": "n_nh9",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "happy",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_nh10"
+    },
+    {
+      "id": "n_nh10",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "happy",
+      "text": "Wait — really?! You're serious?!",
+      "next": "n_nh11"
+    },
+    {
+      "id": "n_nh11",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "Told you. We're too good to shut down.",
+      "next": "n_nh12"
+    },
+    {
+      "id": "n_nh12",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "I think I'm going to cry...",
+      "next": "n_nh13"
+    },
+    {
+      "id": "n_nh13",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "You're already crying.",
+      "next": "n_nh14"
+    },
+    {
+      "id": "n_nh14",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Happy tears! They're different!",
+      "next": "n_nh15"
+    },
+    {
+      "id": "n_nh15",
+      "type": "narration",
+      "text": "We saved the club. But more importantly, we saved each other. Through every argument, every breakdown, every wrong note — we found our way back.",
+      "next": "n_nh16"
+    },
+    {
+      "id": "n_nh16",
+      "type": "narration",
+      "text": "The dissonance resolved. Not into silence, but into something new.",
+      "next": "n_nh17"
+    },
+    {
+      "id": "n_nh17",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_nh18"
+    },
+    {
+      "id": "n_nh18",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_nh19"
+    },
+    {
+      "id": "n_nh19",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_nh20"
+    },
+    {
+      "id": "n_nh20",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.4,
+      "next": "n_ending_title"
+    },
+    {
+      "id": "n_echoes_start",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n_ec2"
+    },
+    {
+      "id": "n_ec2",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "gentle",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_ec3"
+    },
+    {
+      "id": "n_ec3",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_ec4"
+    },
+    {
+      "id": "n_ec4",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n_ec5"
+    },
+    {
+      "id": "n_ec5",
+      "type": "narration",
+      "text": "One by one, they all find their way up here. We stand together under the stars, the echo of our music still hanging in the air.",
+      "next": "n_ec6"
+    },
+    {
+      "id": "n_ec6",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "So. This is it, then.",
+      "next": "n_ec7"
+    },
+    {
+      "id": "n_ec7",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "A club is just a room. The music is wherever we are.",
+      "next": "n_ec8"
+    },
+    {
+      "id": "n_ec8",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "text": "We'll still practice on weekends, right? Please tell me we'll still practice.",
+      "next": "n_ec9"
+    },
+    {
+      "id": "n_ec9",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Of course. My apartment has thin walls, but I don't think my neighbors will mind.",
+      "next": "n_ec10"
+    },
+    {
+      "id": "n_ec10",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "They'll definitely mind.",
+      "next": "n_ec11"
+    },
+    {
+      "id": "n_ec11",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Then we'll play louder.",
+      "next": "n_ec12"
+    },
+    {
+      "id": "n_ec12",
+      "type": "narration",
+      "text": "Everyone laughs. It's soft and a little sad, but it's real.",
+      "next": "n_ec13"
+    },
+    {
+      "id": "n_ec13",
+      "type": "narration",
+      "text": "We walk out of the school together. The gate closes behind us, and the building goes dark.",
+      "next": "n_ec14"
+    },
+    {
+      "id": "n_ec14",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n_ec15"
+    },
+    {
+      "id": "n_ec15",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n_ec16"
+    },
+    {
+      "id": "n_ec16",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n_ec17"
+    },
+    {
+      "id": "n_ec17",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n_ec18"
+    },
+    {
+      "id": "n_ec18",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/streetnight.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n_ec19"
+    },
+    {
+      "id": "n_ec19",
+      "type": "narration",
+      "text": "Some songs don't have happy endings. But they're still worth playing.",
+      "next": "n_ending_title"
+    },
+    {
+      "id": "n_ending_title",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n_title_text"
+    },
+    {
+      "id": "n_title_text",
+      "type": "narration",
+      "text": "DISSONANCE",
+      "text_effect": "typewriter",
+      "effect_speed": 3.0,
+      "next": "n_thanks"
+    },
+    {
+      "id": "n_thanks",
+      "type": "narration",
+      "text": "Thank you for playing.",
+      "next": "final_end"
+    },
+    {
+      "id": "final_end",
+      "type": "end"
+    }
+  ]
+}

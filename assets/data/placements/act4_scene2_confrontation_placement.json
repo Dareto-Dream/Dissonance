@@ -1,0 +1,33 @@
+{
+  "scene_id": "act4_scene2_confrontation",
+  "placements": {
+    "n4": {
+      "tiffany": {
+        "x": 1100,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n6": {
+      "cassian": {
+        "x": 400,
+        "y": 0,
+        "slot": "left"
+      }
+    },
+    "n7": {
+      "hanami": {
+        "x": 680,
+        "y": 0,
+        "slot": "center_left"
+      }
+    },
+    "n8": {
+      "laura": {
+        "x": 1000,
+        "y": 0,
+        "slot": "center_right"
+      }
+    }
+  }
+}

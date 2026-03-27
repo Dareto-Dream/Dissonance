@@ -1,6 +1,7 @@
 package states;
 
 import core.audio.AudioSystem;
+import core.state.GameState;
 import dev.DevTools;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -12,6 +13,8 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import openfl.Assets;
 import rhythm.RhythmState;
+import ui.MenuButton;
+import ui.SaveLoadOverlay;
 import util.MobileSupport;
 
 class TitleState extends FlxState
@@ -28,6 +31,7 @@ class TitleState extends FlxState
 	private var selectedIndex:Int = 0;
 	private var bgPulseTimer:Float = 0;
 	private var isTransitioning:Bool = false;
+	private var saveLoadOverlay:SaveLoadOverlay;
 
 	override public function create():Void
 	{
@@ -114,7 +118,7 @@ class TitleState extends FlxState
 		menuButtons.add(playBtn);
 
 		var loadBtn = new MenuButton(menuX, buttonY + buttonSpacing, "LOAD GAME", function() {
-			showStatus("Load game is not available yet.");
+			openLoadOverlay();
 		});
 		menuButtons.add(loadBtn);
 
@@ -231,6 +235,12 @@ class TitleState extends FlxState
 			return;
 		}
 
+		// If save/load overlay is active, let it handle input
+		if (saveLoadOverlay != null && saveLoadOverlay.active)
+		{
+			return;
+		}
+
 		// Subtle background color pulse
 		bgPulseTimer += elapsed;
 		if (bgOverlay != null)
@@ -269,6 +279,38 @@ class TitleState extends FlxState
 		{
 			menuButtons.members[i].setSelected(i == selectedIndex);
 		}
+	}
+
+	private function openLoadOverlay():Void
+	{
+		if (saveLoadOverlay != null)
+		{
+			remove(saveLoadOverlay, true);
+			saveLoadOverlay.destroy();
+		}
+
+		saveLoadOverlay = new SaveLoadOverlay(LOAD, () -> {
+			// On close
+			if (saveLoadOverlay != null)
+			{
+				remove(saveLoadOverlay, true);
+				saveLoadOverlay.destroy();
+				saveLoadOverlay = null;
+			}
+		}, (data) -> {
+			// On load
+			if (data != null)
+			{
+				var state = GameState.get();
+				isTransitioning = true;
+				AudioSystem.fadeOutMusic(0.3);
+				FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+					FlxG.switchState(() -> new VNState(state.currentScene, null, state.currentNode));
+				});
+			}
+		});
+
+		add(saveLoadOverlay);
 	}
 
 	private function startGame():Void
@@ -413,136 +455,5 @@ class TitleState extends FlxState
 			startDelay: 1.0,
 			ease: FlxEase.quadOut
 		});
-	}
-}
-
-class MenuButton extends FlxSprite
-{
-	private var text:FlxText;
-	private var indicator:FlxSprite;
-	private var callback:Void->Void;
-	private var baseColor:FlxColor = FlxColor.fromRGB(138, 43, 226); // Purple
-	private var hoverColor:FlxColor = FlxColor.fromRGB(168, 73, 255); // Lighter purple
-	private var isSelected:Bool = false;
-
-	public function new(x:Float, y:Float, label:String, callback:Void->Void)
-	{
-		super(x, y);
-
-		this.callback = callback;
-
-		var buttonWidth = MobileSupport.titleButtonWidth();
-		var buttonHeight = MobileSupport.titleButtonHeight();
-		var fontSize = MobileSupport.isMobile() ? 28 : 20;
-
-		// Button background
-		makeGraphic(buttonWidth, buttonHeight, FlxColor.fromRGB(18, 12, 32));
-		alpha = 0.82;
-
-		// Selection indicator
-		indicator = new FlxSprite(x - 15, y + 10);
-		indicator.makeGraphic(6, Std.int(buttonHeight - 20), baseColor);
-		indicator.visible = false;
-
-		// Text
-		text = new FlxText(x + 20, y, buttonWidth - 28, label);
-		text.setFormat(null, fontSize, baseColor, LEFT);
-		text.setBorderStyle(OUTLINE, FlxColor.BLACK, 1);
-	}
-
-	override public function update(elapsed:Float):Void
-	{
-		super.update(elapsed);
-
-		text.alpha = alpha;
-		indicator.alpha = alpha;
-
-		// Update indicator position
-		indicator.x = x - 15;
-		indicator.y = y + 10;
-
-		// Mouse hover
-		if (MobileSupport.pointerOverlaps(this))
-		{
-			text.color = hoverColor;
-			text.scale.set(1.05, 1.05);
-
-			if (MobileSupport.pointerJustPressedOver(this))
-			{
-				onClick();
-			}
-		}
-		else if (!isSelected)
-		{
-			text.color = baseColor;
-			text.scale.set(1, 1);
-		}
-
-		// Update text position
-		text.x = x + 20;
-		text.y = y + (height - text.height) / 2;
-	}
-
-	override public function draw():Void
-	{
-		super.draw();
-
-		if (indicator != null && indicator.visible)
-		{
-			indicator.draw();
-		}
-
-		if (text != null)
-		{
-			text.draw();
-		}
-	}
-
-	public function setSelected(selected:Bool):Void
-	{
-		isSelected = selected;
-		indicator.visible = selected;
-
-		if (selected)
-		{
-			text.color = hoverColor;
-		}
-		else
-		{
-			text.color = baseColor;
-		}
-	}
-
-	public function onClick():Void
-	{
-		// Button click effect
-		// FlxG.sound.play("assets/sounds/select.ogg", 0.5);
-		FlxTween.tween(this.scale, {x: 0.95, y: 0.95}, 0.1, {
-			onComplete: function(_) {
-				FlxTween.tween(this.scale, {x: 1, y: 1}, 0.1);
-			}
-		});
-
-		if (callback != null)
-		{
-			callback();
-		}
-	}
-
-	override public function destroy():Void
-	{
-		super.destroy();
-
-		if (text != null)
-		{
-			text.destroy();
-			text = null;
-		}
-
-		if (indicator != null)
-		{
-			indicator.destroy();
-			indicator = null;
-		}
 	}
 }

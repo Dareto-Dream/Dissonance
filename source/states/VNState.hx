@@ -7,6 +7,7 @@ import core.effects.EffectSystem;
 import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
 import core.scene.SceneRunner;
+import core.state.GameState;
 import dev.DevTools;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -16,6 +17,8 @@ import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import rhythm.RhythmCompletionBridge;
+import ui.DialogueHistory;
+import ui.PauseOverlay;
 import util.MobileSupport;
 import vn.RhythmBridge;
 import vn.VNCommands;
@@ -32,6 +35,10 @@ class VNState extends FlxState
 	private var scenePath:String;
 	private var defaultBGM:String;
 	private var startNodeOverride:String;
+
+	private var pauseOverlay:PauseOverlay;
+	private var pauseButton:FlxSprite;
+	private var dialogueHistory:DialogueHistory;
 
 	private var devOverlayBg:FlxSprite;
 	private var devOverlayText:FlxText;
@@ -81,6 +88,10 @@ class VNState extends FlxState
 			}
 		}
 
+		// Initialize or update GameState
+		var gameState = GameState.get();
+		gameState.currentScene = sceneToLoad;
+
 		runner = new SceneRunner(sceneToLoad);
 		if (resumeNode != null)
 		{
@@ -88,11 +99,15 @@ class VNState extends FlxState
 			trace('[VNState] SceneRunner positioned at resume node: ${resumeNode}');
 		}
 
+		gameState.currentNode = runner.currentNode;
+
 		BackgroundSystem.reset();
 		VNCommands.setVNState(this);
 
 		bgGroup = new FlxSpriteGroup();
 		add(bgGroup);
+
+		BackgroundSystem.init(bgGroup);
 
 		var debugBG = new FlxSprite(0, 0);
 		debugBG.makeGraphic(FlxG.width, FlxG.height, 0xff111111);
@@ -133,6 +148,23 @@ class VNState extends FlxState
 			syncSelectedNodeToCurrent();
 		}
 
+		// Dialogue history overlay
+		dialogueHistory = new DialogueHistory();
+		add(dialogueHistory);
+
+		// Pause overlay (must be added last to render on top)
+		pauseOverlay = new PauseOverlay(this);
+		add(pauseOverlay);
+
+		// Mobile pause button
+		if (MobileSupport.isMobile())
+		{
+			pauseButton = new FlxSprite(FlxG.width - 52, 12);
+			pauseButton.makeGraphic(40, 40, FlxColor.fromRGBFloat(0.1, 0.07, 0.18, 0.7));
+			pauseButton.scrollFactor.set(0, 0);
+			add(pauseButton);
+		}
+
 		if (RhythmCompletionBridge.hasPendingCallback())
 		{
 			trace('[VNState] Executing pending rhythm completion callback');
@@ -146,6 +178,44 @@ class VNState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		// Pause toggle: ESC key or mobile pause button
+		#if FLX_KEYBOARD
+		if (FlxG.keys.justPressed.ESCAPE)
+		{
+			pauseOverlay.toggle();
+		}
+		#end
+
+		if (pauseButton != null && MobileSupport.pointerJustPressedOver(pauseButton))
+		{
+			pauseOverlay.toggle();
+		}
+
+		// Dialogue history toggle (H key)
+		#if FLX_KEYBOARD
+		if (FlxG.keys.justPressed.H && !pauseOverlay.isPaused)
+		{
+			dialogueHistory.toggle();
+		}
+		#end
+
+		// When dialogue history is open, only update it
+		if (dialogueHistory.isOpen)
+		{
+			dialogueHistory.update(elapsed);
+			return;
+		}
+
+		// When paused, only update the pause overlay
+		if (pauseOverlay.isPaused)
+		{
+			pauseOverlay.update(elapsed);
+			return;
+		}
+
+		// Track playtime
+		GameState.get().playtime += elapsed;
 
 		if (runner != null)
 		{

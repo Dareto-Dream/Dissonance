@@ -1,0 +1,117 @@
+{
+  "scene_id": "act5_scene3_epilogue",
+  "placements": {
+    "n_broken_harmony_start": {
+      "tiffany": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n_bh8": {
+      "hanami": {
+        "x": 580,
+        "y": 0,
+        "slot": "left"
+      }
+    },
+    "n_bh9": {
+      "cassian": {
+        "x": 1100,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n_bh10": {
+      "laura": {
+        "x": 400,
+        "y": 0,
+        "slot": "far_left"
+      }
+    },
+    "n_fading_notes_start": {
+      "hanami": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n_fn7": {
+      "tiffany": {
+        "x": 1100,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n_fn8": {
+      "cassian": {
+        "x": 580,
+        "y": 0,
+        "slot": "left"
+      }
+    },
+    "n_fn9": {
+      "laura": {
+        "x": 400,
+        "y": 0,
+        "slot": "far_left"
+      }
+    },
+    "n_new_harmony_start": {
+      "tiffany": {
+        "x": 840,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n_nh7": {
+      "hanami": {
+        "x": 580,
+        "y": 0,
+        "slot": "left"
+      }
+    },
+    "n_nh8": {
+      "cassian": {
+        "x": 1100,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n_nh9": {
+      "laura": {
+        "x": 400,
+        "y": 0,
+        "slot": "far_left"
+      }
+    },
+    "n_echoes_start": {
+      "cassian": {
+        "x": 580,
+        "y": 0,
+        "slot": "left"
+      }
+    },
+    "n_ec2": {
+      "hanami": {
+        "x": 1100,
+        "y": 0,
+        "slot": "right"
+      }
+    },
+    "n_ec3": {
+      "laura": {
+        "x": 400,
+        "y": 0,
+        "slot": "far_left"
+      }
+    },
+    "n_ec4": {
+      "tiffany": {
+        "x": 1000,
+        "y": 0,
+        "slot": "center_right"
+      }
+    }
+  }
+}

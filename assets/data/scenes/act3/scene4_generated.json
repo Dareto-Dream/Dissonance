@@ -1,0 +1,602 @@
+{
+  "scene_id": "act3_scene4_crossroads",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/roof/evening2.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/unsettled.ogg",
+      "volume": 0.4,
+      "transition": "fade",
+      "duration": 2,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The festival is winding down. The rooftop is empty, the evening sky streaked with orange and violet.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "You lean against the railing and stare out at the campus below. Students trickle out through the front gate, carrying prizes and leftovers.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "It should feel like a victory. You performed. The crowd loved it. But all you can think about is Hanami's face when she said the word \"chronic.\"",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "narration",
+      "text": "And Cassian's fist hitting the desk. And Tiffany's trembling hands. And Laura trying so hard not to fall apart.",
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "narration",
+      "text": "You can't fix any of it. But maybe you can be there. One at a time.",
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/roof/night1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "narration",
+      "text": "You find Cassian where you expected to -- on the roof, after everyone else has gone. His guitar is in his lap, and he's playing something quiet.",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/guitar_tuning.wav",
+      "volume": 0.4,
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "narration",
+      "text": "The melody is simple. Gentle. Nothing like the sharp, driving riffs he usually plays. It sounds like a lullaby.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "You don't have to stand there pretending you're not watching.",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Sorry. I didn't want to interrupt.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "It's fine. Sit down if you want.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "narration",
+      "text": "You sit. For a while, neither of you says anything. The guitar fills the silence.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "This was her favorite song. My sister's. I used to play it for her in the hospital when she couldn't sleep.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Music was the only thing that made her smile in there. The only thing that felt real.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "His fingers pause on the strings. The last note fades into the night air.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "When Hanami said that today... it was like being back in that hospital room. Watching someone you care about slip away and knowing you can't stop it.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "She'd be proud of you.",
+          "target": "n22_proud"
+        },
+        {
+          "text": "You're not alone in this.",
+          "target": "n22_notalone"
+        }
+      ]
+    },
+    {
+      "id": "n22_proud",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Your sister... she'd be proud of you, Cassian. The way you play, the way you care about this group. She'd be proud.",
+      "next": "n23_proud_react"
+    },
+    {
+      "id": "n23_proud_react",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "...Yeah. Maybe. She'd probably tell me to stop brooding so much.",
+      "next": "n24_proud_trust"
+    },
+    {
+      "id": "n24_proud_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n28_cassian_end"
+    },
+    {
+      "id": "n22_notalone",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "You're not alone in this. Not this time. We're all going through it together.",
+      "next": "n23_notalone_react"
+    },
+    {
+      "id": "n23_notalone_react",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Together, huh. Last time, I was alone. I had to watch it happen by myself.",
+      "next": "n24_notalone"
+    },
+    {
+      "id": "n24_notalone",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "smirk",
+      "text": "...But I guess that's different now. I'll hold you to that.",
+      "next": "n25_notalone_trust"
+    },
+    {
+      "id": "n25_notalone_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n26_notalone_rot"
+    },
+    {
+      "id": "n26_notalone_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_rot",
+      "value": 1,
+      "op": "subtract",
+      "next": "n28_cassian_end"
+    },
+    {
+      "id": "n28_cassian_end",
+      "type": "narration",
+      "text": "He picks up the guitar again and starts playing. This time, it's something new. Something that doesn't sound like goodbye.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n30"
+    },
+    {
+      "id": "n30",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway/evening1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "narration",
+      "text": "The hallway is empty. Most of the festival booths have been taken down. But from around the corner, you hear a voice.",
+      "next": "n32"
+    },
+    {
+      "id": "n32",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n33"
+    },
+    {
+      "id": "n33",
+      "type": "narration",
+      "text": "Laura is standing alone in the hallway, humming quietly, her eyes closed. She's running through the performance again in her head.",
+      "next": "n34"
+    },
+    {
+      "id": "n34",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "neutral",
+      "text": "Oh! I didn't see you there. I was just... practicing.",
+      "next": "n35"
+    },
+    {
+      "id": "n35",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "After the festival? You're still going?",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "cheerful",
+      "text": "I know it sounds silly. But today, on that stage... I wasn't scared. For the first time, I wasn't scared.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "friendly",
+      "text": "I'm not going to let everyone down. Not when it matters. Not after what Hanami told us.",
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "narration",
+      "text": "There's a steadiness in her eyes that wasn't there before. The nervous fidgeting is gone. In its place is something quiet and determined.",
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "friendly",
+      "text": "If Hanami can push through what she's dealing with, then I can push through my fears. It's the least I can do.",
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "laura_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "You were great today, Laura. Really.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "cheerful",
+      "text": "Thanks. That means a lot. Goodnight -- and take care of yourself too, okay?",
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club2/night1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "narration",
+      "text": "The club room. The lights are off, but a faint glow from the hallway spills under the door.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "narration",
+      "text": "You push the door open. Papers are scattered across the desks -- schedules, setlists, notes in Tiffany's precise handwriting. Some of them are crumpled.",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "narration",
+      "text": "Tiffany is sitting at the desk in the dark. Her head is in her hands. When she hears the door, she looks up -- and you see it. She's crying.",
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "narration",
+      "text": "Not the controlled, dignified kind. Real tears, ugly and raw, streaking mascara down her cheeks.",
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "You shouldn't be here.",
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Neither should you. Not alone.",
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I can't lose this club. It's all I have. Without it, I'm just... I'm nothing.",
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "narration",
+      "text": "Her voice cracks. The president, the planner, the one who always holds everything together -- she's falling apart.",
+      "next": "n54"
+    },
+    {
+      "id": "n54",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "Comfort her.",
+          "target": "n55_comfort"
+        },
+        {
+          "text": "What do you mean, it's all you have?",
+          "target": "n55_ask"
+        }
+      ]
+    },
+    {
+      "id": "n55_comfort",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Hey. You're not going to lose it. And even if things change, you still have us. You still have people who care.",
+      "next": "n56_comfort_react"
+    },
+    {
+      "id": "n56_comfort_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "You say that now. Everyone says that. But people leave. They always leave.",
+      "next": "n57_comfort"
+    },
+    {
+      "id": "n57_comfort",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Then I'll be the one who doesn't.",
+      "next": "n58_comfort_trust"
+    },
+    {
+      "id": "n58_comfort_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n62_converge"
+    },
+    {
+      "id": "n55_ask",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "What do you mean, it's all you have? Tiffany, talk to me.",
+      "next": "n56_ask_react"
+    },
+    {
+      "id": "n56_ask_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "My parents don't care what I do as long as I'm \"successful.\" My old friends drifted away when I got too intense about everything. This club... these people... it's the only place I've ever felt like I mattered.",
+      "next": "n57_ask"
+    },
+    {
+      "id": "n57_ask",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "And now Hanami is sick, and Cassian is shutting down, and I can feel it all slipping through my fingers no matter how hard I try to hold on.",
+      "next": "n58_ask_trust"
+    },
+    {
+      "id": "n58_ask_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n59_ask_rot"
+    },
+    {
+      "id": "n59_ask_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n62_converge"
+    },
+    {
+      "id": "n62_converge",
+      "type": "narration",
+      "text": "She wipes her eyes with the back of her hand. Slowly, the mask starts to rebuild itself. But you've seen underneath it now.",
+      "next": "n63"
+    },
+    {
+      "id": "n63",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "...Go home. It's late. We'll figure out the rest tomorrow.",
+      "next": "n64"
+    },
+    {
+      "id": "n64",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n65"
+    },
+    {
+      "id": "n65",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.act2_complete",
+      "value": true,
+      "next": "n66"
+    },
+    {
+      "id": "n66",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n67"
+    },
+    {
+      "id": "n67",
+      "type": "narration",
+      "text": "You walk home under a sky full of stars. The festival is over. The music has stopped.",
+      "next": "n68"
+    },
+    {
+      "id": "n68",
+      "type": "narration",
+      "text": "But in the silence, you can still hear it -- every note, every voice, every moment that brought you here.",
+      "next": "n69"
+    },
+    {
+      "id": "n69",
+      "type": "narration",
+      "text": "Whatever comes next, you know one thing for certain: these people matter to you. And you're not going to let them face it alone.",
+      "next": "n70"
+    },
+    {
+      "id": "n70",
+      "type": "narration",
+      "text": "End of Act 3.",
+      "next": "n71"
+    },
+    {
+      "id": "n71",
+      "type": "end",
+      "next_scene": "scenes/act4/scene1_generated.json"
+    }
+  ]
+}

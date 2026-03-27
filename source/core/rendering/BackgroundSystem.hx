@@ -4,37 +4,42 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
-import states.VNState;
 
 class BackgroundSystem {
     private static var currentBG:FlxSprite = null;
     private static var nextBG:FlxSprite = null;
-
     private static var bgGroup:FlxSpriteGroup = null;
 
-    private static function getGroup():FlxSpriteGroup {
-        if (bgGroup == null) {
-            var state = cast(FlxG.state, VNState);
-			bgGroup = state.bgGroup;
-        }
-        return bgGroup;
+    /** Current background path (for save/load snapshots). */
+    public static var currentPath:String = "";
+
+    /**
+     * Initialize with a reference to the background sprite group.
+     * Must be called before set().
+     */
+    public static function init(group:FlxSpriteGroup):Void {
+        bgGroup = group;
     }
 
-	// Reset state when switching scenes
-	public static function reset():Void
-	{
-		currentBG = null;
-		nextBG = null;
-		bgGroup = null;
-	}
+    public static function reset():Void {
+        currentBG = null;
+        nextBG = null;
+        bgGroup = null;
+        currentPath = "";
+    }
 
     public static function set(bg:String, transition:String = "cut", duration:Float = 0.5):Void {
-        var group = getGroup();
+        if (bgGroup == null) {
+            trace("[BackgroundSystem] WARNING: bgGroup not initialized. Call init() first.");
+            return;
+        }
+
+        currentPath = bg;
 
         try {
             nextBG = new FlxSprite(0, 0, bg);
         } catch(e:Dynamic) {
-            trace("[BackgroundSystem] Warning: could not load background '" + bg + "'. Using placeholder instead.");
+            trace("[BackgroundSystem] Warning: could not load background '" + bg + "'. Using placeholder.");
             nextBG = new FlxSprite(0, 0);
             nextBG.makeGraphic(FlxG.width, FlxG.height, 0xff222244);
         }
@@ -42,17 +47,16 @@ class BackgroundSystem {
         scaleToScreen(nextBG);
 
         switch (transition) {
-            case "cut":         applyCut(group);
-            case "fade":        applyFade(group, duration);
-            case "crossfade":   applyCrossfade(group, duration);
-            case "slide_left":  applySlide(group, -FlxG.width, 0, duration);
-            case "slide_right": applySlide(group, FlxG.width, 0, duration);
-            case "slide_up":    applySlide(group, 0, -FlxG.height, duration);
-            case "slide_down":  applySlide(group, 0, FlxG.height, duration);
-
+            case "cut":         applyCut(bgGroup);
+            case "fade":        applyFade(bgGroup, duration);
+            case "crossfade":   applyCrossfade(bgGroup, duration);
+            case "slide_left":  applySlide(bgGroup, -FlxG.width, 0, duration);
+            case "slide_right": applySlide(bgGroup, FlxG.width, 0, duration);
+            case "slide_up":    applySlide(bgGroup, 0, -FlxG.height, duration);
+            case "slide_down":  applySlide(bgGroup, 0, FlxG.height, duration);
             default:
                 trace("[BackgroundSystem] Unknown transition: " + transition);
-                applyCut(group);
+                applyCut(bgGroup);
         }
     }
 
@@ -66,7 +70,6 @@ class BackgroundSystem {
             currentBG.kill();
             group.remove(currentBG, true);
         }
-
         currentBG = nextBG;
         group.add(currentBG);
     }
@@ -76,10 +79,8 @@ class BackgroundSystem {
             currentBG.kill();
             group.remove(currentBG, true);
         }
-
         nextBG.alpha = 0;
         group.add(nextBG);
-
         FlxTween.tween(nextBG, { alpha: 1 }, duration, {
             onComplete: (_) -> currentBG = nextBG
         });
@@ -94,10 +95,8 @@ class BackgroundSystem {
                 }
             });
         }
-
         nextBG.alpha = 0;
         group.add(nextBG);
-
         FlxTween.tween(nextBG, { alpha: 1 }, duration, {
             onComplete: (_) -> currentBG = nextBG
         });

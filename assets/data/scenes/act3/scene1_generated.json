@@ -1,0 +1,429 @@
+{
+  "scene_id": "act3_scene1_preparation",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/front/day1c.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/my_little_world.ogg",
+      "volume": 0.6,
+      "transition": "fade",
+      "duration": 2,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "Festival day. The school grounds are alive with color -- banners strung between buildings, booths lining the walkways, and students everywhere.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "narration",
+      "text": "The air smells like fried food and fresh paint. Laughter drifts from every direction. It almost feels like a different school.",
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "But somewhere beneath the excitement, a knot sits heavy in your stomach. Today is the day. The performance.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "narration",
+      "text": "You weave through the crowd toward the club room, passing students hawking takoyaki and handing out flyers.",
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club1/day1.png",
+      "transition": "fade",
+      "duration": 0.8,
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "narration",
+      "text": "The club room door is already open. Inside, the air is thick with tension.",
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "text": "Oh, you're here! I was starting to think I got the time wrong. I've checked the setlist like twelve times already.",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "slide_left",
+      "duration": 0.4,
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Twelve times, huh. That's restraint for you.",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "smile",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "Good morning! Can you feel it? The whole school is buzzing.",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "narration",
+      "text": "Hanami is smiling, but her skin is pale and there are faint shadows under her eyes. She's holding her water bottle with both hands, like she needs the anchor.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_slam.wav",
+      "volume": 0.5,
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "slide_left",
+      "duration": 0.3,
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Alright. Everyone's here. Good.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "narration",
+      "text": "Tiffany sets a clipboard on the desk. It's covered in color-coded notes, timestamps, and arrows. She's been up all night.",
+      "next": "n20"
+    },
+    {
+      "id": "n20",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "I've mapped out every minute. Warm-up at ten. Sound check at ten-thirty. We're in the third performance slot, so we go on at one-fifteen sharp.",
+      "next": "n21"
+    },
+    {
+      "id": "n21",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "No one leaves this room until we've run through the set at least twice. No exceptions.",
+      "next": "n22"
+    },
+    {
+      "id": "n22",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "annoyed",
+      "text": "Twice? We've rehearsed this a hundred times. We know the songs.",
+      "next": "n23"
+    },
+    {
+      "id": "n23",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "Knowing and executing are two different things. I'm not leaving anything to chance.",
+      "next": "n24"
+    },
+    {
+      "id": "n24",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "text": "It's okay, I don't mind practicing more. Better safe than sorry, right?",
+      "next": "n25"
+    },
+    {
+      "id": "n25",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "Tiffany... try to breathe. We're going to be wonderful.",
+      "next": "n26"
+    },
+    {
+      "id": "n26",
+      "type": "narration",
+      "text": "Tiffany's jaw tightens. She looks at each of you in turn, measuring, calculating.",
+      "next": "n27"
+    },
+    {
+      "id": "n27",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "This is our moment. Everything we've worked for comes down to today. So let's make it count.",
+      "next": "n28"
+    },
+    {
+      "id": "n28",
+      "type": "narration",
+      "text": "It's a pep talk. Or it's supposed to be. But the way she says it feels less like encouragement and more like a command.",
+      "next": "n29"
+    },
+    {
+      "id": "n29",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "We've got this, together.",
+          "target": "n30_unite"
+        },
+        {
+          "text": "Let's just do our best.",
+          "target": "n30_pressure"
+        }
+      ]
+    },
+    {
+      "id": "n30_unite",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "We've got this. All of us, together. That's what makes this work.",
+      "next": "n31_unite_trust1"
+    },
+    {
+      "id": "n31_unite_trust1",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n31_unite_trust2"
+    },
+    {
+      "id": "n31_unite_trust2",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n31_unite_trust3"
+    },
+    {
+      "id": "n31_unite_trust3",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n31_unite_trust4"
+    },
+    {
+      "id": "n31_unite_trust4",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "laura_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n32_unite_react"
+    },
+    {
+      "id": "n32_unite_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "...Right. Together.",
+      "next": "n35_converge"
+    },
+    {
+      "id": "n30_pressure",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Let's just do our best. That's all anyone can ask.",
+      "next": "n31_pressure_trust"
+    },
+    {
+      "id": "n31_pressure_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n31_pressure_rot"
+    },
+    {
+      "id": "n31_pressure_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n32_pressure_react"
+    },
+    {
+      "id": "n32_pressure_react",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "annoyed",
+      "text": "\"Our best\" isn't a plan. But... fine.",
+      "next": "n33_pressure_hanami"
+    },
+    {
+      "id": "n33_pressure_hanami",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "I think that's the right way to look at it.",
+      "next": "n35_converge"
+    },
+    {
+      "id": "n35_converge",
+      "type": "narration",
+      "text": "The room settles into a focused quiet. Everyone picks up their instruments.",
+      "next": "n36"
+    },
+    {
+      "id": "n36",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Sound check. From the top. Cassian, count us in.",
+      "next": "n37"
+    },
+    {
+      "id": "n37",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/countdown_beep.wav",
+      "volume": 0.6,
+      "next": "n38"
+    },
+    {
+      "id": "n38",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/guitar_strum.wav",
+      "volume": 0.5,
+      "next": "n39"
+    },
+    {
+      "id": "n39",
+      "type": "narration",
+      "text": "The first notes ring out, filling the small room. It's rough at the edges, but it's real. It's yours.",
+      "next": "n40"
+    },
+    {
+      "id": "n40",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/piano_chord.wav",
+      "volume": 0.4,
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "narration",
+      "text": "Hanami's fingers find the keys with practiced grace. Laura's voice wavers for a moment, then steadies. Cassian's guitar carries them all.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "default_smile",
+      "text": "Good. That was good. One more time, and we'll be ready.",
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.festival_day",
+      "value": true,
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "narration",
+      "text": "The festival waits outside. The crowd is gathering. In a few hours, you'll be on stage.",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "narration",
+      "text": "Whatever happens next, there's no turning back.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "end",
+      "next_scene": "scenes/act3/scene2_generated.json"
+    }
+  ]
+}

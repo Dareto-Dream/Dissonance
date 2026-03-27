@@ -1,0 +1,19 @@
+{
+  "scene_id": "act2_scene3_truth",
+  "placements": {
+    "n5": {
+      "cassian": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      }
+    },
+    "n36": {
+      "tiffany": {
+        "x": 640,
+        "y": 0,
+        "slot": "center"
+      }
+    }
+  }
+}

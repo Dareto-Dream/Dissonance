@@ -1,0 +1,544 @@
+{
+  "scene_id": "act4_scene2_confrontation",
+  "start": "n1",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/club2/evening1.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "action",
+      "action": "play_music",
+      "track": "assets/music/editors_life.ogg",
+      "volume": 0.5,
+      "transition": "fade",
+      "duration": 1.5,
+      "next": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "narration",
+      "text": "The evening light cuts across the club room in long, amber streaks. Everyone is here, but nobody is sitting together.",
+      "next": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "action",
+      "action": "show_character",
+      "character": "tiffany",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n5"
+    },
+    {
+      "id": "n5",
+      "type": "narration",
+      "text": "Tiffany stands by the window, arms crossed, staring at the floor. She looks like she hasn't slept.",
+      "next": "n6"
+    },
+    {
+      "id": "n6",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "angry",
+      "transition": "slide_right",
+      "duration": 0.4,
+      "next": "n7"
+    },
+    {
+      "id": "n7",
+      "type": "action",
+      "action": "show_character",
+      "character": "hanami",
+      "pose": "sad",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n8"
+    },
+    {
+      "id": "n8",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "anxious",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n9"
+    },
+    {
+      "id": "n9",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "So. Are you going to tell us, or do we have to pretend we don't already know?",
+      "next": "n10"
+    },
+    {
+      "id": "n10",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "...",
+      "next": "n11"
+    },
+    {
+      "id": "n11",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "How long have you known, Tiffany? How long have you been lying to us?",
+      "next": "n12"
+    },
+    {
+      "id": "n12",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "Since before the festival. I thought... I thought if we proved ourselves—",
+      "next": "n13"
+    },
+    {
+      "id": "n13",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "You THOUGHT? You put everyone through hell based on a thought?",
+      "next": "n14"
+    },
+    {
+      "id": "n14",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "So it was all for nothing? Everything we worked for... the late nights, the stress, all of it?",
+      "next": "n15"
+    },
+    {
+      "id": "n15",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "It wasn't for nothing.",
+      "next": "n16"
+    },
+    {
+      "id": "n16",
+      "type": "narration",
+      "text": "Everyone turns to Hanami. She's pale, but her voice is steady.",
+      "next": "n17"
+    },
+    {
+      "id": "n17",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "gentle",
+      "text": "The music was real. What we felt when we played together — that was real. No budget cut can take that away.",
+      "next": "n18"
+    },
+    {
+      "id": "n18",
+      "type": "narration",
+      "text": "A heavy silence settles over the room. Tiffany's composure is crumbling.",
+      "next": "n19"
+    },
+    {
+      "id": "n19",
+      "type": "if",
+      "condition": "tiffany_rot >= 5",
+      "trueNode": "n20_high_rot",
+      "falseNode": "n20_low_rot"
+    },
+    {
+      "id": "n20_high_rot",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 3,
+      "duration": 0.5,
+      "next": "n21_high_rot"
+    },
+    {
+      "id": "n21_high_rot",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "broken_blood",
+      "text": "I FAILED everyone! Is that what you want to hear?! I failed and I KNEW I was failing and I couldn't STOP!",
+      "text_effect": "shake",
+      "effect_intensity": 3.0,
+      "next": "n22_high_rot"
+    },
+    {
+      "id": "n22_high_rot",
+      "type": "action",
+      "action": "glitch",
+      "intensity": 2.0,
+      "duration": 0.6,
+      "next": "n23_high_rot"
+    },
+    {
+      "id": "n23_high_rot",
+      "type": "narration",
+      "text": "She's screaming now, tears streaming down her face. Her hands are shaking uncontrollably.",
+      "next": "n26_converge"
+    },
+    {
+      "id": "n20_low_rot",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "crying",
+      "text": "I'm sorry. I'm so sorry. I thought I was protecting everyone, but I was just... scared.",
+      "next": "n21_low_rot"
+    },
+    {
+      "id": "n21_low_rot",
+      "type": "narration",
+      "text": "She's hurt, and she's barely holding it together. But she's still standing.",
+      "next": "n26_converge"
+    },
+    {
+      "id": "n26_converge",
+      "type": "if",
+      "condition": "cassian_trust >= 4",
+      "trueNode": "n27_cassian_rally",
+      "falseNode": "n27_cassian_storms"
+    },
+    {
+      "id": "n27_cassian_rally",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...Look. I'm angry. I have every right to be angry.",
+      "next": "n28_cassian_rally"
+    },
+    {
+      "id": "n28_cassian_rally",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "But we're not giving up. Not like this. If this club is going down, it goes down on our terms.",
+      "next": "n30_converge2"
+    },
+    {
+      "id": "n27_cassian_storms",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "I can't be in this room right now. I can't even look at you.",
+      "next": "n28_cassian_storms"
+    },
+    {
+      "id": "n28_cassian_storms",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/door_slam.wav",
+      "volume": 0.7,
+      "next": "n29_cassian_storms"
+    },
+    {
+      "id": "n29_cassian_storms",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n29b_narration"
+    },
+    {
+      "id": "n29b_narration",
+      "type": "narration",
+      "text": "The door slams behind him. The silence that follows is deafening.",
+      "next": "n30_converge2"
+    },
+    {
+      "id": "n30_converge2",
+      "type": "narration",
+      "text": "Everyone looks at me. Somehow, the next move is mine.",
+      "next": "n31"
+    },
+    {
+      "id": "n31",
+      "type": "choice",
+      "choices": [
+        {
+          "text": "We fight to save the club.",
+          "target": "n32_fight"
+        },
+        {
+          "text": "Maybe it's time to let go.",
+          "target": "n32_letgo"
+        },
+        {
+          "text": "Let's make our last performance count.",
+          "target": "n32_last"
+        }
+      ]
+    },
+    {
+      "id": "n32_fight",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "No. We're not done. If the school wants to shut us down, we make them reconsider. We fight for this.",
+      "next": "n33_fight_trust"
+    },
+    {
+      "id": "n33_fight_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n33b_fight_trust"
+    },
+    {
+      "id": "n33b_fight_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n33c_fight_trust"
+    },
+    {
+      "id": "n33c_fight_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n33d_fight_trust"
+    },
+    {
+      "id": "n33d_fight_trust",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "laura_trust",
+      "value": 1,
+      "op": "add",
+      "next": "n34_fight_react"
+    },
+    {
+      "id": "n34_fight_react",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "nervous_smile",
+      "text": "You really think we can?",
+      "next": "n35_fight_react"
+    },
+    {
+      "id": "n35_fight_react",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "I think we have to try.",
+      "next": "n40_converge3"
+    },
+    {
+      "id": "n32_letgo",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "Maybe... maybe it's time to let go. Some things aren't meant to last forever.",
+      "next": "n33_letgo_rot"
+    },
+    {
+      "id": "n33_letgo_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n33b_letgo_rot"
+    },
+    {
+      "id": "n33b_letgo_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n33c_letgo_rot"
+    },
+    {
+      "id": "n33c_letgo_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n33d_letgo_rot"
+    },
+    {
+      "id": "n33d_letgo_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "laura_rot",
+      "value": 1,
+      "op": "add",
+      "next": "n34_letgo_react"
+    },
+    {
+      "id": "n34_letgo_react",
+      "type": "narration",
+      "text": "The room deflates. Hanami looks down. Laura's crying gets worse.",
+      "next": "n35_letgo_react"
+    },
+    {
+      "id": "n35_letgo_react",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "sad",
+      "text": "Even so... I'd like to play together one more time. If that's okay.",
+      "next": "n40_converge3"
+    },
+    {
+      "id": "n32_last",
+      "type": "dialogue",
+      "speaker": "MC",
+      "text": "If this is really the end, then let's make it mean something. One last performance. Not for the school. For us.",
+      "next": "n33_last_react"
+    },
+    {
+      "id": "n33_last_react",
+      "type": "dialogue",
+      "speaker": "Hanami",
+      "character": "hanami",
+      "pose": "smile",
+      "text": "I'd like that.",
+      "next": "n34_last_react"
+    },
+    {
+      "id": "n34_last_react",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "tearful_smile",
+      "text": "Yeah... me too.",
+      "next": "n40_converge3"
+    },
+    {
+      "id": "n40_converge3",
+      "type": "narration",
+      "text": "There's a fragile agreement in the air. Not hope exactly, but something close. A refusal to end in silence.",
+      "next": "n41"
+    },
+    {
+      "id": "n41",
+      "type": "dialogue",
+      "speaker": "Tiffany",
+      "character": "tiffany",
+      "pose": "neutral",
+      "text": "Then... let's play. Right now. Before we lose our nerve.",
+      "next": "n42"
+    },
+    {
+      "id": "n42",
+      "type": "action",
+      "action": "play_sound",
+      "sound": "assets/sounds/guitar_tuning.wav",
+      "volume": 0.5,
+      "next": "n43"
+    },
+    {
+      "id": "n43",
+      "type": "narration",
+      "text": "Instruments come out. Fingers find familiar positions. For a moment, it's like nothing has changed.",
+      "next": "n44"
+    },
+    {
+      "id": "n44",
+      "type": "game",
+      "song": "unity_or_ruin_generated",
+      "next": "n45"
+    },
+    {
+      "id": "n45",
+      "type": "narration",
+      "text": "The last note fades. Nobody moves.",
+      "next": "n46"
+    },
+    {
+      "id": "n46",
+      "type": "narration",
+      "text": "For one perfect moment, the music held all the broken pieces together. Maybe that's all any of us can ask for.",
+      "next": "n47"
+    },
+    {
+      "id": "n47",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.act3_complete",
+      "value": true,
+      "next": "n48"
+    },
+    {
+      "id": "n48",
+      "type": "action",
+      "action": "hide_character",
+      "character": "tiffany",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n49"
+    },
+    {
+      "id": "n49",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n50"
+    },
+    {
+      "id": "n50",
+      "type": "action",
+      "action": "hide_character",
+      "character": "hanami",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n51"
+    },
+    {
+      "id": "n51",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.3,
+      "next": "n52"
+    },
+    {
+      "id": "n52",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 1.0,
+      "next": "n53"
+    },
+    {
+      "id": "n53",
+      "type": "end",
+      "next_scene": "scenes/act4/scene3_generated.json"
+    }
+  ]
+}

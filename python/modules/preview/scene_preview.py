@@ -172,6 +172,10 @@ class VNEngine:
         self.background: str = ""
         self.current_id: str = self.start_id
 
+        # Mock game state for condition evaluation and variable tracking
+        self.game_state: Dict[str, float] = {}
+        self.game_flags: Dict[str, bool] = {}
+
         # Display output set by next_display_node()
         self.speaker:   Optional[str]       = None
         self.text:      str                 = ""
@@ -244,8 +248,10 @@ class VNEngine:
             return True
 
         if ntype == "if":
-            # Always take trueNode for preview purposes
-            self.current_id = node.get("trueNode", node.get("falseNode", ""))
+            # Evaluate condition against mock game state
+            condition = node.get("condition", "")
+            result = self._eval_condition(condition)
+            self.current_id = node.get("trueNode" if result else "falseNode", "")
             return self.advance()
 
         if ntype == "game":
@@ -288,6 +294,8 @@ class VNEngine:
         engine.characters   = {}
         engine.background   = ""
         engine.current_id   = self.start_id
+        engine.game_state   = {}
+        engine.game_flags   = {}
         engine.speaker      = None
         engine.text         = ""
         engine.is_narration = False
@@ -352,6 +360,77 @@ class VNEngine:
             if cid in self.characters:
                 flipped = node.get("flipped", True)
                 self.characters[cid].flipped = flipped
+        elif action == "set_variable":
+            var_name = node.get("variable", "")
+            value = float(node.get("value", 0))
+            op = node.get("op", "set")
+            if op == "add":
+                self.game_state[var_name] = self.game_state.get(var_name, 0) + value
+            elif op == "subtract":
+                self.game_state[var_name] = self.game_state.get(var_name, 0) - value
+            elif op == "multiply":
+                self.game_state[var_name] = self.game_state.get(var_name, 0) * value
+            else:
+                self.game_state[var_name] = value
+        elif action == "set_flag":
+            flag_name = node.get("flag", "")
+            value = node.get("value", True)
+            self.game_flags[flag_name] = bool(value)
+
+    def _eval_condition(self, expr: str) -> bool:
+        """Simple condition evaluator for preview. Supports: var op value [and/or ...]."""
+        if not expr or not expr.strip():
+            return True
+        try:
+            # Split by 'and'/'or' and evaluate each part
+            parts = expr.replace("(", "").replace(")", "")
+            # Handle 'or' first (lower precedence)
+            or_parts = [p.strip() for p in parts.split(" or ")]
+            for or_part in or_parts:
+                and_parts = [p.strip() for p in or_part.split(" and ")]
+                all_true = True
+                for part in and_parts:
+                    if not self._eval_simple(part):
+                        all_true = False
+                        break
+                if all_true:
+                    return True
+            return False
+        except Exception:
+            return True  # Default to true on parse error
+
+    def _eval_simple(self, expr: str) -> bool:
+        """Evaluate a single comparison like 'tiffany_rot <= 2'."""
+        for op in ("<=", ">=", "!=", "==", "<", ">"):
+            if op in expr:
+                left, right = expr.split(op, 1)
+                left = left.strip()
+                right = right.strip()
+                # Resolve left side from game state
+                if left in self.game_flags:
+                    lval = 1.0 if self.game_flags[left] else 0.0
+                else:
+                    lval = self.game_state.get(left, 0.0)
+                # Resolve right side
+                if right == "true":
+                    rval = 1.0
+                elif right == "false":
+                    rval = 0.0
+                else:
+                    try:
+                        rval = float(right)
+                    except ValueError:
+                        if right in self.game_flags:
+                            rval = 1.0 if self.game_flags[right] else 0.0
+                        else:
+                            rval = self.game_state.get(right, 0.0)
+                if op == "==": return lval == rval
+                if op == "!=": return lval != rval
+                if op == "<":  return lval < rval
+                if op == "<=": return lval <= rval
+                if op == ">":  return lval > rval
+                if op == ">=": return lval >= rval
+        return True
 
     def _apply_placement(self, node_id: str):
         """Apply placement overrides from the placement file for this node."""

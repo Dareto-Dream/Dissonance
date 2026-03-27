@@ -86,7 +86,7 @@
     {
       "id": "n11",
       "type": "game",
-      "song": "afternoon_melody",
+      "song": "afternoon_melody_generated",
       "next": "n12"
     },
     {
@@ -139,9 +139,14 @@
       "type": "dialogue",
       "speaker": "MC",
       "text": "Is everything alright? You seem... distant.",
-      "set_flag": {
-        "asked_hanami_concern": true
-      },
+      "next": "n17_ask_flag"
+    },
+    {
+      "id": "n17_ask_flag",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.asked_hanami_concern",
+      "value": true,
       "next": "n18_ask"
     },
     {
