@@ -10,7 +10,15 @@
          file="Dissonance"
          main="Main"
          version="0.0.1"
-         company="HaxeFlixel" />
+         company="HaxeFlixel"
+         id="com.deltavdevs.dissonance" />
+
+    <!-- iOS Signing (prevents Xcode reset) -->
+    <certificate team-id="2G9HK8853K" signing-identity="iPhone Developer" />
+
+    <!-- Optional but helps consistency -->
+    <ios deployment="13.0" />
+
 
     <!-- Use Flixel's preloader -->
     <app preloader="flixel.system.FlxPreloader" />
@@ -53,7 +61,6 @@
             allow-high-dpi="true" />
 
 
-
     <!-- _____________________________ Path Settings ____________________________ -->
 
     <set name="BUILD_DIR" value="export" />
@@ -82,7 +89,6 @@
 
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 	<haxedef name="message.reporting" value="pretty" />
-
 
 
     <!-- _________________________________ Custom _______________________________ -->
