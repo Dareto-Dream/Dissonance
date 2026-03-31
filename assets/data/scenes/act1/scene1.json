@@ -1,7 +1,34 @@
 {
   "scene_id": "act1_scene1_prologue",
-  "start": "intro_music",
+  "start": "init_tiffany_rot",
   "nodes": [
+    {
+      "id": "init_tiffany_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "tiffany_rot",
+      "value": 7,
+      "op": "set",
+      "next": "init_cassian_rot"
+    },
+    {
+      "id": "init_cassian_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "cassian_rot",
+      "value": 7,
+      "op": "set",
+      "next": "init_hanami_rot"
+    },
+    {
+      "id": "init_hanami_rot",
+      "type": "action",
+      "action": "set_variable",
+      "variable": "hanami_rot",
+      "value": 7,
+      "op": "set",
+      "next": "intro_music"
+    },
     {
       "id": "intro_music",
       "type": "action",

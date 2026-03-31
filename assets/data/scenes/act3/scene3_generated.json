@@ -372,7 +372,7 @@
       "action": "set_variable",
       "variable": "hanami_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n43_sooner_rot2"
     },
     {
@@ -381,7 +381,7 @@
       "action": "set_variable",
       "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n46_converge"
     },
     {
@@ -404,7 +404,7 @@
       "action": "set_variable",
       "variable": "hanami_rot",
       "value": 2,
-      "op": "add",
+      "op": "subtract",
       "next": "n49"
     },
     {

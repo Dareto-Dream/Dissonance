@@ -1,6 +1,8 @@
 # Dissonance Visual Novel Editor
 
-A comprehensive, modular Python/Pygame editor for creating visual novel content for the Dissonance Engine (HaxeFlixel).
+Legacy Python/Pygame editor for Dissonance. The primary supported workflow is now the built-in desktop editor opened from the game title screen with `7` or the `EDITOR` menu entry.
+
+Use this directory as reference material while porting or comparing behavior. It is no longer the main authoring path.
 
 ## Features
 

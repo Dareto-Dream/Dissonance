@@ -1,7 +1,7 @@
 package core.scene;
 
+import core.content.ContentRepository;
 import haxe.Json;
-import openfl.utils.Assets;
 
 class SceneParser {
     public var sceneId:String;
@@ -11,7 +11,7 @@ class SceneParser {
 
     public function new(path:String) {
         // path example: "scenes/act1/act1_scene1.json"
-        var raw:String = Assets.getText("assets/data/" + path);
+        var raw:String = ContentRepository.readText("assets/data/" + path);
 
         var data:Dynamic = Json.parse(raw);
 

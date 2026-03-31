@@ -24,7 +24,7 @@
     {
       "id": "n3",
       "type": "narration",
-      "text": "The evening light cuts across the club room in long, amber streaks. Everyone is here, but nobody is sitting together.",
+      "text": "The evening light cuts across the club room in long, amber streaks. Two weeks since Hanami. The room feels wrong without her -- the empty chair by the keyboard, the absence of her humming. Everyone is here, but it doesn't feel like everyone.",
       "next": "n4"
     },
     {
@@ -51,16 +51,12 @@
       "pose": "angry",
       "transition": "slide_right",
       "duration": 0.4,
-      "next": "n7"
+      "next": "n8"
     },
     {
       "id": "n7",
-      "type": "action",
-      "action": "show_character",
-      "character": "hanami",
-      "pose": "sad",
-      "transition": "fade",
-      "duration": 0.4,
+      "type": "narration",
+      "text": "Her chair is still there. Someone put her music folder on the shelf instead of throwing it away.",
       "next": "n8"
     },
     {
@@ -129,26 +125,26 @@
     },
     {
       "id": "n15",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "sad",
-      "text": "It wasn't for nothing.",
+      "type": "narration",
+      "text": "The silence stretches. Nobody wants to be the one to say what everyone is thinking.",
       "next": "n16"
     },
     {
       "id": "n16",
-      "type": "narration",
-      "text": "Everyone turns to Hanami. She's pale, but her voice is steady.",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "Hanami would say... she would say the music was real. That nothing can take that away.",
       "next": "n17"
     },
     {
       "id": "n17",
       "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "gentle",
-      "text": "The music was real. What we felt when we played together — that was real. No budget cut can take that away.",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "angry",
+      "text": "...Yeah. She would.",
       "next": "n18"
     },
     {
@@ -160,7 +156,7 @@
     {
       "id": "n19",
       "type": "if",
-      "condition": "tiffany_rot >= 5",
+      "condition": "tiffany_rot <= 2",
       "trueNode": "n20_high_rot",
       "falseNode": "n20_low_rot"
     },
@@ -322,7 +318,7 @@
       "id": "n33c_fight_trust",
       "type": "action",
       "action": "set_variable",
-      "variable": "hanami_trust",
+      "variable": "cassian_trust",
       "value": 1,
       "op": "add",
       "next": "n33d_fight_trust"
@@ -365,7 +361,7 @@
       "action": "set_variable",
       "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n33b_letgo_rot"
     },
     {
@@ -374,16 +370,16 @@
       "action": "set_variable",
       "variable": "cassian_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n33c_letgo_rot"
     },
     {
       "id": "n33c_letgo_rot",
       "type": "action",
       "action": "set_variable",
-      "variable": "hanami_rot",
+      "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n33d_letgo_rot"
     },
     {
@@ -398,16 +394,13 @@
     {
       "id": "n34_letgo_react",
       "type": "narration",
-      "text": "The room deflates. Hanami looks down. Laura's crying gets worse.",
+      "text": "The room goes very quiet. Laura's crying gets worse.",
       "next": "n35_letgo_react"
     },
     {
       "id": "n35_letgo_react",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "sad",
-      "text": "Even so... I'd like to play together one more time. If that's okay.",
+      "type": "narration",
+      "text": "You think of what Hanami said, before everything. \"I'd like to play together one more time. If that's okay.\" You realize you never got the chance.",
       "next": "n40_converge3"
     },
     {
@@ -419,11 +412,8 @@
     },
     {
       "id": "n33_last_react",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "smile",
-      "text": "I'd like that.",
+      "type": "narration",
+      "text": "You think of Hanami, and how much she would have wanted this.",
       "next": "n34_last_react"
     },
     {
@@ -506,15 +496,12 @@
       "character": "cassian",
       "transition": "fade_out",
       "duration": 0.3,
-      "next": "n50"
+      "next": "n51"
     },
     {
       "id": "n50",
-      "type": "action",
-      "action": "hide_character",
-      "character": "hanami",
-      "transition": "fade_out",
-      "duration": 0.3,
+      "type": "narration",
+      "text": "[UNUSED - hanami hide_character removed, Hanami died in Act 3]",
       "next": "n51"
     },
     {

@@ -42,7 +42,7 @@
     {
       "id": "n6",
       "type": "if",
-      "condition": "tiffany_rot >= 7",
+      "condition": "tiffany_rot <= 0",
       "trueNode": "n7_tiffany_broken",
       "falseNode": "n7_tiffany_calm"
     },
@@ -93,7 +93,7 @@
       "character": "tiffany",
       "transition": "fade_out",
       "duration": 0.3,
-      "next": "n10"
+      "next": "n11"
     },
     {
       "id": "n10",
@@ -107,15 +107,9 @@
     },
     {
       "id": "n11",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "gentle",
-      "text": "Music never really ends. It just... resonates.",
-      "text_effect": "wave",
-      "effect_amplitude": 2.0,
-      "effect_speed": 1.5,
-      "next": "n12"
+      "type": "narration",
+      "text": "You remember what she said. \"Music never really ends. It just... resonates.\" Her words hang in the air.",
+      "next": "n13"
     },
     {
       "id": "n12",
@@ -250,7 +244,7 @@
     {
       "id": "n29_ovation",
       "type": "narration",
-      "text": "I look at the others. Hanami is crying. Cassian is pretending he isn't. Laura is beaming. Tiffany...",
+      "text": "I look at the others. There is a space next to Cassian where she should be. Cassian is pretending he isn't crying. Laura is beaming. Tiffany...",
       "next": "n30_ovation"
     },
     {

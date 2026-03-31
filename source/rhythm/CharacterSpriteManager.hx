@@ -1,5 +1,6 @@
 package rhythm;
 
+import core.content.ContentRepository;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import haxe.Json;
@@ -129,13 +130,13 @@ class CharacterSpriteManager
 
         try
         {
-            if (!Assets.exists(path))
+            if (!ContentRepository.exists(path))
             {
                 trace('[CharacterSpriteManager] ERROR: Character JSON not found: ${path}');
                 return null;
             }
 
-            var jsonText = Assets.getText(path);
+            var jsonText = ContentRepository.readText(path);
             var data:RhythmCharacterData = Json.parse(jsonText);
 
             trace('[CharacterSpriteManager] Character data loaded: ${characterID}');

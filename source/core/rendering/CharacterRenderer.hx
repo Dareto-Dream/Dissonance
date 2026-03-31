@@ -1,5 +1,6 @@
 package core.rendering;
 
+import core.content.ContentRepository;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup;
@@ -83,6 +84,7 @@ class CharacterRenderer extends FlxGroup
 	// =========================================================================
 	public var currentPose:String;
 	public var isFlipped:Bool = false;
+	public var currentTint:Int = FlxColor.WHITE;
 
 	/** Whether rhythm-mode atlases are active. */
 	public var isRhythmMode:Bool = false;
@@ -137,7 +139,7 @@ class CharacterRenderer extends FlxGroup
 		var jsonPath = 'assets/data/characters/$characterName/poses.json';
 		try
 		{
-			var jsonText = Assets.getText(jsonPath);
+			var jsonText = ContentRepository.readText(jsonPath);
 			poseData = Json.parse(jsonText);
 
 			if (poseData == null) throw "Parsed JSON is null";
@@ -471,12 +473,14 @@ class CharacterRenderer extends FlxGroup
 	/** Apply a color tint to all layers. Pass FlxColor.WHITE to clear. */
 	public function setTint(color:Int):Void
 	{
+		currentTint = color;
 		for (spr in vnLayers)     spr.color = color;
 		for (spr in rhythmLayers) spr.color = color;
 	}
 
 	public function clearTint():Void
 	{
+		currentTint = FlxColor.WHITE;
 		setTint(FlxColor.WHITE);
 	}
 

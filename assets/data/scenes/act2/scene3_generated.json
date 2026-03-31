@@ -223,7 +223,7 @@
       "action": "set_variable",
       "variable": "cassian_rot",
       "value": 1,
-      "op": "subtract",
+      "op": "add",
       "next": "n29_empathy_react"
     },
     {
@@ -248,7 +248,7 @@
       "action": "set_variable",
       "variable": "cassian_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n28_challenge_react"
     },
     {
@@ -404,7 +404,7 @@
       "action": "set_variable",
       "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n49"
     },
     {

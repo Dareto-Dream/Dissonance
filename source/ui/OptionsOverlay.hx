@@ -1,16 +1,12 @@
 package ui;
 
-import core.audio.AudioSystem;
-import core.dialogue.DialogueSystem;
+import core.state.OptionsService;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import util.MobileSupport;
-import vn.Constants;
 
 /**
  * OptionsOverlay - In-game options menu.
@@ -20,28 +16,24 @@ import vn.Constants;
  */
 class OptionsOverlay extends FlxGroup {
     private static inline var PURPLE:Int = 0xFF8A2BE2;
-    private static inline var SAVE_KEY:String = "dissonance_options";
 
     public var isOpen(default, null):Bool = false;
 
     private var backdrop:FlxSprite;
     private var title:FlxText;
     private var sliders:Array<OptionSlider>;
+    private var autoAdvanceBtn:FlxSprite;
+    private var autoAdvanceText:FlxText;
+    private var fullscreenBtn:FlxSprite;
+    private var fullscreenText:FlxText;
     private var closeBtn:FlxSprite;
     private var closeBtnText:FlxText;
     private var onClose:Void->Void;
 
-    // Saved option values
-    public static var textSpeed:Float = 30.0;
-    public static var musicVolume:Float = 0.7;
-    public static var sfxVolume:Float = 0.8;
-    public static var autoAdvanceSpeed:Float = 2.0;
-    public static var autoAdvanceEnabled:Bool = false;
-
     public function new(onClose:Void->Void) {
         super();
         this.onClose = onClose;
-        loadOptions();
+        OptionsService.ensureLoaded();
         createUI();
     }
 
@@ -69,34 +61,55 @@ class OptionsOverlay extends FlxGroup {
         var sliderX = Std.int((sw - sliderWidth) / 2);
 
         // Text Speed
-        addSlider(sliderX, startY, sliderWidth, sliderHeight, "Text Speed", textSpeed, 10, 80, (v) -> {
-            textSpeed = v;
-            saveOptions();
+        addSlider(sliderX, startY, sliderWidth, sliderHeight, "Text Speed", OptionsService.textSpeed, 10, 80, (v) -> {
+            OptionsService.setTextSpeed(v);
         });
 
         // Music Volume
-        addSlider(sliderX, startY + sliderSpacing, sliderWidth, sliderHeight, "Music Volume", musicVolume, 0, 1, (v) -> {
-            musicVolume = v;
-            if (FlxG.sound.music != null) FlxG.sound.music.volume = v;
-            saveOptions();
+        addSlider(sliderX, startY + sliderSpacing, sliderWidth, sliderHeight, "Music Volume", OptionsService.musicVolume, 0, 1, (v) -> {
+            OptionsService.setMusicVolume(v);
         });
 
         // SFX Volume
-        addSlider(sliderX, startY + sliderSpacing * 2, sliderWidth, sliderHeight, "SFX Volume", sfxVolume, 0, 1, (v) -> {
-            sfxVolume = v;
-            saveOptions();
+        addSlider(sliderX, startY + sliderSpacing * 2, sliderWidth, sliderHeight, "SFX Volume", OptionsService.sfxVolume, 0, 1, (v) -> {
+            OptionsService.setSfxVolume(v);
         });
 
         // Auto-advance Speed
-        addSlider(sliderX, startY + sliderSpacing * 3, sliderWidth, sliderHeight, "Auto-Advance Delay", autoAdvanceSpeed, 0.5, 5, (v) -> {
-            autoAdvanceSpeed = v;
-            saveOptions();
+        addSlider(sliderX, startY + sliderSpacing * 3, sliderWidth, sliderHeight, "Auto-Advance Delay", OptionsService.autoAdvanceDelay, 0.5, 5, (v) -> {
+            OptionsService.setAutoAdvanceDelay(v);
         });
+
+        var toggleWidth = Std.int(sliderWidth / 2) - 10;
+        var toggleHeight = mobile ? 44 : 32;
+        var toggleY = startY + sliderSpacing * 4 + 8;
+
+        autoAdvanceBtn = new FlxSprite(sliderX, toggleY);
+        autoAdvanceBtn.makeGraphic(toggleWidth, toggleHeight, FlxColor.fromRGB(30, 20, 50));
+        autoAdvanceBtn.scrollFactor.set(0, 0);
+        add(autoAdvanceBtn);
+
+        autoAdvanceText = new FlxText(autoAdvanceBtn.x, autoAdvanceBtn.y, toggleWidth, "");
+        autoAdvanceText.setFormat(null, mobile ? 18 : 14, PURPLE, CENTER);
+        autoAdvanceText.scrollFactor.set(0, 0);
+        autoAdvanceText.y = autoAdvanceBtn.y + (toggleHeight - autoAdvanceText.height) / 2;
+        add(autoAdvanceText);
+
+        fullscreenBtn = new FlxSprite(sliderX + toggleWidth + 20, toggleY);
+        fullscreenBtn.makeGraphic(toggleWidth, toggleHeight, FlxColor.fromRGB(30, 20, 50));
+        fullscreenBtn.scrollFactor.set(0, 0);
+        add(fullscreenBtn);
+
+        fullscreenText = new FlxText(fullscreenBtn.x, fullscreenBtn.y, toggleWidth, "");
+        fullscreenText.setFormat(null, mobile ? 18 : 14, PURPLE, CENTER);
+        fullscreenText.scrollFactor.set(0, 0);
+        fullscreenText.y = fullscreenBtn.y + (toggleHeight - fullscreenText.height) / 2;
+        add(fullscreenText);
 
         // Close button
         var closeBtnWidth = mobile ? 200 : 150;
         var closeBtnHeight = mobile ? 50 : 36;
-        var closeBtnY = sh - (mobile ? 80 : 60);
+        var closeBtnY = sh - (mobile ? 60 : 40);
 
         closeBtn = new FlxSprite(Std.int((sw - closeBtnWidth) / 2), closeBtnY);
         closeBtn.makeGraphic(closeBtnWidth, closeBtnHeight, FlxColor.fromRGB(30, 20, 50));
@@ -109,6 +122,7 @@ class OptionsOverlay extends FlxGroup {
         closeBtnText.y = closeBtn.y + (closeBtnHeight - closeBtnText.height) / 2;
         add(closeBtnText);
 
+        refreshToggleLabels();
         isOpen = true;
     }
 
@@ -130,6 +144,16 @@ class OptionsOverlay extends FlxGroup {
         }
         #end
 
+        if (MobileSupport.pointerJustPressedOver(autoAdvanceBtn) || MobileSupport.pointerJustPressedOver(autoAdvanceText)) {
+            OptionsService.toggleAutoAdvance();
+            refreshToggleLabels();
+        }
+
+        if (MobileSupport.pointerJustPressedOver(fullscreenBtn) || MobileSupport.pointerJustPressedOver(fullscreenText)) {
+            OptionsService.toggleFullscreen();
+            refreshToggleLabels();
+        }
+
         if (MobileSupport.pointerJustPressedOver(closeBtn)) {
             close();
         }
@@ -140,32 +164,13 @@ class OptionsOverlay extends FlxGroup {
         if (onClose != null) onClose();
     }
 
-    // ========================================================================
-    // Persistence
-    // ========================================================================
-
-    public static function loadOptions():Void {
-        FlxG.save.bind(SAVE_KEY);
-        var data:Dynamic = Reflect.field(FlxG.save.data, "options");
-        if (data == null) return;
-
-        if (data.textSpeed != null) textSpeed = data.textSpeed;
-        if (data.musicVolume != null) musicVolume = data.musicVolume;
-        if (data.sfxVolume != null) sfxVolume = data.sfxVolume;
-        if (data.autoAdvanceSpeed != null) autoAdvanceSpeed = data.autoAdvanceSpeed;
-        if (data.autoAdvanceEnabled != null) autoAdvanceEnabled = data.autoAdvanceEnabled;
-    }
-
-    private static function saveOptions():Void {
-        FlxG.save.bind(SAVE_KEY);
-        Reflect.setField(FlxG.save.data, "options", {
-            textSpeed: textSpeed,
-            musicVolume: musicVolume,
-            sfxVolume: sfxVolume,
-            autoAdvanceSpeed: autoAdvanceSpeed,
-            autoAdvanceEnabled: autoAdvanceEnabled
-        });
-        FlxG.save.flush();
+    private function refreshToggleLabels():Void {
+        if (autoAdvanceText != null) {
+            autoAdvanceText.text = 'AUTO: ${OptionsService.autoAdvanceEnabled ? "ON" : "OFF"}';
+        }
+        if (fullscreenText != null) {
+            fullscreenText.text = 'FULLSCREEN: ${OptionsService.fullscreen ? "ON" : "OFF"}';
+        }
     }
 }
 
@@ -247,12 +252,12 @@ private class OptionSlider extends FlxGroup {
 
             var pointerX:Float = 0;
             #if FLX_MOUSE
-            pointerX = FlxG.mouse.screenX;
+            pointerX = FlxG.mouse.viewX;
             #end
             #if FLX_TOUCH
             for (touch in FlxG.touches.list) {
                 if (touch != null && touch.pressed) {
-                    pointerX = touch.screenX;
+                    pointerX = touch.viewX;
                     break;
                 }
             }

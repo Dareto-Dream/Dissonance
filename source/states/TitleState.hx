@@ -2,20 +2,33 @@ package states;
 
 import core.audio.AudioSystem;
 import core.state.GameState;
+import core.state.OptionsService;
+import core.state.ProgressService;
+import core.state.SaveRestoreContext;
+import core.state.SaveSystem;
+import core.state.SystemOverrideService;
 import dev.DevTools;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import openfl.Assets;
 import rhythm.RhythmState;
+import rhythm.RhythmCompletionBridge;
+#if desktop
+import states.EditorState;
+#end
+import states.ExtrasState;
 import ui.MenuButton;
+import ui.OptionsOverlay;
 import ui.SaveLoadOverlay;
 import util.MobileSupport;
+import vn.VNReturnContext;
 
 class TitleState extends FlxState
 {
@@ -32,6 +45,7 @@ class TitleState extends FlxState
 	private var bgPulseTimer:Float = 0;
 	private var isTransitioning:Bool = false;
 	private var saveLoadOverlay:SaveLoadOverlay;
+	private var optionsOverlay:OptionsOverlay;
 
 	override public function create():Void
 	{
@@ -40,6 +54,11 @@ class TitleState extends FlxState
 		#if FLX_MOUSE
 		FlxG.mouse.visible = !MobileSupport.isMobile();
 		#end
+
+		OptionsService.ensureLoaded();
+		OptionsService.apply();
+		ProgressService.ensureLoaded();
+		SystemOverrideService.clearAll();
 
 		// Background
 		createBackground();
@@ -112,27 +131,46 @@ class TitleState extends FlxState
 
 		var menuX = MobileSupport.titleMenuX();
 
-		var playBtn = new MenuButton(menuX, buttonY, "PLAY", function() {
+		var menuIndex = 0;
+		if (SaveSystem.hasAutoSave())
+		{
+			menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "CONTINUE", function() {
+				continueGame();
+			}));
+			menuIndex++;
+		}
+
+		menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "PLAY", function() {
 			startGame();
-		});
-		menuButtons.add(playBtn);
+		}));
+		menuIndex++;
 
-		var loadBtn = new MenuButton(menuX, buttonY + buttonSpacing, "LOAD GAME", function() {
+		menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "LOAD GAME", function() {
 			openLoadOverlay();
-		});
-		menuButtons.add(loadBtn);
+		}));
+		menuIndex++;
 
-		var saveBtn = new MenuButton(menuX, buttonY + buttonSpacing * 2, "SAVE GAME", function() {
-			showStatus("Save game is only available in-story.");
-		});
-		menuButtons.add(saveBtn);
+		if (ProgressService.extrasUnlocked)
+		{
+			menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "EXTRAS", function() {
+				openExtras();
+			}));
+			menuIndex++;
+		}
 
-		var optionsBtn = new MenuButton(menuX, buttonY + buttonSpacing * 3, "OPTIONS", function() {
-			showStatus("Options are not available yet.");
-		});
-		menuButtons.add(optionsBtn);
+		menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "OPTIONS", function() {
+			openOptionsOverlay();
+		}));
+		menuIndex++;
 
-		statusText = new FlxText(menuX, buttonY + buttonSpacing * 4 + 12, FlxG.width - Std.int(menuX * 2), "");
+		#if desktop
+		menuButtons.add(new MenuButton(menuX, buttonY + buttonSpacing * menuIndex, "EDITOR", function() {
+			openEditor();
+		}));
+		menuIndex++;
+		#end
+
+		statusText = new FlxText(menuX, buttonY + buttonSpacing * menuButtons.length + 12, FlxG.width - Std.int(menuX * 2), "");
 		statusText.setFormat(null, MobileSupport.titleStatusFontSize(), FlxColor.fromRGB(220, 210, 255), LEFT);
 		statusText.alpha = 0;
 		add(statusText);
@@ -155,6 +193,11 @@ class TitleState extends FlxState
 		if (DevTools.ENABLED)
 		{
 			createDevOverlay();
+		}
+
+		if (ProgressService.gameCompleted)
+		{
+			showStatus("Main route cleared. Extras unlocked.");
 		}
 
 		// Play title music using AudioSystem (not FlxG.sound)
@@ -207,14 +250,15 @@ class TitleState extends FlxState
 			var duration = FlxG.random.float(8, 15);
 			var targetY = particle.y - FlxG.random.float(100, 300);
 			var targetX = particle.x + FlxG.random.float(-50, 50);
+			var currentParticle = particle;
 
-			FlxTween.tween(particle, {y: targetY, x: targetX}, duration, {
+			FlxTween.tween(currentParticle, {y: targetY, x: targetX}, duration, {
 				type: LOOPING,
 				ease: FlxEase.sineInOut,
 				onComplete: function(_) {
 					// Reset particle to bottom
-					particle.y = FlxG.height + 10;
-					particle.x = FlxG.random.float(0, FlxG.width);
+					currentParticle.y = FlxG.height + 10;
+					currentParticle.x = FlxG.random.float(0, FlxG.width);
 				}
 			});
 		}
@@ -237,6 +281,11 @@ class TitleState extends FlxState
 
 		// If save/load overlay is active, let it handle input
 		if (saveLoadOverlay != null && saveLoadOverlay.isOpen)
+		{
+			return;
+		}
+
+		if (optionsOverlay != null && optionsOverlay.isOpen)
 		{
 			return;
 		}
@@ -270,6 +319,13 @@ class TitleState extends FlxState
 		{
 			menuButtons.members[selectedIndex].onClick();
 		}
+
+		#if desktop
+		if (FlxG.keys.justPressed.SEVEN || FlxG.keys.justPressed.NUMPADSEVEN)
+		{
+			openEditor();
+		}
+		#end
 		#end
 	}
 
@@ -321,6 +377,11 @@ class TitleState extends FlxState
 		}
 
 		isTransitioning = true;
+		GameState.reset();
+		SaveRestoreContext.clear();
+		SystemOverrideService.clearAll();
+		VNReturnContext.clear();
+		RhythmCompletionBridge.clear();
 
 		// Fade out title music before transitioning
 		AudioSystem.fadeOutMusic(0.5);
@@ -328,6 +389,82 @@ class TitleState extends FlxState
 		// Transition to VNState
 		FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function() {
 			FlxG.switchState(() -> new VNState("scenes/act1/scene1.json"));
+		});
+	}
+
+	#if desktop
+	private function openEditor():Void
+	{
+		if (isTransitioning)
+		{
+			return;
+		}
+
+		isTransitioning = true;
+		AudioSystem.fadeOutMusic(0.2);
+		FlxG.camera.fade(FlxColor.BLACK, 0.2, false, function() {
+			FlxG.switchState(() -> new EditorState());
+		});
+	}
+	#else
+	private function openEditor():Void
+	{
+		showStatus("Editor is only available on desktop builds.");
+	}
+	#end
+
+	private function openOptionsOverlay():Void
+	{
+		if (optionsOverlay != null)
+		{
+			remove(optionsOverlay, true);
+			optionsOverlay.destroy();
+		}
+
+		optionsOverlay = new OptionsOverlay(() -> {
+			if (optionsOverlay != null)
+			{
+				remove(optionsOverlay, true);
+				optionsOverlay.destroy();
+				optionsOverlay = null;
+			}
+		});
+
+		add(optionsOverlay);
+	}
+
+	private function continueGame():Void
+	{
+		if (isTransitioning)
+		{
+			return;
+		}
+
+		var data = SaveSystem.loadAutoSave();
+		if (data == null)
+		{
+			showStatus("No autosave found.");
+			return;
+		}
+
+		isTransitioning = true;
+		AudioSystem.fadeOutMusic(0.3);
+		FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+			FlxG.switchState(() -> new VNState(GameState.get().currentScene, null, GameState.get().currentNode));
+		});
+	}
+
+	private function openExtras():Void
+	{
+		if (isTransitioning)
+		{
+			return;
+		}
+
+		isTransitioning = true;
+		AudioSystem.fadeOutMusic(0.2);
+		FlxG.camera.fade(FlxColor.BLACK, 0.2, false, function() {
+			FlxG.switchState(() -> new ExtrasState());
 		});
 	}
 
@@ -383,6 +520,11 @@ class TitleState extends FlxState
 		isTransitioning = true;
 		var scene = DevTools.getSelectedScene();
 		DevTools.notify('Loading scene from title: ${scene}');
+		GameState.reset();
+		SaveRestoreContext.clear();
+		SystemOverrideService.clearAll();
+		VNReturnContext.clear();
+		RhythmCompletionBridge.clear();
 		AudioSystem.fadeOutMusic(0.25);
 		FlxG.camera.fade(FlxColor.BLACK, 0.25, false, function() {
 			FlxG.switchState(() -> new VNState(scene));

@@ -36,87 +36,55 @@
     {
       "id": "n5",
       "type": "narration",
-      "text": "The door behind me opens.",
-      "next": "n6"
-    },
-    {
-      "id": "n6",
-      "type": "action",
-      "action": "show_character",
-      "character": "hanami",
-      "pose": "gentle",
-      "transition": "fade",
-      "duration": 0.5,
+      "text": "I lean against the railing, looking out at the fading light. It's quiet up here. It used to feel like her place too.",
       "next": "n7"
     },
     {
       "id": "n7",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "gentle",
-      "text": "I thought I'd find you up here.",
+      "type": "narration",
+      "text": "I remember the last time Hanami was up here with me. She said she thought she'd always find me in a place like this.",
       "next": "n8"
     },
     {
       "id": "n8",
-      "type": "dialogue",
-      "speaker": "MC",
-      "text": "Hanami. How are you feeling?",
+      "type": "narration",
+      "text": "I never got to ask her how she was really feeling. Not near the end. I keep thinking about that.",
       "next": "n9"
     },
     {
       "id": "n9",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "smile",
-      "text": "Tired. But that's nothing new.",
+      "type": "narration",
+      "text": "She always said she was tired — but she said it the way someone does when they don't want you to worry.",
       "next": "n10"
     },
     {
       "id": "n10",
       "type": "narration",
-      "text": "She leans against the railing, looking out at the fading light. There's something peaceful about her, even now.",
+      "text": "I can still picture her leaning against this railing, looking out at the light just like this. There was something peaceful about her, even then.",
       "next": "n11"
     },
     {
       "id": "n11",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "gentle",
-      "text": "Whatever happens with the club... I'm glad I met all of you. Music gave me something to hold onto when everything else felt uncertain.",
+      "type": "narration",
+      "text": "In her notebook — the one Tiffany found — she wrote: 'Whatever happens with the club... I'm glad I met all of you. Music gave me something to hold onto when everything else felt uncertain.'",
       "next": "n12"
     },
     {
       "id": "n12",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "smile",
-      "text": "So thank you. For that.",
+      "type": "narration",
+      "text": "The last line just said: 'So thank you. For that.'",
       "next": "n13"
     },
     {
       "id": "n13",
       "type": "narration",
-      "text": "She smiles, and for a moment, the weight of everything lifts just a little.",
-      "next": "n14"
-    },
-    {
-      "id": "n14",
-      "type": "action",
-      "action": "hide_character",
-      "character": "hanami",
-      "transition": "fade_out",
-      "duration": 0.4,
+      "text": "I've read it so many times I could recite it. But standing here, it still lifts the weight just a little.",
       "next": "n15"
     },
     {
       "id": "n15",
       "type": "narration",
-      "text": "She heads back inside. A few minutes later, the door opens again.",
+      "text": "The door behind me opens.",
       "next": "n16"
     },
     {
@@ -135,7 +103,7 @@
       "speaker": "Cassian",
       "character": "cassian",
       "pose": "neutral",
-      "text": "Hanami said you were brooding up here.",
+      "text": "Figured I'd find you brooding up here.",
       "next": "n18"
     },
     {
@@ -243,7 +211,7 @@
     {
       "id": "n31",
       "type": "if",
-      "condition": "tiffany_rot >= 7",
+      "condition": "tiffany_rot <= 0",
       "trueNode": "n32_tiffany_broken",
       "falseNode": "n32_tiffany_sincere"
     },
@@ -333,7 +301,7 @@
     {
       "id": "n41",
       "type": "narration",
-      "text": "One final performance. Not to save the club. Not to prove anything. For ourselves.",
+      "text": "One final performance. Not to save the club. Not to prove anything. For ourselves. For her.",
       "next": "n42"
     },
     {
@@ -356,7 +324,7 @@
     {
       "id": "n44",
       "type": "narration",
-      "text": "As if on cue, we hear Hanami, Cassian, and Laura coming back through the rooftop door. They already know.",
+      "text": "As if on cue, Cassian and Laura come back through the rooftop door. They already know.",
       "next": "n45"
     },
     {
@@ -370,13 +338,13 @@
     {
       "id": "n46",
       "type": "narration",
-      "text": "Someone — Laura, maybe — starts humming. Then Hanami joins in. Then Cassian, with a quiet guitar strum he pretends not to care about.",
+      "text": "Someone — Laura, maybe — starts humming. Then Cassian, with a quiet guitar strum he pretends not to care about. You remember Hanami doing this once, filling in the spaces between the notes.",
       "next": "n47"
     },
     {
       "id": "n47",
       "type": "narration",
-      "text": "Five people on a rooftop, holding onto a melody as the stars come out. It feels like a promise.",
+      "text": "Four people on a rooftop, holding onto a melody as the stars come out. It feels like a promise. And like a goodbye we never finished saying.",
       "next": "n48"
     },
     {

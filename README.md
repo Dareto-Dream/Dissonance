@@ -4,9 +4,18 @@ A modular visual novel framework built on HaxeFlixel 5.x with node-based JSON sc
 
 ---
 
+## Authoring Workflow
+
+- Desktop builds now include a built-in editor hub. Open it from the title screen with `7` or the `EDITOR` menu entry.
+- The built-in editor supports structured story and chart editing, validation, scene preview, chart playtesting, placement editing, character/pose JSON editing, XML inspection, condition evaluation, and text-effect preview.
+- The `python/` toolchain is now legacy reference material rather than the main supported workflow.
+
+---
+
 ## Core Features
 
 * **Node-based JSON scripting** - Lightweight, readable scene format
+* **Built-in desktop editor** - In-game authoring hub for story, charts, placements, characters, XML, and preview tools
 * **Advanced audio system** - Music transitions with fade, cut, and wait_till_end modes
 * **Text effects** - Six animation types (shake, glitch, wave, rainbow, fade, typewriter)
 * **Character system** - Multi-layer sprites with poses, emphasis, and custom positioning
@@ -14,6 +23,7 @@ A modular visual novel framework built on HaxeFlixel 5.x with node-based JSON sc
 * **Screen effects** - Shake, flash, and glitch effects
 * **Conditional branching** - Dynamic story paths based on game state
 * **Rhythm game integration** - Seamless transitions between VN and gameplay
+* **Persistent progress** - Autosave continue, completion flow, extras unlocks, and chapter select
 
 ---
 
@@ -321,6 +331,8 @@ Ends scene and loads next.
 }
 ```
 
+If `next_scene` is omitted, the engine now treats the node as campaign completion: it autosaves, persists completion progress, unlocks extras/chapter select, and routes through the completion flow.
+
 ---
 
 # Audio System
@@ -375,8 +387,9 @@ if (AudioSystem.isMusicPlaying()) { }
 // Get current track
 var track = AudioSystem.getCurrentTrack();
 
-// Set volume
-AudioSystem.setVolume(0.5);
+// Set music and SFX bus volume
+AudioSystem.setMusicVolume(0.5);
+AudioSystem.setSfxVolume(0.8);
 ```
 
 ## Default BGM
@@ -811,7 +824,8 @@ VNState must call `DialogueSystem.update(elapsed)` in its update loop for text e
 8. DialogueSystem updates text effects each frame
 9. SceneRunner advances to next node
 10. Process repeats until end node
-11. SceneManager loads next scene
+11. SceneManager autosaves and loads the next scene, or routes to completion on a bare `end`
+12. Completion unlocks extras and returns through title / chapter-select flow
 
 ---
 
@@ -878,6 +892,9 @@ Press F12 in browser to view:
 ## Completed Systems
 
 - AudioSystem (music transitions, sound effects)
+- Built-in desktop editor hub
+- Structured story editor with validation + preview hooks
+- Structured chart editor with validation + playtest hooks
 - DialogueSystem (text display with effects)
 - TextEffectSystem (6 animation types)
 - BackgroundSystem (7 transition modes)
@@ -888,14 +905,16 @@ Press F12 in browser to view:
 - SceneParser (JSON validation)
 - SceneRunner (node execution)
 - VNCommands (action routing)
-- TitleState (menu and audio integration)
+- TitleState (continue, extras, options, editor access)
 - VNState (scene rendering)
+- SaveSystem (typed snapshots + autosave)
+- OptionsService / ProgressService
+- CompletionState / ExtrasState
 
 ## In Development
 
-- ChoiceSystem UI polish
-- ConditionParser expression support
-- RhythmBridge gameplay integration
+- Deeper graph/timeline authoring ergonomics
+- Additional meta systems and glitch/override behaviors
 
 ---
 

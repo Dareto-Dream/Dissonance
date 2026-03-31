@@ -8,8 +8,13 @@ import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
 import core.scene.SceneRunner;
 import core.state.GameState;
+import core.state.ProgressService;
+import core.state.SaveSystem;
+import core.state.SystemOverrideService;
+import flixel.FlxG;
 import flixel.FlxState;
 import flixel.util.FlxColor;
+import states.CompletionState;
 import util.SceneManager;
 
 class VNCommands {
@@ -162,7 +167,8 @@ class VNCommands {
                 EffectSystem.flash(node.color, node.duration);
 
             case "glitch":
-                EffectSystem.glitch(node.intensity, node.duration);
+                var intensity = node.intensity != null ? node.intensity : 1.0;
+                EffectSystem.glitch(intensity * SystemOverrideService.getGlitchMultiplier(), node.duration);
 
             // ── Audio ────────────────────────────────────────────────────
             case "play_sound":
@@ -217,6 +223,12 @@ class VNCommands {
                 var value:Bool = node.value != null ? (node.value == true) : true;
                 state.setFlag(flagName, value);
 
+            case "set_system_override":
+                SystemOverrideService.applyFromNode(node);
+
+            case "clear_system_override":
+                SystemOverrideService.clear(node.override_id != null ? Std.string(node.override_id) : null);
+
             default:
                 trace('[VNCommands] WARNING: Unknown action "${node.action}" — skipping.');
         }
@@ -269,7 +281,20 @@ class VNCommands {
     // ------------------------------------------------------------------
 
     public static function endScene(node:Dynamic, runner:SceneRunner):Void {
-        SceneManager.loadScene(node.next_scene);
+        if (node.next_scene != null && Std.string(node.next_scene) != "")
+        {
+            SceneManager.loadScene(node.next_scene);
+            return;
+        }
+
+        var state = GameState.get();
+        state.setFlag("game_completed", true);
+        SaveSystem.autoSave();
+        ProgressService.unlockMainEnding(node.ending_id != null ? Std.string(node.ending_id) : "main");
+        AudioSystem.fadeOutMusic(0.5);
+        FlxG.camera.fade(FlxColor.BLACK, 0.6, false, function() {
+            FlxG.switchState(() -> new CompletionState());
+        });
     }
 
     // ------------------------------------------------------------------

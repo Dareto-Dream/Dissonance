@@ -261,7 +261,7 @@
       "action": "set_variable",
       "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n27_cassian_react"
     },
     {

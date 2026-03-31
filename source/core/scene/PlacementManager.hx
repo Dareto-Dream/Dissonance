@@ -1,7 +1,7 @@
 package core.scene;
 
+import core.content.ContentRepository;
 import haxe.Json;
-import openfl.utils.Assets;
 import vn.Constants;
 
 /**
@@ -39,12 +39,12 @@ class PlacementManager
     {
         var fullPath = "assets/data/" + path;
 
-        if (!Assets.exists(fullPath))
+        if (!ContentRepository.exists(fullPath))
             return false;
 
         try
         {
-            var raw:Dynamic = Json.parse(Assets.getText(fullPath));
+            var raw:Dynamic = Json.parse(ContentRepository.readText(fullPath));
             data.clear();
 
             for (nodeId in Reflect.fields(raw))

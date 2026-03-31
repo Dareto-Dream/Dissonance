@@ -58,7 +58,7 @@
       "id": "n8",
       "type": "narration",
       "text": "The club room is decorated. Someone hung paper stars from the ceiling and arranged the chairs in a half-circle. It looks beautiful. It looks like a farewell.",
-      "next": "n9"
+      "next": "n10"
     },
     {
       "id": "n9",
@@ -73,17 +73,14 @@
     {
       "id": "n10",
       "type": "narration",
-      "text": "Hanami is already here. She's paler than usual, but her eyes are bright.",
+      "text": "There is a chair set apart from the others — no one sat in it, no one moved it. Nobody had to say anything. We all knew.",
       "next": "n11"
     },
     {
       "id": "n11",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "smile",
-      "text": "I wouldn't miss this for anything.",
-      "next": "n12"
+      "type": "narration",
+      "text": "I can still hear her voice, clear as the day she said it. \"I wouldn't miss this for anything.\" She meant it then. I have to believe she would have meant it now.",
+      "next": "n13"
     },
     {
       "id": "n12",
@@ -94,11 +91,8 @@
     },
     {
       "id": "n13",
-      "type": "dialogue",
-      "speaker": "Hanami",
-      "character": "hanami",
-      "pose": "gentle",
-      "text": "I'm okay. I promise. Some things are worth being a little tired for.",
+      "type": "narration",
+      "text": "Some things are worth being a little tired for. She told me that once. I hold onto it.",
       "next": "n14"
     },
     {
@@ -176,7 +170,7 @@
     {
       "id": "n23",
       "type": "if",
-      "condition": "tiffany_rot >= 7",
+      "condition": "tiffany_rot <= 0",
       "trueNode": "n24_tiffany_broken",
       "falseNode": "n24_tiffany_grateful"
     },
@@ -305,7 +299,7 @@
       "character": "cassian",
       "transition": "fade_out",
       "duration": 0.3,
-      "next": "n38"
+      "next": "n39"
     },
     {
       "id": "n38",

@@ -83,7 +83,10 @@ class PauseOverlay extends FlxGroup {
     }
 
     public function toggle():Void {
-        if (saveLoadOverlay != null && saveLoadOverlay.isOpen) return;
+        if ((saveLoadOverlay != null && saveLoadOverlay.isOpen)
+            || (optionsOverlay != null && optionsOverlay.isOpen)) {
+            return;
+        }
 
         if (isPaused) resume();
         else pause();
@@ -101,9 +104,7 @@ class PauseOverlay extends FlxGroup {
         updateSelection();
 
         // Pause music
-        if (FlxG.sound.music != null && FlxG.sound.music.playing) {
-            FlxG.sound.music.pause();
-        }
+        AudioSystem.pauseMusic();
     }
 
     public function resume():Void {
@@ -128,26 +129,18 @@ class PauseOverlay extends FlxGroup {
         }
 
         // Resume music
-        if (FlxG.sound.music != null && !FlxG.sound.music.playing) {
-            FlxG.sound.music.resume();
-        }
+        AudioSystem.resumeMusic();
     }
 
     override public function update(elapsed:Float):Void {
         if (!isPaused) return;
 
-        // Handle save/load overlay first
-        if (saveLoadOverlay != null && saveLoadOverlay.isOpen) {
-            saveLoadOverlay.update(elapsed);
-            return;
-        }
-
-        if (optionsOverlay != null) {
-            optionsOverlay.update(elapsed);
-            return;
-        }
-
         super.update(elapsed);
+
+        if ((saveLoadOverlay != null && saveLoadOverlay.isOpen)
+            || (optionsOverlay != null && optionsOverlay.isOpen)) {
+            return;
+        }
 
         #if FLX_KEYBOARD
         if (FlxG.keys.justPressed.ESCAPE) {

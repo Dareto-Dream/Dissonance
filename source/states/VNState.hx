@@ -6,8 +6,13 @@ import core.dialogue.DialogueSystem;
 import core.effects.EffectSystem;
 import core.rendering.BackgroundSystem;
 import core.rendering.CharacterSystem;
+import core.rendering.CharacterSystem.CharacterSnapshot;
 import core.scene.SceneRunner;
 import core.state.GameState;
+import core.state.OptionsService;
+import core.state.SaveRestoreContext;
+import core.state.SaveTypes.VisualSnapshot;
+import core.state.SystemOverrideService;
 import dev.DevTools;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -64,11 +69,18 @@ class VNState extends FlxState
 		FlxG.mouse.visible = !MobileSupport.isMobile();
 		#end
 
+		OptionsService.ensureLoaded();
+
 		var returnContext:VNReturnContext = null;
+		var restoreSnapshot:VisualSnapshot = null;
 		if (VNReturnContext.hasPending())
 		{
 			returnContext = VNReturnContext.consume();
 			AudioSystem.onRhythmReturn();
+		}
+		if (SaveRestoreContext.hasPending())
+		{
+			restoreSnapshot = SaveRestoreContext.consume();
 		}
 
 		var sceneToLoad:String;
@@ -143,6 +155,7 @@ class VNState extends FlxState
 		ChoiceSystem.init(uiGroup);
 		EffectSystem.init(uiGroup);
 		AudioSystem.init();
+		OptionsService.apply();
 
 		if (defaultBGM != null && defaultBGM != "")
 		{
@@ -174,8 +187,12 @@ class VNState extends FlxState
 			add(pauseButton);
 		}
 
-		// Restore pre-rhythm visual state (background + character positions/poses)
-		if (returnContext != null)
+		// Restore saved or pre-rhythm visual state (background + character positions/poses)
+		if (restoreSnapshot != null)
+		{
+			applyVisualSnapshot(restoreSnapshot);
+		}
+		else if (returnContext != null)
 		{
 			if (returnContext.bgPath != null && returnContext.bgPath != "")
 				BackgroundSystem.set(returnContext.bgPath, "cut");
@@ -211,24 +228,31 @@ class VNState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		var wasPaused = pauseOverlay != null && pauseOverlay.isPaused;
+		var historyWasOpen = dialogueHistory != null && dialogueHistory.isOpen;
+		var resultsWereVisible = rhythmResultsOverlay != null && rhythmResultsOverlay.visible;
 		super.update(elapsed);
 
 		// Pause toggle: ESC key or mobile pause button
 		#if FLX_KEYBOARD
-		if (FlxG.keys.justPressed.ESCAPE)
+		if (!wasPaused && !historyWasOpen && !resultsWereVisible
+			&& !pauseOverlay.isPaused && FlxG.keys.justPressed.ESCAPE
+			&& SystemOverrideService.canPause())
 		{
-			pauseOverlay.toggle();
+			pauseOverlay.pause();
 		}
 		#end
 
-		if (pauseButton != null && MobileSupport.pointerJustPressedOver(pauseButton))
+		if (pauseButton != null && !wasPaused && !historyWasOpen && !resultsWereVisible
+			&& !pauseOverlay.isPaused && MobileSupport.pointerJustPressedOver(pauseButton)
+			&& SystemOverrideService.canPause())
 		{
-			pauseOverlay.toggle();
+			pauseOverlay.pause();
 		}
 
 		// Dialogue history toggle (H key)
 		#if FLX_KEYBOARD
-		if (FlxG.keys.justPressed.H && !pauseOverlay.isPaused)
+		if (!historyWasOpen && FlxG.keys.justPressed.H && !pauseOverlay.isPaused)
 		{
 			dialogueHistory.toggle();
 		}
@@ -237,21 +261,18 @@ class VNState extends FlxState
 		// When rhythm results overlay is showing, only update it
 		if (rhythmResultsOverlay != null && rhythmResultsOverlay.visible)
 		{
-			rhythmResultsOverlay.update(elapsed);
 			return;
 		}
 
 		// When dialogue history is open, only update it
 		if (dialogueHistory.isOpen)
 		{
-			dialogueHistory.update(elapsed);
 			return;
 		}
 
 		// When paused, only update the pause overlay
 		if (pauseOverlay.isPaused)
 		{
-			pauseOverlay.update(elapsed);
 			return;
 		}
 
@@ -569,5 +590,47 @@ class VNState extends FlxState
 			+ 'M+1 overlay | Shift+M+1 log | M+2 auto-advance | M+3 fast-forward | M+4 auto-choice\n'
 			+ 'M+5 restart scene | Shift+M+5 reload node | M+6 launch chart | Shift+M+6 rhythm mode\n'
 			+ 'M+7/M+8 node select | M+9 jump node | Shift+M+7/8 scene | Shift+M+9/0 chart | M+0 load selected scene | Ctrl+1..9 pick choice';
+	}
+
+	private function applyVisualSnapshot(snapshot:VisualSnapshot):Void
+	{
+		if (snapshot == null)
+		{
+			return;
+		}
+
+		if (snapshot.backgroundPath != null && snapshot.backgroundPath != "")
+		{
+			BackgroundSystem.set(snapshot.backgroundPath, "cut");
+		}
+
+		if (snapshot.musicTrack != null && snapshot.musicTrack != "")
+		{
+			AudioSystem.restoreMusicSnapshot(snapshot.musicTrack, snapshot.musicTime, snapshot.musicVolume);
+		}
+		else
+		{
+			AudioSystem.stopMusic();
+		}
+
+		var charSys = CharacterSystem.get();
+		if (charSys != null && snapshot.characters != null)
+		{
+			var snaps:Array<CharacterSnapshot> = [];
+			for (entry in snapshot.characters)
+			{
+				snaps.push({
+					name: entry.id,
+					pose: entry.pose,
+					slot: entry.position,
+					flipped: entry.isFlipped,
+					showing: true,
+					tint: entry.tint,
+					screenX: entry.screenX,
+					screenY: entry.screenY
+				});
+			}
+			charSys.restoreSnapshot(snaps);
+		}
 	}
 }

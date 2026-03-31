@@ -1,5 +1,7 @@
 package core.dialogue;
 
+import core.state.OptionsService;
+import core.state.SystemOverrideService;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
@@ -71,10 +73,11 @@ class DialogueSystem
 
 			if (isTypewriterEffect(currentEffect) && TextEffectSystem.isTypewriterComplete())
 			{
-				if (autoAdvanceEnabled && doneCallback != null && !typewriterCompleted)
+				var effectiveAutoAdvance = autoAdvanceEnabled || SystemOverrideService.forceAutoAdvanceEnabled() == true;
+				if (effectiveAutoAdvance && doneCallback != null && !typewriterCompleted)
 				{
 					typewriterCompleted = true;
-					timer.start(0.5, function(_)
+					timer.start(OptionsService.autoAdvanceDelay, function(_)
 					{
 						hide();
 						var callback = doneCallback;
@@ -82,7 +85,7 @@ class DialogueSystem
 						if (callback != null) callback();
 					});
 				}
-				else if (!autoAdvanceEnabled && !typewriterCompleted)
+				else if (!effectiveAutoAdvance && !typewriterCompleted)
 				{
 					typewriterCompleted = true;
 					canManualAdvance = true;
@@ -96,7 +99,11 @@ class DialogueSystem
 	// -------------------------------------------------
 	public static function handleInput():Void
 	{
-		if (label == null || !label.visible || autoAdvanceEnabled || doneCallback == null)
+		var effectiveAutoAdvance = autoAdvanceEnabled || SystemOverrideService.forceAutoAdvanceEnabled() == true;
+		if (label == null || !label.visible || effectiveAutoAdvance || doneCallback == null)
+			return;
+
+		if (!SystemOverrideService.canManualAdvance())
 			return;
 
 		var confirmPressed = false;
@@ -137,7 +144,7 @@ class DialogueSystem
 		history.push({speaker: speaker, text: text});
 		if (history.length > MAX_HISTORY) history.splice(0, history.length - MAX_HISTORY);
 
-		_displayText(speaker + ": " + text, done, effectData);
+		_displayText(SystemOverrideService.resolveSpeaker(speaker) + ": " + text, done, effectData);
 	}
 
 	// -------------------------------------------------
@@ -180,9 +187,10 @@ class DialogueSystem
 		label.color = 0xFFFFFFFF;
 
 		timer.cancel();
-		if (autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
+		var effectiveAutoAdvance = autoAdvanceEnabled || SystemOverrideService.forceAutoAdvanceEnabled() == true;
+		if (effectiveAutoAdvance && !isTypewriterEffect(currentEffect))
 		{
-			timer.start(0.9, function(_)
+			timer.start(OptionsService.autoAdvanceDelay, function(_)
 			{
 				hide();
 				var callback = doneCallback;
@@ -190,7 +198,7 @@ class DialogueSystem
 				if (callback != null) callback();
 			});
 		}
-		else if (!autoAdvanceEnabled && !isTypewriterEffect(currentEffect))
+		else if (!effectiveAutoAdvance && !isTypewriterEffect(currentEffect))
 		{
 			canManualAdvance = true;
 		}
@@ -230,7 +238,7 @@ class DialogueSystem
 				Fade(speed);
 
 			case "typewriter":
-				var speed = effectData.effect_speed != null ? effectData.effect_speed : 30.0;
+				var speed = effectData.effect_speed != null ? effectData.effect_speed : OptionsService.textSpeed;
 				Typewriter(speed);
 
 			default: None;

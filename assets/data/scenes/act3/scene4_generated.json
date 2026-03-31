@@ -233,7 +233,7 @@
       "action": "set_variable",
       "variable": "cassian_rot",
       "value": 1,
-      "op": "subtract",
+      "op": "add",
       "next": "n28_cassian_end"
     },
     {
@@ -525,7 +525,7 @@
       "action": "set_variable",
       "variable": "tiffany_rot",
       "value": 1,
-      "op": "add",
+      "op": "subtract",
       "next": "n62_converge"
     },
     {
@@ -556,7 +556,7 @@
       "id": "n65",
       "type": "action",
       "action": "set_flag",
-      "flag": "flags.act2_complete",
+      "flag": "flags.act3_complete",
       "value": true,
       "next": "n66"
     },
@@ -572,29 +572,208 @@
     {
       "id": "n67",
       "type": "narration",
-      "text": "You walk home under a sky full of stars. The festival is over. The music has stopped.",
+      "text": "You walk home alone. The festival is over. The music has stopped.",
       "next": "n68"
     },
     {
       "id": "n68",
       "type": "narration",
-      "text": "But in the silence, you can still hear it -- every note, every voice, every moment that brought you here.",
+      "text": "You fall asleep with Hanami's calm eyes in your mind. Her voice. Her hands on the keys. The way she said \"Let's give them something beautiful.\"",
       "next": "n69"
     },
     {
       "id": "n69",
-      "type": "narration",
-      "text": "Whatever comes next, you know one thing for certain: these people matter to you. And you're not going to let them face it alone.",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/hallway/day1.png",
+      "transition": "fade",
+      "duration": 1.5,
       "next": "n70"
     },
     {
       "id": "n70",
       "type": "narration",
-      "text": "End of Act 3.",
+      "text": "The next morning. Something is wrong the moment you step through the school gate.",
       "next": "n71"
     },
     {
       "id": "n71",
+      "type": "narration",
+      "text": "The hallway near the clubroom is cordoned off. Yellow tape across the door. A cluster of students stands at the far end, speaking in voices too low to carry.",
+      "next": "n72"
+    },
+    {
+      "id": "n72",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 1,
+      "duration": 0.3,
+      "next": "n73"
+    },
+    {
+      "id": "n73",
+      "type": "narration",
+      "text": "Cassian is standing against the stairwell wall. Laura is beside him. Neither of them is moving.",
+      "next": "n74"
+    },
+    {
+      "id": "n74",
+      "type": "action",
+      "action": "show_character",
+      "character": "cassian",
+      "pose": "neutral",
+      "transition": "fade",
+      "duration": 0.5,
+      "next": "n75"
+    },
+    {
+      "id": "n75",
+      "type": "action",
+      "action": "show_character",
+      "character": "laura",
+      "pose": "crying",
+      "transition": "fade",
+      "duration": 0.4,
+      "next": "n76"
+    },
+    {
+      "id": "n76",
+      "type": "narration",
+      "text": "Cassian's face is completely still. Laura is pressing both hands against her mouth.",
+      "next": "n77"
+    },
+    {
+      "id": "n77",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "...They found her. This morning. Behind the building.",
+      "next": "n78"
+    },
+    {
+      "id": "n78",
+      "type": "narration",
+      "text": "He stops. His jaw is clenched so tight you can see it from where you're standing.",
+      "next": "n79"
+    },
+    {
+      "id": "n79",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "In a trash bag. Someone left her in a trash bag.",
+      "next": "n80"
+    },
+    {
+      "id": "n80",
+      "type": "action",
+      "action": "flash",
+      "color": "#000000",
+      "duration": 0.5,
+      "next": "n81"
+    },
+    {
+      "id": "n81",
+      "type": "narration",
+      "text": "The words don't mean anything. You hear them, and they don't mean anything. You hear them again and they still don't.",
+      "next": "n82"
+    },
+    {
+      "id": "n82",
+      "type": "narration",
+      "text": "Hanami Nakamura is dead.",
+      "next": "n83"
+    },
+    {
+      "id": "n83",
+      "type": "action",
+      "action": "shake_screen",
+      "intensity": 3,
+      "duration": 0.6,
+      "next": "n84"
+    },
+    {
+      "id": "n84",
+      "type": "dialogue",
+      "speaker": "Laura",
+      "character": "laura",
+      "pose": "crying",
+      "text": "She said she wanted to see the cherry blossoms this year. She told me that. She was going to--",
+      "next": "n85"
+    },
+    {
+      "id": "n85",
+      "type": "narration",
+      "text": "Laura's voice doesn't break. It just stops.",
+      "next": "n86"
+    },
+    {
+      "id": "n86",
+      "type": "dialogue",
+      "speaker": "Cassian",
+      "character": "cassian",
+      "pose": "neutral",
+      "text": "Tiffany hasn't come in. She doesn't know yet.",
+      "next": "n87"
+    },
+    {
+      "id": "n87",
+      "type": "narration",
+      "text": "The corridor feels very far away. Sound like it's coming through water. Someone is calling your name but it doesn't matter.",
+      "next": "n88"
+    },
+    {
+      "id": "n88",
+      "type": "action",
+      "action": "set_flag",
+      "flag": "flags.hanami_dead",
+      "value": true,
+      "next": "n89"
+    },
+    {
+      "id": "n89",
+      "type": "action",
+      "action": "hide_character",
+      "character": "cassian",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n90"
+    },
+    {
+      "id": "n90",
+      "type": "action",
+      "action": "hide_character",
+      "character": "laura",
+      "transition": "fade_out",
+      "duration": 0.5,
+      "next": "n91"
+    },
+    {
+      "id": "n91",
+      "type": "action",
+      "action": "fade_out_music",
+      "duration": 3.0,
+      "next": "n92"
+    },
+    {
+      "id": "n92",
+      "type": "action",
+      "action": "set_bg",
+      "background": "assets/images/bg/black.png",
+      "transition": "fade",
+      "duration": 2.0,
+      "next": "n93"
+    },
+    {
+      "id": "n93",
+      "type": "narration",
+      "text": "End of Act 3.",
+      "next": "n94"
+    },
+    {
+      "id": "n94",
       "type": "end",
       "next_scene": "scenes/act4/scene1_generated.json"
     }

@@ -1,5 +1,6 @@
 package core.dialogue;
 
+import core.state.SystemOverrideService;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
@@ -53,6 +54,11 @@ class ChoiceSystem
 
 	public static function selectChoice(index:Int):Bool
 	{
+		if (!SystemOverrideService.canChoose())
+		{
+			return false;
+		}
+
 		if (!hasActiveChoices())
 		{
 			return false;
@@ -174,6 +180,11 @@ class ChoiceSystem
 	{
 		if (choiceCallback == null || choiceTexts == null || choiceTexts.length == 0)
 			return;
+
+		if (!SystemOverrideService.canChoose())
+		{
+			return;
+		}
 
 		for (entry in choiceTexts)
 		{

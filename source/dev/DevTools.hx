@@ -1,8 +1,8 @@
 package dev;
 
+import core.content.ContentRepository;
 import flixel.FlxG;
 import haxe.PosInfos;
-import openfl.utils.Assets;
 
 enum abstract DevLogLevel(Int) from Int to Int
 {
@@ -23,8 +23,8 @@ enum abstract RhythmDevMode(Int) from Int to Int
 
 class DevTools
 {
-	public static var ENABLED:Bool = true;
-	public static var SHOW_OVERLAY:Bool = true;
+	public static var ENABLED:Bool = #if debug true #else false #end;
+	public static var SHOW_OVERLAY:Bool = false;
 	public static var LOG_LEVEL:DevLogLevel = INFO;
 
 	public static var DIALOGUE_AUTO_ADVANCE:Bool = false;
@@ -290,17 +290,15 @@ class DevTools
 
 		try
 		{
-			for (assetId in Assets.list())
+			for (assetId in ContentRepository.listFiles("assets/data/scenes", ".json"))
 			{
-				if (StringTools.startsWith(assetId, "assets/data/scenes/") && StringTools.endsWith(assetId, ".json"))
-				{
-					scenePaths.push(assetId.substr("assets/data/".length));
-				}
-				else if (StringTools.startsWith(assetId, "assets/data/charts/") && StringTools.endsWith(assetId, ".json"))
-				{
-					var chartId = assetId.substr("assets/data/charts/".length);
-					chartIds.push(chartId.substr(0, chartId.length - ".json".length));
-				}
+				scenePaths.push(assetId.substr("assets/data/".length));
+			}
+
+			for (assetId in ContentRepository.listFiles("assets/data/charts", ".json"))
+			{
+				var chartId = assetId.substr("assets/data/charts/".length);
+				chartIds.push(chartId.substr(0, chartId.length - ".json".length));
 			}
 		}
 		catch (_:Dynamic) {}

@@ -1,5 +1,6 @@
 package rhythm;
 
+import core.content.ContentRepository;
 import dev.DevTools;
 import dev.DevTools.RhythmDevMode;
 import flixel.FlxG;
@@ -27,6 +28,8 @@ class RhythmState extends FlxState
 	public var chartPath:String;
 	public var returnStateFactory:Void->flixel.FlxState;
 	public var onComplete:Dynamic;
+
+	private var chartDisplayName:String = "";
 
 	private var conductor:Conductor;
 	private var chartHandler:ChartHandler;
@@ -69,10 +72,19 @@ class RhythmState extends FlxState
 
 		if (chartPath == null)
 			throw "RhythmState started without chartPath";
-		if (!Assets.exists(chartPath))
+		if (!ContentRepository.exists(chartPath))
 			throw 'RhythmState could not find chart at ${chartPath}';
 
-		var chart:ChartData = cast haxe.Json.parse(Assets.getText(chartPath));
+		var chart:ChartData = cast haxe.Json.parse(ContentRepository.readText(chartPath));
+		chartDisplayName = deriveChartName(chartPath);
+		if (chart != null && chart.song != null && chart.song.song != null && chart.song.song != "")
+		{
+			song = chart.song.song;
+		}
+		else if (song == null || song == "")
+		{
+			song = chartDisplayName;
+		}
 		configureMobileLayout();
 
 		var stageSprite = createStageSprite(chart.song.stage);
@@ -234,7 +246,7 @@ class RhythmState extends FlxState
 
 		if (DevTools.devChordPressed(3))
 		{
-			restartChart(song);
+			restartCurrentChart();
 			return;
 		}
 
@@ -261,7 +273,7 @@ class RhythmState extends FlxState
 
 		if (DevTools.devChordPressed(7))
 		{
-			restartChart(DevTools.getSelectedChart());
+			restartChartById(DevTools.getSelectedChart());
 			return;
 		}
 
@@ -494,12 +506,23 @@ class RhythmState extends FlxState
 		return sprite;
 	}
 
-	private function restartChart(nextSong:String):Void
+	private function restartCurrentChart():Void
 	{
-		DevTools.notify('Restarting rhythm chart ${nextSong}');
+		DevTools.notify('Restarting current chart ${chartDisplayName != "" ? chartDisplayName : song}');
 		var nextState = new RhythmState();
-		nextState.song = nextSong;
-		nextState.chartPath = 'assets/data/charts/${nextSong}.json';
+		nextState.song = song;
+		nextState.chartPath = chartPath;
+		nextState.returnStateFactory = returnStateFactory;
+		nextState.onComplete = onComplete;
+		FlxG.switchState(() -> nextState);
+	}
+
+	private function restartChartById(nextChartId:String):Void
+	{
+		DevTools.notify('Restarting rhythm chart ${nextChartId}');
+		var nextState = new RhythmState();
+		nextState.song = nextChartId;
+		nextState.chartPath = 'assets/data/charts/${nextChartId}.json';
 		nextState.returnStateFactory = returnStateFactory;
 		nextState.onComplete = onComplete;
 		FlxG.switchState(() -> nextState);
@@ -749,7 +772,7 @@ class RhythmState extends FlxState
 							togglePause();
 						case 1: // RESTART
 							togglePause();
-							restartChart(song);
+							restartCurrentChart();
 						case 2: // QUIT
 							isPaused = false;
 							finishSong({score: 0, combo: 0, accuracy: 0.0, health: 0.0, completed: false});
@@ -800,12 +823,27 @@ class RhythmState extends FlxState
 
 		var acc = Std.int(scoreTracker.getAccuracy() * 10000) / 100;
 		devOverlayText.text =
-			'DEV RHYTHM | Song=${song} | Log=${DevTools.logLevelName(DevTools.LOG_LEVEL)} | Last=${DevTools.lastAction}\n'
+			'DEV RHYTHM | Song=${song} | Chart=${chartDisplayName} | Log=${DevTools.logLevelName(DevTools.LOG_LEVEL)} | Last=${DevTools.lastAction}\n'
 			+ 'Mode=${DevTools.rhythmModeName(DevTools.RHYTHM_MODE)} | AutoFinishDelay=${DevTools.formatFloat(DevTools.RHYTHM_AUTO_FINISH_DELAY)}s | Time=${DevTools.formatFloat(conductor.songPositionMs)}ms\n'
 			+ 'Selected Chart=${DevTools.getSelectedChart()} | Active Notes=${noteHandler.getActiveCount()} | Finishing=${isFinishingSong}\n'
 			+ 'Score=${scoreTracker.score} | Combo=${scoreTracker.combo} (max ${scoreTracker.maxCombo}) | Health=${Std.int(scoreTracker.health * 100)}% | Acc=${acc}%\n'
 			+ 'SICK=${scoreTracker.sickCount} GOOD=${scoreTracker.goodCount} BAD=${scoreTracker.badCount} MISS=${scoreTracker.missCount}\n'
 			+ 'M+1 overlay | Shift+M+1 log | M+2 rhythm mode | M+3 restart current | M+4 success | Shift+M+4 fail\n'
 			+ 'M+5/M+6 chart | M+7 load selected chart | M+8/M+9 auto-finish delay';
+	}
+
+	private function deriveChartName(path:String):String
+	{
+		if (path == null || path == "")
+		{
+			return "(unknown)";
+		}
+
+		var normalized = StringTools.replace(path, "\\", "/");
+		var slash = normalized.lastIndexOf("/");
+		var name = slash >= 0 ? normalized.substr(slash + 1) : normalized;
+		return StringTools.endsWith(name, ".json")
+			? name.substr(0, name.length - ".json".length)
+			: name;
 	}
 }

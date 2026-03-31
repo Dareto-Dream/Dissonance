@@ -11,9 +11,13 @@ class AudioSystem
 	static var nextMusic:FlxSound;
 	static var defaultBGM:String = "";
 	static var currentTrack:String = "";
+	static var currentBaseVolume:Float = 1.0;
+	static var nextBaseVolume:Float = 1.0;
 	static var isTransitioning:Bool = false;
 	static var musicTween:FlxTween;
 	static var nextMusicTween:FlxTween;
+	static var musicBusVolume:Float = 0.7;
+	static var sfxBusVolume:Float = 0.8;
 
 	public static var transitionType:String = "fade";
 	public static var transitionDuration:Float = 2.0;
@@ -89,7 +93,7 @@ class AudioSystem
 			trace("[AudioSystem] WARNING: Sound not found: " + sound);
 			return;
 		}
-		FlxG.sound.play(sound, volume);
+		FlxG.sound.play(sound, volume * sfxBusVolume);
 	}
 
 	public static function playMusic(track:String, volume:Float = 1, ?transition:String, ?duration:Float):Void
@@ -111,6 +115,7 @@ class AudioSystem
 		}
 
 		currentTrack = track;
+		currentBaseVolume = volume;
 
 		switch (transition)
 		{
@@ -132,7 +137,7 @@ class AudioSystem
 		destroySound(music);
 		music = null;
 
-		music = FlxG.sound.load(track, volume, true);
+		music = FlxG.sound.load(track, volume * musicBusVolume, true);
 		if (music != null)
 		{
 			music.persist = true; // survive scene switches within VN
@@ -149,6 +154,7 @@ class AudioSystem
 	{
 		cancelTransition();
 		isTransitioning = true;
+		nextBaseVolume = volume;
 
 		nextMusic = FlxG.sound.load(track, 0, true);
 		if (nextMusic == null)
@@ -178,7 +184,7 @@ class AudioSystem
 		}
 
 		var incomingMusic = nextMusic;
-		nextMusicTween = FlxTween.tween(incomingMusic, {volume: volume}, duration, {
+		nextMusicTween = FlxTween.tween(incomingMusic, {volume: volume * musicBusVolume}, duration, {
 			onComplete: function(_) {
 				if (nextMusic == incomingMusic)
 				{
@@ -190,6 +196,7 @@ class AudioSystem
 					music = incomingMusic;
 				}
 
+				currentBaseVolume = nextBaseVolume;
 				nextMusicTween = null;
 				isTransitioning = false;
 			}
@@ -203,7 +210,8 @@ class AudioSystem
 		if (music != null && music.playing)
 		{
 			isTransitioning = true;
-			nextMusic = FlxG.sound.load(track, volume, true);
+			nextBaseVolume = volume;
+			nextMusic = FlxG.sound.load(track, volume * musicBusVolume, true);
 			if (nextMusic == null)
 			{
 				trace("[AudioSystem] ERROR: Could not load music track: " + track);
@@ -223,6 +231,7 @@ class AudioSystem
 
 				music = nextMusic;
 				nextMusic = null;
+				currentBaseVolume = nextBaseVolume;
 
 				if (music != null)
 				{
@@ -267,6 +276,7 @@ class AudioSystem
 		music = null;
 
 		currentTrack = "";
+		currentBaseVolume = 1.0;
 		isTransitioning = false;
 	}
 
@@ -300,9 +310,108 @@ class AudioSystem
 		return currentTrack;
 	}
 
+	public static function getCurrentTime():Float
+	{
+		return music != null ? music.time : 0.0;
+	}
+
+	public static function getBaseVolume():Float
+	{
+		return currentBaseVolume;
+	}
+
+	public static function pauseMusic():Void
+	{
+		if (music != null && music.playing)
+		{
+			music.pause();
+		}
+	}
+
+	public static function resumeMusic():Void
+	{
+		if (music != null && !music.playing)
+		{
+			music.resume();
+		}
+	}
+
+	public static function setMusicVolume(volume:Float):Void
+	{
+		musicBusVolume = clamp(volume);
+		applyBusVolumes();
+	}
+
+	public static function getMusicVolume():Float
+	{
+		return musicBusVolume;
+	}
+
+	public static function setSfxVolume(volume:Float):Void
+	{
+		sfxBusVolume = clamp(volume);
+	}
+
+	public static function getSfxVolume():Float
+	{
+		return sfxBusVolume;
+	}
+
+	public static function restoreMusicSnapshot(track:String, time:Float = 0.0, volume:Float = 1.0):Void
+	{
+		if (track == null || track == "")
+		{
+			stopMusic();
+			return;
+		}
+
+		currentTrack = track;
+		currentBaseVolume = volume;
+		cancelTransition();
+		destroySound(music);
+		music = null;
+
+		if (!Assets.exists(track))
+		{
+			trace("[AudioSystem] WARNING: Music not found during restore: " + track);
+			return;
+		}
+
+		music = FlxG.sound.load(track, volume * musicBusVolume, true);
+		if (music == null)
+		{
+			trace("[AudioSystem] ERROR: Could not restore music track: " + track);
+			return;
+		}
+
+		music.persist = true;
+		music.onComplete = null;
+		music.play(false, Math.max(0, time));
+	}
+
+	private static function applyBusVolumes():Void
+	{
+		if (music != null)
+		{
+			music.volume = currentBaseVolume * musicBusVolume;
+		}
+
+		if (nextMusic != null)
+		{
+			nextMusic.volume = nextBaseVolume * musicBusVolume;
+		}
+	}
+
 	public static function isMusicPlaying():Bool
 	{
 		return music != null && music.playing;
+	}
+
+	private static function clamp(value:Float):Float
+	{
+		if (value < 0) return 0;
+		if (value > 1) return 1;
+		return value;
 	}
 
 	private static function cancelTween(tween:FlxTween):Void

@@ -8,7 +8,10 @@ typedef CharacterSnapshot = {
 	pose:    String,
 	slot:    String,
 	flipped: Bool,
-	showing: Bool
+	showing: Bool,
+	tint:    Int,
+	screenX: Float,
+	screenY: Float
 }
 
 class CharacterSystem
@@ -252,7 +255,10 @@ class CharacterSystem
 				pose:    r.currentPose,
 				slot:    r.currentPosition,
 				flipped: r.isFlipped,
-				showing: r.isShowing
+				showing: r.isShowing,
+				tint:    r.currentTint,
+				screenX: r.screenX,
+				screenY: r.screenY
 			});
 		}
 		return snaps;
@@ -264,9 +270,38 @@ class CharacterSystem
 		if (snaps == null) return;
 		for (snap in snaps)
 		{
-			if (!snap.showing || snap.pose == null) continue;
+			var renderer = characters.get(snap.name);
+			if (renderer == null)
+			{
+				continue;
+			}
+
+			if (!snap.showing || snap.pose == null)
+			{
+				renderer.hide();
+				continue;
+			}
+
 			show(snap.name, snap.pose, "", 0);
-			if (snap.flipped) flipCharacter(snap.name, true);
+
+			if (snap.slot != null && snap.slot != "")
+			{
+				renderer.setPositionKeyword(snap.slot);
+			}
+			else
+			{
+				renderer.setAbsolutePosition(snap.screenX, snap.screenY);
+			}
+
+			flipCharacter(snap.name, snap.flipped);
+			if (Reflect.hasField(cast snap, "tint"))
+			{
+				renderer.setTint(snap.tint);
+			}
+			else
+			{
+				renderer.clearTint();
+			}
 		}
 	}
 

@@ -1,8 +1,8 @@
 package vn;
 
+import core.content.ContentRepository;
 import haxe.Json;
 import haxe.ds.StringMap;
-import openfl.utils.Assets;
 
 /**
  * Data/config utilities for the VN engine.
@@ -54,7 +54,7 @@ class VNConfig
 
         var raw:String;
         try {
-            raw = Assets.getText(CHARACTER_DEFS_PATH);
+            raw = ContentRepository.readText(CHARACTER_DEFS_PATH);
         } catch (e:Dynamic) {
             trace("[VNConfig] Could not load character defs at " + CHARACTER_DEFS_PATH + ": " + e);
             return map;
